@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-paper">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Library - Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <!-- Template Loader Script -->
+    <script src="../js/template-loader.js"></script>
+</head>
+<body class="text-ink bg-paper">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="font-typewriter text-2xl font-bold">Control Panel</div>
+            <button type="button" class="hamburger-button md:hidden w-6 h-6 flex flex-col justify-center items-center space-y-1" aria-label="Toggle mobile menu">
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-opacity duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+            </button>
+            <nav class="site-nav hidden md:block">
+                <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+                    <li><a href="../index.html" class="nav-dashboard flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="projects.html" class="nav-projects flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="revenue.html" class="nav-revenue flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="writing.html" class="nav-writing flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="ai-library.html" class="nav-ai-library flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="resources.html" class="nav-resources flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-link mr-2"></i> Resources</a></li>
+                    <li><a href="books.html" class="nav-books flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                </ul>
+            </nav>
+        </header>
+        <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+        <main class="py-8">
+            <section class="ai-library-page">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-typewriter">AI Library</h1>
+                    <div class="view-toggle">
+                        <div class="view-toggle-btn list-view active px-3 py-1" title="List View">
+                            <i class="ri-list-check"></i>
+                        </div>
+                        <div class="view-toggle-btn grid-view px-3 py-1" title="Grid View">
+                            <i class="ri-grid-line"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tabs flex border-b border-gray-200">
+                    <div class="tab active px-4 py-2 border-b-2 border-highlight text-highlight">Prompts</div>
+                    <div class="tab px-4 py-2 border-b-2 border-transparent text-light-ink">Agents</div>
+                    <div class="tab px-4 py-2 border-b-2 border-transparent text-light-ink">Models</div>
+                    <div class="tab px-4 py-2 border-b-2 border-transparent text-light-ink">Templates</div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-4 mb-6 mt-6">
+                    <div class="relative flex-grow">
+                        <input type="text" class="search-input" placeholder="Search prompts...">
+                        <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+                    </div>
+                    <select class="filter-dropdown">
+                        <option>All Categories</option>
+                        <option>Creative Writing</option>
+                        <option>Code Generation</option>
+                        <option>Data Analysis</option>
+                        <option>Content Creation</option>
+                    </select>
+                </div>
+                
+                <!-- Floating action button for adding new prompts -->
+                <a href="#" class="floating-button">
+                    <i class="ri-add-line text-2xl"></i>
+                </a>
+                
+                <div class="prompt-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+                    <!-- Code Refactoring Assistant -->
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon">
+                                <i class="ri-code-s-slash-line"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="font-semibold">Code Refactoring Assistant</div>
+                                <div class="text-xs text-light-ink">Code Generation</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="text-sm text-light-ink mb-4">
+                                A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.
+                            </div>
+                            <div class="p-2 bg-gray-100 rounded text-sm font-mono mb-4 overflow-hidden line-clamp-3">
+                                I need help refactoring the following code to make it more maintainable, efficient, and follow best practices. Please explain your changes and why they improve the code.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs text-light-ink">Updated 3 days ago</div>
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blog Post Outliner -->
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon bg-purple-500">
+                                <i class="ri-file-list-line"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="font-semibold">Blog Post Outliner</div>
+                                <div class="text-xs text-light-ink">Content Creation</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="text-sm text-light-ink mb-4">
+                                Generates detailed outlines for blog posts on any topic with key sections and talking points.
+                            </div>
+                            <div class="p-2 bg-gray-100 rounded text-sm font-mono mb-4 overflow-hidden line-clamp-3">
+                                Create a detailed outline for a blog post about [TOPIC]. Include an introduction, at least 5 main sections with 3-4 subsections each, and a conclusion. For each section, provide 1-2 sentences describing the key points to cover.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs text-light-ink">Updated 1 week ago</div>
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Analysis Helper -->
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon bg-green-500">
+                                <i class="ri-bar-chart-box-line"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="font-semibold">Data Analysis Helper</div>
+                                <div class="text-xs text-light-ink">Data Analysis</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="text-sm text-light-ink mb-4">
+                                Helps analyze datasets and draw meaningful insights with visualization suggestions.
+                            </div>
+                            <div class="p-2 bg-gray-100 rounded text-sm font-mono mb-4 overflow-hidden line-clamp-3">
+                                I have a dataset with the following columns: [LIST COLUMNS]. Help me analyze this data to find meaningful insights. Suggest appropriate visualizations and statistical methods to better understand the patterns and relationships in the data.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs text-light-ink">Updated 2 weeks ago</div>
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prompt-list flex flex-col gap-4">
+                    <!-- Code Refactoring Assistant -->
+                    <div class="prompt-list-item bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-highlight text-white rounded flex-shrink-0">
+                            <i class="ri-code-s-slash-line text-2xl"></i>
+                        </div>
+                        <div class="ml-4 flex-grow">
+                            <div class="flex justify-between mb-1">
+                                <div class="font-semibold">Code Refactoring Assistant</div>
+                                <div class="text-xs text-light-ink">Updated 3 days ago</div>
+                            </div>
+                            <div class="text-xs text-light-ink mb-2">Code Generation</div>
+                            <div class="text-sm text-light-ink mb-2">
+                                A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blog Post Outliner -->
+                    <div class="prompt-list-item bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-purple-500 text-white rounded flex-shrink-0">
+                            <i class="ri-file-list-line text-2xl"></i>
+                        </div>
+                        <div class="ml-4 flex-grow">
+                            <div class="flex justify-between mb-1">
+                                <div class="font-semibold">Blog Post Outliner</div>
+                                <div class="text-xs text-light-ink">Updated 1 week ago</div>
+                            </div>
+                            <div class="text-xs text-light-ink mb-2">Content Creation</div>
+                            <div class="text-sm text-light-ink mb-2">
+                                Generates detailed outlines for blog posts on any topic with key sections and talking points.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Analysis Helper -->
+                    <div class="prompt-list-item bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded flex-shrink-0">
+                            <i class="ri-bar-chart-box-line text-2xl"></i>
+                        </div>
+                        <div class="ml-4 flex-grow">
+                            <div class="flex justify-between mb-1">
+                                <div class="font-semibold">Data Analysis Helper</div>
+                                <div class="text-xs text-light-ink">Updated 2 weeks ago</div>
+                            </div>
+                            <div class="text-xs text-light-ink mb-2">Data Analysis</div>
+                            <div class="text-sm text-light-ink mb-2">
+                                Helps analyze datasets and draw meaningful insights with visualization suggestions.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Story Idea Generator -->
+                    <div class="prompt-list-item bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded flex-shrink-0">
+                            <i class="ri-book-open-line text-2xl"></i>
+                        </div>
+                        <div class="ml-4 flex-grow">
+                            <div class="flex justify-between mb-1">
+                                <div class="font-semibold">Story Idea Generator</div>
+                                <div class="text-xs text-light-ink">Updated 1 month ago</div>
+                            </div>
+                            <div class="text-xs text-light-ink mb-2">Creative Writing</div>
+                            <div class="text-sm text-light-ink mb-2">
+                                Generates unique story ideas with character sketches, plot outlines, and setting descriptions.
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-1 text-xs border border-gray-200 rounded">Edit</button>
+                                    <button class="px-2 py-1 text-xs bg-highlight text-white rounded">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // View toggle functionality
+            const gridView = document.querySelector('.grid-view');
+            const listView = document.querySelector('.list-view');
+            const promptGrid = document.querySelector('.prompt-grid');
+            const promptList = document.querySelector('.prompt-list');
+            
+            gridView.addEventListener('click', function() {
+                gridView.classList.add('active');
+                listView.classList.remove('active');
+                promptGrid.classList.remove('hidden');
+                promptList.classList.add('hidden');
+            });
+            
+            listView.addEventListener('click', function() {
+                listView.classList.add('active');
+                gridView.classList.remove('active');
+                promptList.classList.remove('hidden');
+                promptGrid.classList.add('hidden');
+            });
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active', 'border-highlight', 'text-highlight'));
+                    tabs.forEach(t => t.classList.add('border-transparent', 'text-light-ink'));
+                    this.classList.add('active', 'border-highlight', 'text-highlight');
+                    this.classList.remove('border-transparent', 'text-light-ink');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

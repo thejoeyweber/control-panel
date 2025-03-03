@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen font-typewriter">
+    <div class="wrapper mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Header -->
+        <header class="py-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+            <h1 class="text-2xl font-bold">Control Panel</h1>
+            
+            <!-- Hamburger button for mobile -->
+            <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 cursor-pointer">
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+            </button>
+            
+            <!-- Navigation -->
+            <nav id="nav-menu" class="hidden md:flex absolute md:static top-16 left-0 right-0 bg-white dark:bg-gray-800 md:bg-transparent md:dark:bg-transparent z-50 shadow-lg md:shadow-none">
+                <ul class="flex flex-col md:flex-row w-full md:w-auto">
+                    <li><a href="./index.html" class="nav-dashboard block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Dashboard</a></li>
+                    <li><a href="./pages/projects.html" class="nav-projects block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Projects</a></li>
+                    <li><a href="./pages/revenue.html" class="nav-revenue block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Revenue</a></li>
+                    <li><a href="./pages/writing.html" class="nav-writing block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Writing</a></li>
+                    <li><a href="./pages/ai-library.html" class="nav-ai-library block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">AI Library</a></li>
+                    <li><a href="./pages/resources.html" class="nav-resources block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Resources</a></li>
+                    <li><a href="./pages/books.html" class="nav-books block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Books</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- Mobile menu backdrop -->
+        <div id="mobile-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+        
+        <!-- Main content -->
+        <main class="py-6">
+            
+            <section>
+                <h1 class="text-3xl font-typewriter mb-6">Dashboard</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dashboard widgets -->
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">Recent Projects</h3>
+                            <a href="pages/projects.html" class="text-sm text-highlight hover:underline">View all</a>
+                        </div>
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <li class="py-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold">Control Panel</span>
+                                    <span class="badge badge-primary">Active</span>
+                                </div>
+                                <p class="text-sm text-light-ink mt-1">Personal dashboard and management tool</p>
+                            </li>
+                            <li class="py-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold">Retro Game</span>
+                                    <span class="badge badge-warning">Planning</span>
+                                </div>
+                                <p class="text-sm text-light-ink mt-1">JavaScript 2D pixel game</p>
+                            </li>
+                            <li class="py-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold">Writing Assistant</span>
+                                    <span class="badge badge-success">Completed</span>
+                                </div>
+                                <p class="text-sm text-light-ink mt-1">AI-powered writing tool</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">Revenue Overview</h3>
+                            <a href="pages/revenue.html" class="text-sm text-highlight hover:underline">Details</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-semibold">Monthly Goal</span>
+                                    <span class="text-sm">$2,500 / $5,000</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="stat-card">
+                                    <div class="stat-title">This Month</div>
+                                    <div class="stat-value">$2,500</div>
+                                    <div class="stat-desc text-success">↑ $500 (20%)</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-title">Last Month</div>
+                                    <div class="stat-value">$2,000</div>
+                                    <div class="stat-desc">Final</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">Writing Stats</h3>
+                            <a href="pages/writing.html" class="text-sm text-highlight hover:underline">View all</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-semibold">Daily Goal</span>
+                                    <span class="text-sm">750 / 1,000 words</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="stat-card">
+                                    <div class="stat-title">Today</div>
+                                    <div class="stat-value">750</div>
+                                    <div class="stat-desc">words</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-title">This Week</div>
+                                    <div class="stat-value">3,250</div>
+                                    <div class="stat-desc">words</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">AI Tools</h3>
+                            <a href="pages/ai-library.html" class="text-sm text-highlight hover:underline">Library</a>
+                        </div>
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">Text Summarizer</div>
+                                    <p class="text-sm text-light-ink mt-1">Extract key points from long texts</p>
+                                </a>
+                            </li>
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">Image Generator</div>
+                                    <p class="text-sm text-light-ink mt-1">Create images from text descriptions</p>
+                                </a>
+                            </li>
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">Code Assistant</div>
+                                    <p class="text-sm text-light-ink mt-1">Help with coding tasks and debugging</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">Recent Books</h3>
+                            <a href="pages/books.html" class="text-sm text-highlight hover:underline">View all</a>
+                        </div>
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <li class="py-2">
+                                <div class="flex items-start">
+                                    <div class="bg-gray-100 dark:bg-gray-800 w-10 h-14 rounded mr-3 flex-shrink-0"></div>
+                                    <div>
+                                        <div class="font-semibold">Design Patterns</div>
+                                        <p class="text-sm text-light-ink">Erich Gamma et al.</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="py-2">
+                                <div class="flex items-start">
+                                    <div class="bg-gray-100 dark:bg-gray-800 w-10 h-14 rounded mr-3 flex-shrink-0"></div>
+                                    <div>
+                                        <div class="font-semibold">Clean Code</div>
+                                        <p class="text-sm text-light-ink">Robert C. Martin</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="py-2">
+                                <div class="flex items-start">
+                                    <div class="bg-gray-100 dark:bg-gray-800 w-10 h-14 rounded mr-3 flex-shrink-0"></div>
+                                    <div>
+                                        <div class="font-semibold">The Pragmatic Programmer</div>
+                                        <p class="text-sm text-light-ink">Andrew Hunt, David Thomas</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="widget">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-typewriter">Resources</h3>
+                            <a href="pages/resources.html" class="text-sm text-highlight hover:underline">View all</a>
+                        </div>
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">MDN Web Docs</div>
+                                    <p class="text-sm text-light-ink mt-1">https://developer.mozilla.org</p>
+                                </a>
+                            </li>
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">GitHub</div>
+                                    <p class="text-sm text-light-ink mt-1">https://github.com</p>
+                                </a>
+                            </li>
+                            <li class="py-2">
+                                <a href="#" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="font-semibold">Stack Overflow</div>
+                                    <p class="text-sm text-light-ink mt-1">https://stackoverflow.com</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        
+        </main>
+        
+        <!-- Footer -->
+        <footer class="py-4 text-center text-sm text-gray-600 dark:text-gray-400 border-t border-gray-300 dark:border-gray-700">
+            <p>© 2023 Control Panel - Personal Dashboard</p>
+            <button id="dark-mode-toggle" class="mt-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md text-xs">
+                <span class="dark-mode-text">Toggle Dark Mode</span>
+            </button>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    
+</body>
+</html> 

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-paper">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <!-- Template Loader Script -->
+    <script src="../js/template-loader.js"></script>
+</head>
+<body class="text-ink bg-paper">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="font-typewriter text-2xl font-bold">Control Panel</div>
+            <button type="button" class="hamburger-button md:hidden w-6 h-6 flex flex-col justify-center items-center space-y-1" aria-label="Toggle mobile menu">
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-opacity duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+            </button>
+            <nav class="site-nav hidden md:block">
+                <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+                    <li><a href="../index.html" class="nav-dashboard flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="projects.html" class="nav-projects flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="revenue.html" class="nav-revenue flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="writing.html" class="nav-writing flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="ai-library.html" class="nav-ai-library flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="resources.html" class="nav-resources flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-link mr-2"></i> Resources</a></li>
+                    <li><a href="books.html" class="nav-books flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                </ul>
+            </nav>
+        </header>
+        <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+        
+        <main class="py-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h1 class="text-3xl font-typewriter mb-4 md:mb-0">Resources</h1>
+                <button class="btn btn-primary">
+                    <i class="ri-add-line mr-1"></i> Add Resource
+                </button>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center gap-4 mb-6">
+                <div class="relative flex-grow">
+                    <input type="text" placeholder="Search resources..." class="form-control pl-10 w-full">
+                    <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <select class="form-control">
+                        <option>All Categories</option>
+                        <option>Development</option>
+                        <option>Design</option>
+                        <option>Business</option>
+                        <option>Productivity</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button class="grid-view active"><i class="ri-grid-line"></i></button>
+                        <button class="list-view"><i class="ri-list-check"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Development Section -->
+            <div class="mb-10">
+                <h2 class="border-b pb-2 mb-4">Development</h2>
+                
+                <!-- Grid View -->
+                <div class="grid-resources grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-blue-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-github-fill text-2xl text-blue-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">GitHub</h3>
+                                <p class="text-sm text-light-ink mb-2">Code hosting platform for version control and collaboration</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://github.com" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Jan 15, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-orange-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-stackexchange-line text-2xl text-orange-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">Stack Overflow</h3>
+                                <p class="text-sm text-light-ink mb-2">Community for developers to learn and share programming knowledge</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://stackoverflow.com" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Jan 15, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-purple-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-firefox-line text-2xl text-purple-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">MDN Web Docs</h3>
+                                <p class="text-sm text-light-ink mb-2">Comprehensive resource for web developers</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://developer.mozilla.org" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Jan 20, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View (Hidden by default) -->
+                <div class="list-resources hidden">
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-blue-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-github-fill text-xl text-blue-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">GitHub</h3>
+                                        <p class="text-sm text-light-ink">Code hosting platform for version control and collaboration</p>
+                                    </div>
+                                    <a href="https://github.com" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-orange-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-stackexchange-line text-xl text-orange-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Stack Overflow</h3>
+                                        <p class="text-sm text-light-ink">Community for developers to learn and share programming knowledge</p>
+                                    </div>
+                                    <a href="https://stackoverflow.com" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-purple-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-firefox-line text-xl text-purple-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">MDN Web Docs</h3>
+                                        <p class="text-sm text-light-ink">Comprehensive resource for web developers</p>
+                                    </div>
+                                    <a href="https://developer.mozilla.org" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Design Section -->
+            <div class="mb-10">
+                <h2 class="border-b pb-2 mb-4">Design</h2>
+                
+                <!-- Grid View -->
+                <div class="grid-resources grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-pink-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-dribbble-line text-2xl text-pink-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">Dribbble</h3>
+                                <p class="text-sm text-light-ink mb-2">Community of designers sharing work and getting inspiration</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://dribbble.com" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Feb 5, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-red-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-pinterest-line text-2xl text-red-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">Figma</h3>
+                                <p class="text-sm text-light-ink mb-2">Collaborative interface design tool</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://figma.com" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Feb 10, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View (Hidden by default) -->
+                <div class="list-resources hidden">
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-pink-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-dribbble-line text-xl text-pink-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Dribbble</h3>
+                                        <p class="text-sm text-light-ink">Community of designers sharing work and getting inspiration</p>
+                                    </div>
+                                    <a href="https://dribbble.com" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-red-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-pinterest-line text-xl text-red-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Figma</h3>
+                                        <p class="text-sm text-light-ink">Collaborative interface design tool</p>
+                                    </div>
+                                    <a href="https://figma.com" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Productivity Section -->
+            <div class="mb-10">
+                <h2 class="border-b pb-2 mb-4">Productivity</h2>
+                
+                <!-- Grid View -->
+                <div class="grid-resources grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-green-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-notion-fill text-2xl text-green-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">Notion</h3>
+                                <p class="text-sm text-light-ink mb-2">All-in-one workspace for notes, tasks, wikis, and databases</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://notion.so" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Jan 25, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="flex p-4">
+                            <div class="w-12 h-12 rounded bg-teal-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-time-line text-2xl text-teal-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold mb-1">Toggl</h3>
+                                <p class="text-sm text-light-ink mb-2">Time tracking app for productivity and project management</p>
+                                <div class="flex items-center text-sm">
+                                    <a href="https://toggl.com" target="_blank" class="text-highlight hover:underline mr-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                    <span class="text-light-ink">Added: Feb 15, 2023</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View (Hidden by default) -->
+                <div class="list-resources hidden">
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-green-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-notion-fill text-xl text-green-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Notion</h3>
+                                        <p class="text-sm text-light-ink">All-in-one workspace for notes, tasks, wikis, and databases</p>
+                                    </div>
+                                    <a href="https://notion.so" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded bg-teal-100 flex-shrink-0 flex items-center justify-center mr-4">
+                                <i class="ri-time-line text-xl text-teal-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold">Toggl</h3>
+                                        <p class="text-sm text-light-ink">Time tracking app for productivity and project management</p>
+                                    </div>
+                                    <a href="https://toggl.com" target="_blank" class="text-highlight hover:underline ml-4">
+                                        <i class="ri-external-link-line mr-1"></i>Visit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/main.js"></script>
+</body>
+</html> 

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Library - Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen font-typewriter">
+    <div class="wrapper mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Header -->
+        <header class="py-4 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+            <h1 class="text-2xl font-bold">Control Panel</h1>
+            
+            <!-- Hamburger button for mobile -->
+            <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 cursor-pointer">
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+                <span class="hamburger-line w-6 h-0.5 bg-gray-800 dark:bg-gray-200 transition-all"></span>
+            </button>
+            
+            <!-- Navigation -->
+            <nav id="nav-menu" class="hidden md:flex absolute md:static top-16 left-0 right-0 bg-white dark:bg-gray-800 md:bg-transparent md:dark:bg-transparent z-50 shadow-lg md:shadow-none">
+                <ul class="flex flex-col md:flex-row w-full md:w-auto">
+                    <li><a href="../index.html" class="nav-dashboard block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Dashboard</a></li>
+                    <li><a href="../pages/projects.html" class="nav-projects block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Projects</a></li>
+                    <li><a href="../pages/revenue.html" class="nav-revenue block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Revenue</a></li>
+                    <li><a href="../pages/writing.html" class="nav-writing block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Writing</a></li>
+                    <li><a href="../pages/ai-library.html" class="nav-ai-library block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">AI Library</a></li>
+                    <li><a href="../pages/resources.html" class="nav-resources block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Resources</a></li>
+                    <li><a href="../pages/books.html" class="nav-books block px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700">Books</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- Mobile menu backdrop -->
+        <div id="mobile-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+        
+        <!-- Main content -->
+        <main class="py-6">
+            
+            <section class="ai-library-page">
+                <div class="ai-header">
+                    <h1>AI Library</h1>
+                    <div class="view-toggle">
+                        <div class="view-toggle-btn list-view active" title="List View">
+                            <i class="ri-list-check"></i>
+                        </div>
+                        <div class="view-toggle-btn grid-view" title="Grid View">
+                            <i class="ri-grid-line"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-tabs">
+                    <div class="tab active">Prompts</div>
+                    <div class="tab">Agents</div>
+                    <div class="tab">Models</div>
+                    <div class="tab">Templates</div>
+                </div>
+                
+                <div class="ai-search">
+                    <input type="text" class="search-input" placeholder="Search prompts...">
+                    <select class="filter-dropdown">
+                        <option>All Categories</option>
+                        <option>Creative Writing</option>
+                        <option>Code Generation</option>
+                        <option>Data Analysis</option>
+                        <option>Content Creation</option>
+                    </select>
+                </div>
+                
+                <div class="prompt-grid" style="display: none;">
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon">
+                                <i class="ri-code-s-slash-line"></i>
+                            </div>
+                            <div class="prompt-title-wrapper">
+                                <div class="prompt-title">Code Refactoring Assistant</div>
+                                <div class="prompt-category">Code Generation</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="prompt-description">
+                                A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.
+                            </div>
+                            <div class="prompt-text">
+                                I want you to act as a code refactoring assistant. I will provide you with messy code, and your task is to refactor it to be more readable, maintainable, and efficient. Please apply clean code principles, design patterns where appropriate, and explain your changes.
+                            </div>
+                            <div class="prompt-actions">
+                                <div class="prompt-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                                <div class="prompt-meta">
+                                    Updated 3 days ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon" style="background-color: var(--color-tertiary);">
+                                <i class="ri-article-line"></i>
+                            </div>
+                            <div class="prompt-title-wrapper">
+                                <div class="prompt-title">Blog Post Outliner</div>
+                                <div class="prompt-category">Content Creation</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="prompt-description">
+                                Generates detailed outlines for blog posts on any topic with key sections and talking points.
+                            </div>
+                            <div class="prompt-text">
+                                I need you to create a detailed blog post outline on [TOPIC]. Please include an introduction, 5-7 main sections with 3-5 bullet points each for what to cover, and a conclusion. For each section, suggest a compelling subheading and briefly describe what should be covered.
+                            </div>
+                            <div class="prompt-actions">
+                                <div class="prompt-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                                <div class="prompt-meta">
+                                    Updated 1 week ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon" style="background-color: var(--color-secondary);">
+                                <i class="ri-bar-chart-2-line"></i>
+                            </div>
+                            <div class="prompt-title-wrapper">
+                                <div class="prompt-title">Data Analysis Helper</div>
+                                <div class="prompt-category">Data Analysis</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="prompt-description">
+                                Helps analyze datasets and draw meaningful insights with visualization suggestions.
+                            </div>
+                            <div class="prompt-text">
+                                I want you to act as a data analyst. I'll provide you with a dataset or description of data. Your task is to suggest meaningful analyses, identify patterns or trends, recommend visualization approaches, and help me draw insights from the data.
+                            </div>
+                            <div class="prompt-actions">
+                                <div class="prompt-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                                <div class="prompt-meta">
+                                    Updated 2 weeks ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prompt-card">
+                        <div class="prompt-header">
+                            <div class="prompt-icon" style="background-color: var(--color-accent);">
+                                <i class="ri-quill-pen-line"></i>
+                            </div>
+                            <div class="prompt-title-wrapper">
+                                <div class="prompt-title">Story Idea Generator</div>
+                                <div class="prompt-category">Creative Writing</div>
+                            </div>
+                        </div>
+                        <div class="prompt-content">
+                            <div class="prompt-description">
+                                Generates unique story ideas with character profiles, plot outlines, and setting descriptions.
+                            </div>
+                            <div class="prompt-text">
+                                Generate a unique story idea for me. Include a main character with an interesting background, a compelling conflict or challenge they face, a distinctive setting, and a potential plot twist.
+                            </div>
+                            <div class="prompt-actions">
+                                <div class="prompt-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                                <div class="prompt-meta">
+                                    Updated 1 month ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View -->
+                <div class="prompt-list">
+                    <!-- Prompt 1 -->
+                    <div class="prompt-list-item">
+                        <div class="prompt-list-icon">
+                            <i class="ri-code-s-slash-line"></i>
+                        </div>
+                        <div class="prompt-list-content">
+                            <div class="prompt-list-header">
+                                <div>
+                                    <div class="prompt-list-title">Code Refactoring Assistant</div>
+                                    <div class="prompt-list-category">Code Generation</div>
+                                </div>
+                                <div class="prompt-meta">Updated 3 days ago</div>
+                            </div>
+                            <div class="prompt-list-description">
+                                A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.
+                            </div>
+                            <div class="prompt-list-actions">
+                                <div class="prompt-list-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Prompt 2 -->
+                    <div class="prompt-list-item">
+                        <div class="prompt-list-icon" style="background-color: var(--color-tertiary);">
+                            <i class="ri-article-line"></i>
+                        </div>
+                        <div class="prompt-list-content">
+                            <div class="prompt-list-header">
+                                <div>
+                                    <div class="prompt-list-title">Blog Post Outliner</div>
+                                    <div class="prompt-list-category">Content Creation</div>
+                                </div>
+                                <div class="prompt-meta">Updated 1 week ago</div>
+                            </div>
+                            <div class="prompt-list-description">
+                                Generates detailed outlines for blog posts on any topic with key sections and talking points.
+                            </div>
+                            <div class="prompt-list-actions">
+                                <div class="prompt-list-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Prompt 3 -->
+                    <div class="prompt-list-item">
+                        <div class="prompt-list-icon" style="background-color: var(--color-secondary);">
+                            <i class="ri-bar-chart-2-line"></i>
+                        </div>
+                        <div class="prompt-list-content">
+                            <div class="prompt-list-header">
+                                <div>
+                                    <div class="prompt-list-title">Data Analysis Helper</div>
+                                    <div class="prompt-list-category">Data Analysis</div>
+                                </div>
+                                <div class="prompt-meta">Updated 2 weeks ago</div>
+                            </div>
+                            <div class="prompt-list-description">
+                                Helps analyze datasets and draw meaningful insights with visualization suggestions.
+                            </div>
+                            <div class="prompt-list-actions">
+                                <div class="prompt-list-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Prompt 4 -->
+                    <div class="prompt-list-item">
+                        <div class="prompt-list-icon" style="background-color: var(--color-accent);">
+                            <i class="ri-quill-pen-line"></i>
+                        </div>
+                        <div class="prompt-list-content">
+                            <div class="prompt-list-header">
+                                <div>
+                                    <div class="prompt-list-title">Story Idea Generator</div>
+                                    <div class="prompt-list-category">Creative Writing</div>
+                                </div>
+                                <div class="prompt-meta">Updated 1 month ago</div>
+                            </div>
+                            <div class="prompt-list-description">
+                                Generates unique story ideas with character profiles, plot outlines, and setting descriptions.
+                            </div>
+                            <div class="prompt-list-actions">
+                                <div class="prompt-list-buttons">
+                                    <button class="prompt-btn">Edit</button>
+                                    <button class="prompt-btn copy">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        
+        </main>
+        
+        <!-- Footer -->
+        <footer class="py-4 text-center text-sm text-gray-600 dark:text-gray-400 border-t border-gray-300 dark:border-gray-700">
+            <p>© 2023 Control Panel - Personal Dashboard</p>
+            <button id="dark-mode-toggle" class="mt-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md text-xs">
+                <span class="dark-mode-text">Toggle Dark Mode</span>
+            </button>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    
+</body>
+</html> 

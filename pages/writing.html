@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-paper">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing - Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <!-- Template Loader Script -->
+    <script src="../js/template-loader.js"></script>
+</head>
+<body class="text-ink bg-paper">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="font-typewriter text-2xl font-bold">Control Panel</div>
+            <button type="button" class="hamburger-button md:hidden w-6 h-6 flex flex-col justify-center items-center space-y-1" aria-label="Toggle mobile menu">
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-opacity duration-300"></span>
+                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+            </button>
+            <nav class="site-nav hidden md:block">
+                <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+                    <li><a href="../index.html" class="nav-dashboard flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="projects.html" class="nav-projects flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="revenue.html" class="nav-revenue flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="writing.html" class="nav-writing flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="ai-library.html" class="nav-ai-library flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="resources.html" class="nav-resources flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-link mr-2"></i> Resources</a></li>
+                    <li><a href="books.html" class="nav-books flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                </ul>
+            </nav>
+        </header>
+        <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+        
+        <main class="py-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h1 class="text-3xl font-typewriter mb-4 md:mb-0">Writing</h1>
+                <button class="btn btn-primary">
+                    <i class="ri-add-line mr-1"></i> New Content
+                </button>
+            </div>
+            
+            <div class="flex overflow-x-auto border-b mb-6">
+                <button class="px-4 py-2 border-b-2 border-highlight font-medium text-highlight whitespace-nowrap">All Content</button>
+                <button class="px-4 py-2 border-b-2 border-transparent font-medium text-light-ink hover:text-ink whitespace-nowrap">Blog Posts</button>
+                <button class="px-4 py-2 border-b-2 border-transparent font-medium text-light-ink hover:text-ink whitespace-nowrap">Newsletter</button>
+                <button class="px-4 py-2 border-b-2 border-transparent font-medium text-light-ink hover:text-ink whitespace-nowrap">Documentation</button>
+                <button class="px-4 py-2 border-b-2 border-transparent font-medium text-light-ink hover:text-ink whitespace-nowrap">Social Media</button>
+                <button class="px-4 py-2 border-b-2 border-transparent font-medium text-light-ink hover:text-ink whitespace-nowrap">Notes</button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                <div class="lg:col-span-3">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div class="relative flex-grow">
+                            <input type="text" placeholder="Search content..." class="form-control pl-10 w-full">
+                            <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="view-toggle">
+                                <button class="grid-view active"><i class="ri-grid-line"></i></button>
+                                <button class="list-view"><i class="ri-list-check"></i></button>
+                            </div>
+                            <select class="form-control w-auto">
+                                <option>Recent First</option>
+                                <option>Oldest First</option>
+                                <option>Title (A-Z)</option>
+                                <option>Most Views</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid View -->
+                    <div class="grid-content grid sm:grid-cols-2 gap-4">
+                        <div class="card">
+                            <div class="border-b pb-2 mb-3">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="card-title">Building a Personal Control Panel</h3>
+                                    <span class="badge badge-primary">Draft</span>
+                                </div>
+                                <div class="text-sm text-light-ink">Last edited: March 2, 2023</div>
+                            </div>
+                            <p class="text-sm text-light-ink mb-4 line-clamp-3">Creating a lightweight, vanilla web application to function as a personal dashboard for tracking projects, revenue, and writing content.</p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-100 rounded">Blog</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="border-b pb-2 mb-3">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="card-title">Getting Started with Tailwind CSS</h3>
+                                    <span class="badge badge-success">Published</span>
+                                </div>
+                                <div class="text-sm text-light-ink">Last edited: February 28, 2023</div>
+                            </div>
+                            <p class="text-sm text-light-ink mb-4 line-clamp-3">A comprehensive guide to setting up and using Tailwind CSS for your next web project. Learn about utility-first CSS and why it's gaining popularity.</p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-100 rounded">Tutorial</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="border-b pb-2 mb-3">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="card-title">Weekly Newsletter #42</h3>
+                                    <span class="badge badge-success">Published</span>
+                                </div>
+                                <div class="text-sm text-light-ink">Last edited: February 25, 2023</div>
+                            </div>
+                            <p class="text-sm text-light-ink mb-4 line-clamp-3">This week in tech: The latest updates on AI advancements, web development trends, and productivity tools you should know about.</p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-100 rounded">Newsletter</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="border-b pb-2 mb-3">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="card-title">The Future of Web Development</h3>
+                                    <span class="badge badge-warning">Scheduled</span>
+                                </div>
+                                <div class="text-sm text-light-ink">Last edited: February 20, 2023</div>
+                            </div>
+                            <p class="text-sm text-light-ink mb-4 line-clamp-3">Exploring emerging technologies and methodologies that will shape the future of web development over the next decade.</p>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-100 rounded">Blog</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- List View (Hidden by default) -->
+                    <div class="list-content hidden">
+                        <div class="card p-4 mb-3">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h3 class="text-lg font-bold">Building a Personal Control Panel</h3>
+                                        <span class="badge badge-primary">Draft</span>
+                                    </div>
+                                    <p class="text-sm text-light-ink mb-2">Creating a lightweight, vanilla web application to function as a personal dashboard for tracking projects, revenue, and writing content.</p>
+                                    <div class="flex items-center text-xs text-light-ink">
+                                        <span class="mr-4">Last edited: March 2, 2023</span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded">Blog</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-4 mb-3">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h3 class="text-lg font-bold">Getting Started with Tailwind CSS</h3>
+                                        <span class="badge badge-success">Published</span>
+                                    </div>
+                                    <p class="text-sm text-light-ink mb-2">A comprehensive guide to setting up and using Tailwind CSS for your next web project. Learn about utility-first CSS and why it's gaining popularity.</p>
+                                    <div class="flex items-center text-xs text-light-ink">
+                                        <span class="mr-4">Last edited: February 28, 2023</span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded">Tutorial</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-4 mb-3">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h3 class="text-lg font-bold">Weekly Newsletter #42</h3>
+                                        <span class="badge badge-success">Published</span>
+                                    </div>
+                                    <p class="text-sm text-light-ink mb-2">This week in tech: The latest updates on AI advancements, web development trends, and productivity tools you should know about.</p>
+                                    <div class="flex items-center text-xs text-light-ink">
+                                        <span class="mr-4">Last edited: February 25, 2023</span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded">Newsletter</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-4 mb-3">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h3 class="text-lg font-bold">The Future of Web Development</h3>
+                                        <span class="badge badge-warning">Scheduled</span>
+                                    </div>
+                                    <p class="text-sm text-light-ink mb-2">Exploring emerging technologies and methodologies that will shape the future of web development over the next decade.</p>
+                                    <div class="flex items-center text-xs text-light-ink">
+                                        <span class="mr-4">Last edited: February 20, 2023</span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded">Blog</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-eye-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-edit-line"></i></button>
+                                    <button class="text-light-ink hover:text-ink"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-center">
+                        <nav class="inline-flex">
+                            <button class="px-3 py-1 border-r text-light-ink hover:bg-gray-100">&lt;</button>
+                            <button class="px-3 py-1 border-r bg-highlight text-white">1</button>
+                            <button class="px-3 py-1 border-r text-light-ink hover:bg-gray-100">2</button>
+                            <button class="px-3 py-1 border-r text-light-ink hover:bg-gray-100">3</button>
+                            <button class="px-3 py-1 text-light-ink hover:bg-gray-100">&gt;</button>
+                        </nav>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-1">
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">Stats</h3>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div class="stat-card">
+                                <div class="stat-title">Total Content</div>
+                                <div class="stat-value">42</div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex-between mb-1">
+                                    <span class="text-sm font-semibold">Daily Goal</span>
+                                    <span class="text-sm">750 / 1,000 words</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-sm text-light-ink mb-1">Drafts</div>
+                                    <div class="font-bold">5</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-light-ink mb-1">Published</div>
+                                    <div class="font-bold">37</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Categories</h3>
+                            <button class="text-sm text-highlight">Edit</button>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <div class="flex-between">
+                                <span>Blog Posts</span>
+                                <span class="text-light-ink">18</span>
+                            </div>
+                            <div class="flex-between">
+                                <span>Tutorials</span>
+                                <span class="text-light-ink">8</span>
+                            </div>
+                            <div class="flex-between">
+                                <span>Newsletter</span>
+                                <span class="text-light-ink">12</span>
+                            </div>
+                            <div class="flex-between">
+                                <span>Documentation</span>
+                                <span class="text-light-ink">3</span>
+                            </div>
+                            <div class="flex-between">
+                                <span>Social Media</span>
+                                <span class="text-light-ink">7</span>
+                            </div>
+                            <div class="flex-between">
+                                <span>Notes</span>
+                                <span class="text-light-ink">4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/main.js"></script>
+</body>
+</html> 
