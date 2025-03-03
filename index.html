@@ -41,32 +41,68 @@
                     <!-- Dashboard widgets -->
                     <div class="widget">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-typewriter">Recent Projects</h3>
-                            <a href="pages/projects.html" class="text-sm text-highlight hover:underline">View all</a>
+                            <h3 class="text-xl font-typewriter">Projects</h3>
+                            <div class="flex gap-2">
+                                <a href="pages/projects-dashboard.html" class="text-sm text-highlight hover:underline">Dashboard</a>
+                                <span class="text-light-ink">|</span>
+                                <a href="pages/projects.html" class="text-sm text-highlight hover:underline">List</a>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Active Projects</span>
+                                <span class="text-sm">5 of 12</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-blue-500" style="width: 42%"></div>
+                            </div>
                         </div>
                         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                             <li class="py-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold">Control Panel</span>
-                                    <span class="badge badge-primary">Active</span>
-                                </div>
-                                <p class="text-sm text-light-ink mt-1">Personal dashboard and management tool</p>
+                                <a href="pages/project-detail.html" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold">Control Panel</span>
+                                        <span class="badge badge-primary">Active</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-sm text-light-ink">Personal dashboard and management tool</p>
+                                        <span class="text-xs text-light-ink">2h ago</span>
+                                    </div>
+                                </a>
                             </li>
                             <li class="py-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold">Retro Game</span>
-                                    <span class="badge badge-warning">Planning</span>
-                                </div>
-                                <p class="text-sm text-light-ink mt-1">JavaScript 2D pixel game</p>
+                                <a href="pages/project-detail.html" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold">Retro Game</span>
+                                        <span class="badge badge-warning">Planning</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-sm text-light-ink">JavaScript 2D pixel game</p>
+                                        <span class="text-xs text-light-ink">3d ago</span>
+                                    </div>
+                                </a>
                             </li>
                             <li class="py-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold">Writing Assistant</span>
-                                    <span class="badge badge-success">Completed</span>
-                                </div>
-                                <p class="text-sm text-light-ink mt-1">AI-powered writing tool</p>
+                                <a href="pages/project-detail.html" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-1 rounded transition-colors">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold">Writing Assistant</span>
+                                        <span class="badge badge-success">Completed</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-sm text-light-ink">AI-powered writing tool</p>
+                                        <span class="text-xs text-light-ink">2w ago</span>
+                                    </div>
+                                </a>
                             </li>
                         </ul>
+                        <div class="mt-3 flex justify-between">
+                            <a href="pages/activity-dashboard.html" class="text-sm text-highlight hover:underline flex items-center">
+                                <i class="ri-history-line mr-1"></i> Activity Dashboard
+                            </a>
+                            <a href="pages/projects.html" class="btn-secondary btn-xs">
+                                <i class="ri-add-line mr-1"></i> New Project
+                            </a>
+                        </div>
                     </div>
 
                     <div class="widget">

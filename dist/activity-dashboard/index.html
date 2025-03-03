@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-paper">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Dashboard - Control Panel</title>
+    <!-- Preload fonts to prevent FOUT (Flash of Unstyled Text) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <style>
+        /* Critical CSS to prevent layout shifts */
+        html {
+            overflow-y: scroll; /* Always show scrollbar to prevent layout shifts */
+        }
+        
+        body {
+            font-family: 'Special Elite', cursive;
+            font-display: optional;
+            color: #333333;
+            background-color: #f0f4f8;
+        }
+        
+        header {
+            min-height: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+        
+        main {
+            width: 100%;
+            max-width: 100%;
+            min-height: 500px;
+            padding: 1.5rem 0;
+        }
+        
+        /* Navigation styles */
+        .nav-dashboard, .nav-projects, .nav-revenue, .nav-writing, 
+        .nav-ai-library, .nav-resources, .nav-books {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+            color: #777777;
+        }
+        
+        .nav-dashboard:hover, .nav-projects:hover, .nav-revenue:hover, 
+        .nav-writing:hover, .nav-ai-library:hover, .nav-resources:hover, 
+        .nav-books:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Active navigation styles applied directly */
+        .nav-dashboard.active, .nav-projects.active, .nav-revenue.active,
+        .nav-writing.active, .nav-ai-library.active, .nav-resources.active,
+        .nav-books.active {
+            background-color: #4361ee;
+            color: white;
+        }
+        
+        /* Hide content until fonts are loaded */
+        .fonts-loading {
+            visibility: hidden;
+        }
+        
+        .fonts-loaded {
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+    <script>
+        // Font loading diagnostics
+        console.log('[FONTS] Starting font loading diagnostics');
+        
+        // Add class to indicate fonts are loading
+        document.documentElement.classList.add('fonts-loading');
+        
+        // Check if the browser supports the Font Loading API
+        if ('fonts' in document) {
+            console.log('[FONTS] Font Loading API is supported');
+            
+            // Create a promise that resolves when the font is loaded
+            document.fonts.ready.then(function() {
+                console.log('[FONTS] All fonts are loaded');
+                document.documentElement.classList.remove('fonts-loading');
+                document.documentElement.classList.add('fonts-loaded');
+            });
+            
+            // Log individual font loading status
+            document.fonts.forEach(function(font) {
+                console.log('[FONTS] Font:', font.family, 'Status:', font.status);
+                font.loaded.then(function() {
+                    console.log('[FONTS] Font loaded:', font.family);
+                }).catch(function(error) {
+                    console.error('[FONTS] Font loading error:', font.family, error);
+                });
+            });
+        } else {
+            console.log('[FONTS] Font Loading API is not supported');
+            
+            // Fallback for browsers that don't support the Font Loading API
+            // Remove the loading class after a short delay
+            setTimeout(function() {
+                console.log('[FONTS] Fallback timeout completed');
+                document.documentElement.classList.remove('fonts-loading');
+                document.documentElement.classList.add('fonts-loaded');
+            }, 500);
+        }
+        
+        // Log page load events
+        console.log('[PAGE] Document readyState:', document.readyState);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[PAGE] DOMContentLoaded event fired');
+        });
+        window.addEventListener('load', function() {
+            console.log('[PAGE] Window load event fired');
+        });
+    </script>
+    
+</head>
+<body class="text-ink bg-paper min-h-screen font-typewriter">
+    <div class="wrapper mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Header -->
+        <header class="py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <a href="../" class="text-2xl font-bold hover:text-highlight transition-colors">Control Panel</a>
+                
+                <!-- Navigation for desktop -->
+                <nav id="nav-menu" class="hidden md:block">
+                    <ul class="flex space-x-4">
+                        <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                        <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                        <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                        <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                        <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                        <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                        <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                    </ul>
+                </nav>
+                
+                <!-- Hamburger button for mobile -->
+                <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-2 cursor-pointer z-50">
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                </button>
+            </div>
+            
+            <!-- Mobile navigation menu - Will push content down when opened -->
+            <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
+                <ul class="flex flex-col space-y-2">
+                    <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                    <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                </ul>
+            </div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="py-6">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h1 class="text-3xl font-typewriter mb-4 md:mb-0">Activity Dashboard</h1>
+                <div class="flex space-x-3">
+                    <a href="projects-dashboard.html" class="btn-secondary">
+                        <i class="ri-dashboard-line mr-1"></i> Projects Dashboard
+                    </a>
+                    <a href="projects.html" class="btn-secondary">
+                        <i class="ri-list-check mr-1"></i> Projects List
+                    </a>
+                    <button class="btn" id="log-activity-btn">
+                        <i class="ri-add-line mr-1"></i> Log Activity
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column - Activity Feed -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Activity Summary -->
+                    <div class="card">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="stat-card">
+                                <div class="stat-title">Today</div>
+                                <div class="stat-value">5</div>
+                                <div class="text-xs text-light-ink">Activity entries</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">This Week</div>
+                                <div class="stat-value">23</div>
+                                <div class="text-xs text-light-ink">Activity entries</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Most Active Project</div>
+                                <div class="stat-value">Control Panel</div>
+                                <div class="text-xs text-light-ink">12 entries this week</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Heatmap -->
+                    <div class="card">
+                        <h3 class="text-lg font-typewriter mb-4">Activity Heatmap</h3>
+                        
+                        <div class="activity-heatmap bg-gray-50 dark:bg-gray-800 p-4 rounded">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm text-light-ink">All Projects</span>
+                                <select class="form-control form-control-sm w-auto">
+                                    <option>Last 6 months</option>
+                                    <option>Last 3 months</option>
+                                    <option>Last month</option>
+                                    <option>Last year</option>
+                                </select>
+                            </div>
+                            <div class="heatmap-grid grid grid-cols-26 gap-1 h-32">
+                                <!-- Placeholder heatmap cells - would be generated by JavaScript -->
+                                <div class="bg-green-100 rounded"></div>
+                                <div class="bg-green-200 rounded"></div>
+                                <div class="bg-green-300 rounded"></div>
+                                <div class="bg-green-400 rounded"></div>
+                                <div class="bg-green-100 rounded"></div>
+                                <div class="bg-green-200 rounded"></div>
+                                <div class="bg-green-300 rounded"></div>
+                                <!-- More cells would be generated by JavaScript -->
+                            </div>
+                            <div class="flex justify-between items-center mt-2 text-xs text-light-ink">
+                                <div>Less</div>
+                                <div class="flex items-center gap-1">
+                                    <div class="w-3 h-3 bg-green-100 rounded"></div>
+                                    <div class="w-3 h-3 bg-green-200 rounded"></div>
+                                    <div class="w-3 h-3 bg-green-300 rounded"></div>
+                                    <div class="w-3 h-3 bg-green-400 rounded"></div>
+                                </div>
+                                <div>More</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Feed -->
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-typewriter">Activity Feed</h3>
+                            <div class="flex gap-2">
+                                <select class="form-control form-control-sm">
+                                    <option>All Projects</option>
+                                    <option>Control Panel</option>
+                                    <option>Retro Game</option>
+                                    <option>Writing Assistant</option>
+                                </select>
+                                <select class="form-control form-control-sm">
+                                    <option>All Activities</option>
+                                    <option>Manual Logs</option>
+                                    <option>GitHub Events</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Timeline -->
+                        <div class="activity-timeline space-y-4">
+                            <!-- Today Header -->
+                            <div class="timeline-day-header flex items-center">
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 mr-3"></div>
+                                <div class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-light-ink text-sm">Today</div>
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 ml-3"></div>
+                            </div>
+                            
+                            <!-- GitHub Activity -->
+                            <div class="activity-item flex items-start gap-3">
+                                <div class="activity-icon bg-blue-50 p-2 rounded-full">
+                                    <i class="ri-github-fill text-blue-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">GitHub Commit <span class="text-light-ink text-sm">on Control Panel</span></span>
+                                        <span class="text-light-ink text-sm">2 hours ago</span>
+                                    </div>
+                                    <div class="text-light-ink">
+                                        <code class="bg-gray-50 dark:bg-gray-800 px-1 rounded text-sm">feat: implemented projects list view</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Manual Activity Log -->
+                            <div class="activity-item flex items-start gap-3">
+                                <div class="activity-icon bg-purple-50 p-2 rounded-full">
+                                    <i class="ri-edit-line text-purple-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Manual Log <span class="text-light-ink text-sm">on Control Panel</span></span>
+                                        <span class="text-light-ink text-sm">3 hours ago</span>
+                                    </div>
+                                    <div class="text-light-ink">
+                                        <div class="markdown-content">
+                                            <p>Researched best practices for activity feed UIs. Found several good examples on Dribbble that we can use for inspiration.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Yesterday Header -->
+                            <div class="timeline-day-header flex items-center mt-6">
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 mr-3"></div>
+                                <div class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-light-ink text-sm">Yesterday</div>
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 ml-3"></div>
+                            </div>
+                            
+                            <!-- GitHub Pull Request -->
+                            <div class="activity-item flex items-start gap-3">
+                                <div class="activity-icon bg-green-50 p-2 rounded-full">
+                                    <i class="ri-git-pull-request-line text-green-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Pull Request Merged <span class="text-light-ink text-sm">on Control Panel</span></span>
+                                        <span class="text-light-ink text-sm">Yesterday</span>
+                                    </div>
+                                    <div class="text-light-ink">
+                                        <code class="bg-gray-50 dark:bg-gray-800 px-1 rounded text-sm">PR #12: Add project filtering and sorting functionality</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Manual Activity Log for Retro Game -->
+                            <div class="activity-item flex items-start gap-3">
+                                <div class="activity-icon bg-purple-50 p-2 rounded-full">
+                                    <i class="ri-edit-line text-purple-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Manual Log <span class="text-light-ink text-sm">on Retro Game</span></span>
+                                        <span class="text-light-ink text-sm">Yesterday</span>
+                                    </div>
+                                    <div class="text-light-ink">
+                                        <div class="markdown-content">
+                                            <p>Sketched out initial character sprites and game background. Need to decide on pixel art style: 16x16 or 32x32.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Previous Week Header -->
+                            <div class="timeline-day-header flex items-center mt-6">
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 mr-3"></div>
+                                <div class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-light-ink text-sm">Previous Week</div>
+                                <div class="flex-grow border-t border-gray-200 dark:border-gray-700 ml-3"></div>
+                            </div>
+                            
+                            <!-- GitHub Issue -->
+                            <div class="activity-item flex items-start gap-3">
+                                <div class="activity-icon bg-blue-50 p-2 rounded-full">
+                                    <i class="ri-error-warning-line text-blue-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Issue Created <span class="text-light-ink text-sm">on Writing Assistant</span></span>
+                                        <span class="text-light-ink text-sm">Last week</span>
+                                    </div>
+                                    <div class="text-light-ink">
+                                        <code class="bg-gray-50 dark:bg-gray-800 px-1 rounded text-sm">Issue #8: API rate limiting handling needed</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Load More -->
+                            <div class="text-center pt-4">
+                                <button class="btn-secondary">Load More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Log Activity & Next Steps -->
+                <div class="space-y-6">
+                    <!-- Log Activity Card -->
+                    <div class="card">
+                        <h3 class="text-lg font-typewriter mb-4">Quick Log</h3>
+                        
+                        <form id="quick-log-form">
+                            <div class="form-group mb-4">
+                                <label for="project-select" class="block mb-2">Project</label>
+                                <select id="project-select" class="form-control w-full">
+                                    <option>Control Panel</option>
+                                    <option>Retro Game</option>
+                                    <option>Writing Assistant</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                <label for="log-type" class="block mb-2">Log Type</label>
+                                <select id="log-type" class="form-control w-full">
+                                    <option>Work Log</option>
+                                    <option>Research</option>
+                                    <option>Meeting Notes</option>
+                                    <option>Problem-Solution</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                <label for="quick-activity-content" class="block mb-2">Content</label>
+                                <div class="border border-gray-300 dark:border-gray-700 rounded">
+                                    <div class="flex border-b border-gray-300 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800">
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-bold"></i>
+                                        </button>
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-italic"></i>
+                                        </button>
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-link"></i>
+                                        </button>
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-list-unordered"></i>
+                                        </button>
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-list-ordered"></i>
+                                        </button>
+                                        <button type="button" class="p-1 text-light-ink hover:text-ink">
+                                            <i class="ri-code-line"></i>
+                                        </button>
+                                    </div>
+                                    <textarea id="quick-activity-content" class="form-control w-full border-none" rows="4" placeholder="What did you work on?"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" class="form-checkbox">
+                                    <span>Add to project next steps</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <button type="submit" class="btn w-full">Save Activity</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Projects with Missing Next Steps -->
+                    <div class="card">
+                        <h3 class="text-lg font-typewriter mb-4">Needs Attention</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="p-3 bg-red-50 border border-red-100 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="ri-error-warning-line text-red-500"></i>
+                                    <span class="font-medium">Control Panel</span>
+                                </div>
+                                <div class="text-light-ink text-sm">Missing next steps</div>
+                                <div class="mt-2">
+                                    <a href="project-detail.html" class="btn-secondary btn-sm">
+                                        <i class="ri-add-line mr-1"></i> Add Next Steps
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-yellow-50 border border-yellow-100 rounded">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="ri-time-line text-yellow-500"></i>
+                                    <span class="font-medium">Writing Assistant</span>
+                                </div>
+                                <div class="text-light-ink text-sm">No activity in 2 weeks</div>
+                                <div class="mt-2">
+                                    <a href="project-detail.html" class="btn-secondary btn-sm">
+                                        <i class="ri-eye-line mr-1"></i> View Project
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent GitHub Activity -->
+                    <div class="card">
+                        <h3 class="text-lg font-typewriter mb-4">Recent GitHub Activity</h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2">
+                                <div class="activity-icon bg-blue-50 p-1 rounded-full">
+                                    <i class="ri-github-fill text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm">
+                                        <span class="font-medium">feat: implemented projects list view</span>
+                                    </div>
+                                    <div class="text-xs text-light-ink">Control Panel • 2 hours ago</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-2">
+                                <div class="activity-icon bg-blue-50 p-1 rounded-full">
+                                    <i class="ri-github-fill text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm">
+                                        <span class="font-medium">fix: mobile responsive issues</span>
+                                    </div>
+                                    <div class="text-xs text-light-ink">Control Panel • Yesterday</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-2">
+                                <div class="activity-icon bg-green-50 p-1 rounded-full">
+                                    <i class="ri-git-pull-request-line text-green-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm">
+                                        <span class="font-medium">PR #12: Add project filtering</span>
+                                    </div>
+                                    <div class="text-xs text-light-ink">Control Panel • Yesterday</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <a href="#" class="text-highlight text-sm hover:underline">View all GitHub activity</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        </main>
+        
+        <!-- Footer -->
+        <footer class="py-4 text-center text-sm text-light-ink border-t border-gray-200 dark:border-gray-700">
+            <p>© 2025 Control Panel - Personal Dashboard</p>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    
+</body>
+</html> 
