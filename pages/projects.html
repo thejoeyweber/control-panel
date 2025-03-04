@@ -14,10 +14,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="font-typewriter text-2xl font-bold">Control Panel</div>
-            <button type="button" class="hamburger-button md:hidden w-6 h-6 flex flex-col justify-center items-center space-y-1" aria-label="Toggle mobile menu">
-                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
-                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-opacity duration-300"></span>
-                <span class="block w-5 h-0.5 bg-ink dark:bg-white transition-transform duration-300"></span>
+            <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 cursor-pointer">
+                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
             </button>
             <nav class="site-nav hidden md:block">
                 <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
@@ -33,6 +33,19 @@
         </header>
         <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
         
+        <!-- Mobile navigation menu -->
+        <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
+            <ul class="flex flex-col space-y-2">
+                <li><a href="../index.html" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                <li><a href="projects.html" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded active"><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                <li><a href="revenue.html" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                <li><a href="writing.html" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                <li><a href="ai-library.html" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                <li><a href="resources.html" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-link mr-2"></i> Resources</a></li>
+                <li><a href="books.html" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-book-read-line mr-2"></i> Books</a></li>
+            </ul>
+        </div>
+
         <main class="py-8">
             <!-- Header Section -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">

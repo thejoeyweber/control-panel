@@ -229,14 +229,6 @@ function setupBookViewToggle() {
 }
 
 /**
- * Sets up dark mode toggle functionality
- */
-function setupDarkModeToggle() {
-  // This function is no longer used as we've removed the dark mode toggle
-  // Keeping the function as a placeholder in case we need to reimplement it later
-}
-
-/**
  * Creates a placeholder chart
  * @param {string} selector - The ID of the element to create the chart in
  * @param {Array} data - The data for the chart
@@ -268,69 +260,113 @@ function createPlaceholderChart(selector, data) {
   ctx.stroke();
 }
 
-/**
- * Creates a modal dialog
- * @param {string} title - The title of the modal
- * @param {string} content - The content of the modal
- * @returns {HTMLElement} - The modal element
- */
-function createModal(title, content) {
+// Helper function for view toggles
+function setActiveViewToggle(activeButton, inactiveButton, viewMode) {
+  // Update active/inactive states
+  activeButton.classList.add('active');
+  inactiveButton.classList.remove('active');
+  
+  // Set background color for inactive button
+  if (viewMode === 'grid') {
+    gridViewButton.classList.add('bg-gray-200');
+    listViewButton.classList.remove('bg-gray-200');
+  } else {
+    listViewButton.classList.add('bg-gray-200');
+    gridViewButton.classList.remove('bg-gray-200');
+  }
+  
+  // Save preference
+  localStorage.setItem('bookViewMode', viewMode);
+}
+
+// Modal element creation - utility function
+function createModalElement(tag, className, content) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (content) {
+    if (typeof content === 'string') {
+      element.textContent = content;
+    } else {
+      element.appendChild(content);
+    }
+  }
+  return element;
+}
+
+// Create modal dialog
+function createModal(title, content, onSave) {
   // Create modal container
-  const modalContainer = document.createElement('div');
-  modalContainer.className = 'fixed inset-0 flex items-center justify-center z-50';
+  const modal = createModalElement('div', 'modal');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
   
-  // Create backdrop
-  const backdrop = document.createElement('div');
-  backdrop.className = 'absolute inset-0 bg-black bg-opacity-50';
-  modalContainer.appendChild(backdrop);
+  // Create modal content
+  const modalContent = createModalElement('div', 'modal-content');
   
-  // Create modal
-  const modal = document.createElement('div');
-  modal.className = 'bg-white dark:bg-dark-paper rounded-lg shadow-xl z-10 w-full max-w-md mx-4 overflow-hidden';
+  // Create header
+  const modalHeader = createModalElement('div', 'modal-header');
+  const modalTitle = createModalElement('h3', '', title);
+  const closeButton = createModalElement('button', 'modal-close', '×');
+  closeButton.setAttribute('aria-label', 'Close');
   
-  // Create modal header
-  const modalHeader = document.createElement('div');
-  modalHeader.className = 'flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700';
-  
-  // Create title
-  const modalTitle = document.createElement('h3');
-  modalTitle.className = 'text-lg font-typewriter';
-  modalTitle.textContent = title;
   modalHeader.appendChild(modalTitle);
-  
-  // Create close button
-  const closeButton = document.createElement('button');
-  closeButton.className = 'text-light-ink hover:text-highlight transition-colors';
-  closeButton.innerHTML = '<i class="ri-close-line text-xl"></i>';
   modalHeader.appendChild(closeButton);
   
-  // Create modal body
-  const modalBody = document.createElement('div');
-  modalBody.className = 'p-4';
-  modalBody.innerHTML = content;
+  // Create body
+  const modalBody = createModalElement('div', 'modal-body');
+  
+  if (typeof content === 'string') {
+    modalBody.innerHTML = content;
+  } else {
+    modalBody.appendChild(content);
+  }
+  
+  // Create footer
+  const modalFooter = createModalElement('div', 'modal-footer');
+  const cancelButton = createModalElement('button', 'btn btn-secondary', 'Cancel');
+  const saveButton = createModalElement('button', 'btn btn-primary', 'Save');
+  
+  modalFooter.appendChild(cancelButton);
+  modalFooter.appendChild(saveButton);
   
   // Assemble modal
-  modal.appendChild(modalHeader);
-  modal.appendChild(modalBody);
-  modalContainer.appendChild(modal);
-  
-  // Add to document
-  document.body.appendChild(modalContainer);
-  
-  // Close modal function
-  const closeModal = () => {
-    modalContainer.classList.add('opacity-0');
-    setTimeout(() => {
-      document.body.removeChild(modalContainer);
-    }, 300);
-  };
+  modalContent.appendChild(modalHeader);
+  modalContent.appendChild(modalBody);
+  modalContent.appendChild(modalFooter);
+  modal.appendChild(modalContent);
   
   // Add event listeners
-  closeButton.addEventListener('click', closeModal);
-  backdrop.addEventListener('click', closeModal);
+  closeButton.addEventListener('click', () => {
+    closeModal(modal);
+  });
   
-  // Return modal element
-  return modalContainer;
+  cancelButton.addEventListener('click', () => {
+    closeModal(modal);
+  });
+  
+  saveButton.addEventListener('click', () => {
+    if (onSave) {
+      onSave();
+    }
+    closeModal(modal);
+  });
+  
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal(modal);
+    }
+  });
+  
+  // Add to DOM
+  document.body.appendChild(modal);
+  
+  // Show modal
+  setTimeout(() => {
+    modal.classList.add('show');
+  }, 10);
+  
+  return modal;
 }
 
 // Setup smooth page transitions
