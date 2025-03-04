@@ -47,18 +47,20 @@ controlpanel/
 │   ├── revenue.html
 │   └── ...
 ├── css/
-│   ├── tailwind.css       # Tailwind directives + custom styles
-│   └── styles.css         # Compiled output
+│   ├── tailwind.css       # Tailwind directives with custom styles
+│   └── styles.css         # Compiled CSS output
 ├── js/
 │   ├── build-pages.js     # Build script for pages
-│   ├── main.js            # Core frontend logic
+│   ├── main.js            # Main JavaScript functionality
 │   ├── template-processor.js # Template processor
+│   └── template-loader.js # Template loader for browser
+├── migration-scripts/     # Scripts used for one-time migrations
 │   └── create-page.js     # Utility to create new pages
 ├── templates/
 │   └── base.html          # Base template
 ├── assets/                # Static assets
 ├── img/                   # Images
-├── index.html             # Main entry point
+├── build.js               # Main build script
 ├── package.json           # Project dependencies
 ├── postcss.config.js      # PostCSS configuration
 ├── tailwind.config.js     # Tailwind configuration
@@ -96,12 +98,12 @@ This will start the Tailwind CSS watcher to compile your CSS in real-time.
 To create a new page:
 
 ```bash
-npm run create-page <page-name> "Page Title"
+node migration-scripts/create-page.js <page-name> "Page Title"
 ```
 
 Example:
 ```bash
-npm run create-page tasks "Task Manager"
+node migration-scripts/create-page.js tasks "Task Manager"
 ```
 
 ### Building for Production
@@ -188,10 +190,7 @@ Dark mode is implemented using Tailwind's `dark:` variant and the `class` strate
 - `pages/`: Individual pages for different sections
 - `css/`: CSS files
   - `styles.css`: Compiled CSS
-  - `tailwind.css`: Tailwind directives and custom components
-  - `main.css`: Custom styles that can't be easily replaced with Tailwind
-  - `modal.css`: Modal component styles
-  - `normalize.css`: CSS normalization
+  - `tailwind.css`: Tailwind directives and custom components with integrated modal styles
 - `js/`: JavaScript files
   - `main.js`: Main JavaScript functionality
 - `img/`: Images and assets
@@ -244,13 +243,13 @@ controlpanel/
 
 ### Theming
 
-The project uses CSS variables for easy theming. Modify the color scheme in `css/main.css`:
+The project uses CSS variables for easy theming. Modify the color scheme in `css/tailwind.css`:
 
 ```css
 :root {
   /* Colors */
-  --color-primary: #3498db;
-  --color-primary-dark: #2980b9;
+  --color-paper: #f0f4f8;
+  --color-ink: #333333;
   /* ... other colors ... */
 }
 ```
@@ -321,7 +320,6 @@ This project is for personal use only.
 ## Acknowledgements
 
 - [Remix Icon](https://remixicon.com/) for the icon library
-- [Normalize.css](https://necolas.github.io/normalize.css/) for CSS reset
 
 ## Technical Details
 

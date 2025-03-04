@@ -48,9 +48,9 @@ async function build() {
     console.log('Building pages...');
     require('./js/build-pages');
     
-    // Copy index.html to dist
+    // Copy index.html from pages to dist
     console.log('Copying index.html to output directory...');
-    copyFile('index.html', path.join(config.outputDir, 'index.html'));
+    copyFile(path.join(config.pagesDir, 'index.html'), path.join(config.outputDir, 'index.html'));
     
     // Copy asset directories
     console.log('Copying assets...');

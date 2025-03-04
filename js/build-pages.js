@@ -33,9 +33,6 @@ async function buildPages() {
     // Load template
     const template = fs.readFileSync(path.join(config.rootDir, config.templatePath), 'utf8');
     
-    // Build index page
-    await buildPage('index.html', template, '');
-    
     // Get all pages in pages directory
     const pages = fs.readdirSync(path.join(config.rootDir, config.pagesDir))
       .filter(file => file.endsWith('.html'));
@@ -44,6 +41,12 @@ async function buildPages() {
     for (const page of pages) {
       // Get the page name without extension
       const pageName = page.replace('.html', '');
+      
+      // Handle index.html specially
+      if (pageName === 'index') {
+        await buildPage(page, template, config.pagesDir, '');
+        continue;
+      }
       
       // Create directory for clean URL if it doesn't exist
       const pageDir = path.join(config.outputDir, pageName);
@@ -80,7 +83,11 @@ async function buildPage(pageName, template, pageDir, cleanUrlPath = null) {
     let outputPath;
     let relativePath;
     
-    if (cleanUrlPath) {
+    if (pageName === 'index.html' && cleanUrlPath === '') {
+      // For main index page, keep at root
+      outputPath = path.join(config.outputDir, pageName);
+      relativePath = '';
+    } else if (cleanUrlPath) {
       // For pages other than index, use clean URL structure
       outputPath = path.join(config.outputDir, cleanUrlPath, 'index.html');
       relativePath = '../';

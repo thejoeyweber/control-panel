@@ -4,8 +4,8 @@
  * This script creates a new page using the template system.
  * It's designed to be run from the command line with arguments for the page name and title.
  * 
- * Usage: node js/create-page.js <page-name> <page-title>
- * Example: node js/create-page.js tasks "Task Manager"
+ * Usage: node migration-scripts/create-page.js <page-name> <page-title>
+ * Example: node migration-scripts/create-page.js tasks "Task Manager"
  */
 
 const fs = require('fs');
@@ -17,10 +17,10 @@ const pageName = args[0];
 const pageTitle = args[1] || pageName.charAt(0).toUpperCase() + pageName.slice(1);
 
 // Check if page name is provided
-if (!pageName) {
-  console.error('Error: Page name is required');
-  console.log('Usage: node js/create-page.js <page-name> <page-title>');
-  console.log('Example: node js/create-page.js tasks "Task Manager"');
+if (process.argv.length < 4) {
+  console.log('Error: Missing required arguments');
+  console.log('Usage: node migration-scripts/create-page.js <page-name> <page-title>');
+  console.log('Example: node migration-scripts/create-page.js tasks "Task Manager"');
   process.exit(1);
 }
 

@@ -8,7 +8,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" as="style">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
     <style>
         /* Critical CSS to prevent layout shifts */
@@ -126,18 +126,18 @@
         <!-- Header -->
         <header class="py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex justify-between items-center">
-                <a href="./" class="text-2xl font-bold hover:text-highlight transition-colors">Control Panel</a>
+                <a href="../" class="text-2xl font-bold hover:text-highlight transition-colors">Control Panel</a>
                 
                 <!-- Navigation for desktop -->
                 <nav id="nav-menu" class="hidden md:block">
                     <ul class="flex space-x-4">
-                        <li><a href="./" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded active"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                        <li><a href="./projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                        <li><a href="./revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                        <li><a href="./writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                        <li><a href="./ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                        <li><a href="./resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
-                        <li><a href="./books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                        <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                        <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                        <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                        <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                        <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                        <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                        <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
                     </ul>
                 </nav>
                 
@@ -152,13 +152,13 @@
             <!-- Mobile navigation menu - Will push content down when opened -->
             <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
                 <ul class="flex flex-col space-y-2">
-                    <li><a href="./" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded active"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                    <li><a href="./projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                    <li><a href="./revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                    <li><a href="./writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                    <li><a href="./ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                    <li><a href="./resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
-                    <li><a href="./books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                    <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                    <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
                 </ul>
             </div>
         </header>
@@ -398,7 +398,7 @@
     </div>
     
     <!-- Scripts -->
-    <script src="js/main.js"></script>
+    <script src="../js/main.js"></script>
     
 </body>
 </html> 

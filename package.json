@@ -8,7 +8,6 @@
     "build": "npx tailwindcss -i ./css/tailwind.css -o ./css/styles.css --minify",
     "build:pages": "node js/build-pages.js",
     "build:all": "node build.js",
-    "create-page": "node js/create-page.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "serve dist -p 3000"
   },
