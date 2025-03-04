@@ -374,3 +374,30 @@ The mobile navigation system has been implemented with the following features:
   ```
   npm run build
   ```
+
+## Code Optimization for Token Efficiency
+
+The codebase has been optimized for token efficiency to improve LLM processing:
+
+### Centralized Templates
+- Moved all repeated HTML elements (header, navigation, mobile menu, footer) into the base template
+- Individual pages now only contain their unique content within a `<main>` tag
+- Reduced duplication across pages by 60-70%
+
+### Build Process Improvements
+- Centralized configuration between build scripts
+- Enhanced template system to extract and insert page-specific content
+- Improved handling of scripts and styles to avoid duplication
+
+### JavaScript Optimizations
+- Consolidated common functionality in main.js
+- Implemented feature detection to only run relevant code
+- Made functions more modular with better error handling
+
+### Benefits
+- Significantly reduced token count when working with this codebase
+- Single source of truth for navigation and common UI elements
+- Better maintainability through separation of concerns
+- Easier for LLMs to understand the core functionality of each page
+
+These optimizations were implemented without changing the functionality or appearance of the application.

@@ -166,117 +166,117 @@
         <!-- Main content -->
         <main class="py-6">
             
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <h1 class="text-3xl font-typewriter mb-4 md:mb-0">AI Library</h1>
-                <div class="flex flex-col md:flex-row gap-4">
-                    <button class="btn">
-                        <i class="ri-add-line mr-1"></i> Add Prompt
-                    </button>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h1 class="text-3xl font-typewriter mb-4 md:mb-0">AI Library</h1>
+            <div class="flex flex-col md:flex-row gap-4">
+                <button class="btn">
+                    <i class="ri-add-line mr-1"></i> Add Prompt
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="flex space-x-8">
+                <a href="#" class="border-b-2 border-highlight px-1 py-4 text-highlight">Prompts</a>
+                <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Agents</a>
+                <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Models</a>
+                <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Templates</a>
+            </nav>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="relative flex-grow">
+                <input type="text" placeholder="Search prompts..." class="w-full px-4 py-2 pl-10 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
+                <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+            </div>
+            <select class="w-full md:w-auto px-4 py-2 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
+                <option>All Categories</option>
+                <option>Code Generation</option>
+                <option>Content Creation</option>
+                <option>Data Analysis</option>
+            </select>
+        </div>
+
+        <!-- Prompt Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Code Refactoring Assistant -->
+            <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="ri-code-line text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium">Code Refactoring Assistant</h3>
+                        <span class="text-sm text-light-ink">Code Generation</span>
+                    </div>
+                </div>
+                <p class="text-light-ink mb-4">A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-light-ink">Updated 3 days ago</span>
+                    <div class="flex gap-2">
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                            <i class="ri-edit-line"></i>
+                        </button>
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
+                            <i class="ri-file-copy-line"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tabs -->
-            <div class="border-b border-gray-200 mb-6">
-                <nav class="flex space-x-8">
-                    <a href="#" class="border-b-2 border-highlight px-1 py-4 text-highlight">Prompts</a>
-                    <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Agents</a>
-                    <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Models</a>
-                    <a href="#" class="border-b-2 border-transparent px-1 py-4 text-light-ink hover:text-highlight hover:border-gray-300">Templates</a>
-                </nav>
-            </div>
-
-            <!-- Search and Filter -->
-            <div class="flex flex-col md:flex-row gap-4 mb-6">
-                <div class="relative flex-grow">
-                    <input type="text" placeholder="Search prompts..." class="w-full px-4 py-2 pl-10 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
-                    <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
-                </div>
-                <select class="w-full md:w-auto px-4 py-2 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
-                    <option>All Categories</option>
-                    <option>Code Generation</option>
-                    <option>Content Creation</option>
-                    <option>Data Analysis</option>
-                </select>
-            </div>
-
-            <!-- Prompt Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Code Refactoring Assistant -->
-                <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-blue-100 p-3 rounded-lg">
-                            <i class="ri-code-line text-blue-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium">Code Refactoring Assistant</h3>
-                            <span class="text-sm text-light-ink">Code Generation</span>
-                        </div>
+            <!-- Blog Post Outliner -->
+            <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <i class="ri-file-text-line text-purple-600 text-xl"></i>
                     </div>
-                    <p class="text-light-ink mb-4">A prompt that helps refactor messy code into clean, maintainable code with detailed explanations.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-light-ink">Updated 3 days ago</span>
-                        <div class="flex gap-2">
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                <i class="ri-edit-line"></i>
-                            </button>
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
-                                <i class="ri-file-copy-line"></i>
-                            </button>
-                        </div>
+                    <div>
+                        <h3 class="text-lg font-medium">Blog Post Outliner</h3>
+                        <span class="text-sm text-light-ink">Content Creation</span>
                     </div>
                 </div>
-
-                <!-- Blog Post Outliner -->
-                <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-purple-100 p-3 rounded-lg">
-                            <i class="ri-file-text-line text-purple-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium">Blog Post Outliner</h3>
-                            <span class="text-sm text-light-ink">Content Creation</span>
-                        </div>
-                    </div>
-                    <p class="text-light-ink mb-4">Generates detailed outlines for blog posts on any topic with key sections and talking points.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-light-ink">Updated 1 week ago</span>
-                        <div class="flex gap-2">
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                <i class="ri-edit-line"></i>
-                            </button>
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
-                                <i class="ri-file-copy-line"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Analysis Helper -->
-                <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-green-100 p-3 rounded-lg">
-                            <i class="ri-bar-chart-line text-green-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-medium">Data Analysis Helper</h3>
-                            <span class="text-sm text-light-ink">Data Analysis</span>
-                        </div>
-                    </div>
-                    <p class="text-light-ink mb-4">Helps analyze datasets and draw meaningful insights with visualization suggestions.</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-light-ink">Updated 2 weeks ago</span>
-                        <div class="flex gap-2">
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                <i class="ri-edit-line"></i>
-                            </button>
-                            <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
-                                <i class="ri-file-copy-line"></i>
-                            </button>
-                        </div>
+                <p class="text-light-ink mb-4">Generates detailed outlines for blog posts on any topic with key sections and talking points.</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-light-ink">Updated 1 week ago</span>
+                    <div class="flex gap-2">
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                            <i class="ri-edit-line"></i>
+                        </button>
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
+                            <i class="ri-file-copy-line"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-        
+
+            <!-- Data Analysis Helper -->
+            <div class="bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="ri-bar-chart-line text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium">Data Analysis Helper</h3>
+                        <span class="text-sm text-light-ink">Data Analysis</span>
+                    </div>
+                </div>
+                <p class="text-light-ink mb-4">Helps analyze datasets and draw meaningful insights with visualization suggestions.</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-light-ink">Updated 2 weeks ago</span>
+                    <div class="flex gap-2">
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                            <i class="ri-edit-line"></i>
+                        </button>
+                        <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Copy">
+                            <i class="ri-file-copy-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
         </main>
         
         <!-- Footer -->
@@ -287,6 +287,42 @@
     
     <!-- Scripts -->
     <script src="../js/main.js"></script>
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // View toggle functionality
+            const gridView = document.querySelector('.grid-view');
+            const listView = document.querySelector('.list-view');
+            const promptGrid = document.querySelector('.prompt-grid');
+            const promptList = document.querySelector('.prompt-list');
+            
+            if (gridView && listView && promptGrid && promptList) {
+                gridView.addEventListener('click', function() {
+                    gridView.classList.add('active');
+                    listView.classList.remove('active');
+                    promptGrid.classList.remove('hidden');
+                    promptList.classList.add('hidden');
+                });
+                
+                listView.addEventListener('click', function() {
+                    listView.classList.add('active');
+                    gridView.classList.remove('active');
+                    promptList.classList.remove('hidden');
+                    promptGrid.classList.add('hidden');
+                });
+            }
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active', 'border-highlight', 'text-highlight'));
+                    tabs.forEach(t => t.classList.add('border-transparent', 'text-light-ink'));
+                    this.classList.add('active', 'border-highlight', 'text-highlight');
+                    this.classList.remove('border-transparent', 'text-light-ink');
+                });
+            });
+        });
+    </script>
+
 </body>
 </html> 

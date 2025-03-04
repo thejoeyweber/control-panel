@@ -1,15 +1,14 @@
 /**
  * Build Script
  * 
- * This script runs the build process for the Control Panel application.
- * It builds the CSS using Tailwind and then builds the pages using the template system.
+ * This script runs the main build process for the Control Panel application.
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration
+// Configuration - centralized config for the entire build process
 const config = {
   outputDir: 'dist',
   cssDir: 'css',
@@ -17,8 +16,12 @@ const config = {
   pagesDir: 'pages',
   templatesDir: 'templates',
   assetsDir: 'assets',
-  imgDir: 'img'
+  imgDir: 'img',
+  templatePath: 'templates/base.html'
 };
+
+// Export the config for other scripts to use
+exports.config = config;
 
 /**
  * Main function to run the build process
@@ -45,12 +48,9 @@ async function build() {
     copyDirectory(config.jsDir, path.join(config.outputDir, config.jsDir));
     
     // Build pages
-    console.log('Building pages...');
+    console.log('Building pages using template system...');
+    // We use require here to load the build-pages module and run it
     require('./js/build-pages');
-    
-    // Copy index.html from pages to dist
-    console.log('Copying index.html to output directory...');
-    copyFile(path.join(config.pagesDir, 'index.html'), path.join(config.outputDir, 'index.html'));
     
     // Copy asset directories
     console.log('Copying assets...');
@@ -123,5 +123,11 @@ function copyFile(src, dest) {
   }
 }
 
-// Run the build process
-build(); 
+// Export utility functions for use in other build scripts
+exports.copyDirectory = copyDirectory;
+exports.copyFile = copyFile;
+
+// Run the build process if this script is executed directly
+if (require.main === module) {
+  build();
+} 

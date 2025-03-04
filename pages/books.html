@@ -1,329 +1,219 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-paper">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Books - Control Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
 </head>
-<body class="text-ink bg-paper">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="font-typewriter text-2xl font-bold">Control Panel</div>
-            <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 cursor-pointer">
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-            </button>
-            <nav class="site-nav hidden md:block">
-                <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-                    <li><a href="../index.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                    <li><a href="projects.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                    <li><a href="revenue.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                    <li><a href="writing.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                    <li><a href="ai-library.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                    <li><a href="resources.html" class="flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-link mr-2"></i> Resources</a></li>
-                    <li><a href="books.html" class="active flex items-center text-ink hover:text-highlight transition-colors"><i class="ri-book-read-line mr-2"></i> Books</a></li>
-                </ul>
-            </nav>
-        </header>
-        <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
-        
-        <!-- Mobile navigation menu -->
-        <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
-            <ul class="flex flex-col space-y-2">
-                <li><a href="../index.html" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                <li><a href="projects.html" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                <li><a href="revenue.html" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                <li><a href="writing.html" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                <li><a href="ai-library.html" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                <li><a href="resources.html" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-link mr-2"></i> Resources</a></li>
-                <li><a href="books.html" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded active"><i class="ri-book-read-line mr-2"></i> Books</a></li>
-            </ul>
-        </div>
-
-        <main class="py-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <h1 class="text-3xl font-typewriter mb-4 md:mb-0">Books</h1>
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="view-toggle flex rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <button class="grid-view flex-1 px-3 py-1 flex items-center justify-center bg-white dark:bg-dark-paper hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors">
-                            <i class="ri-grid-fill mr-1"></i> Grid
-                        </button>
-                        <button class="list-view flex-1 px-3 py-1 flex items-center justify-center bg-white dark:bg-dark-paper hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors">
-                            <i class="ri-list-check mr-1"></i> List
-                        </button>
-                    </div>
-                    <button class="inline-flex items-center px-4 py-2 bg-highlight text-white rounded hover:bg-highlight/90 transition-colors">
-                        <i class="ri-add-line mr-1"></i> Add Book
+<body>
+    <main class="py-8">
+        <!-- Main content for the books page -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h1 class="text-3xl font-typewriter mb-4 md:mb-0">Books</h1>
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex items-center space-x-2">
+                    <button class="grid-view p-2 rounded">
+                        <i class="ri-grid-fill text-xl"></i>
+                    </button>
+                    <button class="list-view p-2 rounded">
+                        <i class="ri-list-check text-xl"></i>
                     </button>
                 </div>
+                <button class="btn">
+                    <i class="ri-add-line mr-1"></i> Add Book
+                </button>
             </div>
-            
-            <div class="flex flex-col md:flex-row gap-4 mb-6">
-                <div class="relative flex-grow">
-                    <input type="text" placeholder="Search books..." class="w-full px-4 py-2 pl-10 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-dark-paper focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
-                    <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
-                </div>
-                <select class="w-full md:w-auto px-4 py-2 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-dark-paper focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
-                    <option>All Categories</option>
-                    <option>Programming</option>
-                    <option>Design</option>
-                    <option>Business</option>
-                    <option>Fiction</option>
-                </select>
-            </div>
-            
-            <!-- Grid View -->
-            <div class="grid-books grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Book 1 -->
-                <div class="bg-white dark:bg-dark-paper rounded-lg shadow-card p-4 hover:shadow-card-hover transition-shadow">
-                    <div class="flex flex-col h-full">
-                        <div class="flex items-start mb-4">
-                            <div class="bg-gray-100 w-16 h-24 rounded mr-3 flex-shrink-0"></div>
-                            <div>
-                                <h3 class="text-lg font-typewriter">Design Patterns</h3>
-                                <p class="text-sm text-light-ink">Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides</p>
-                                <div class="flex items-center mt-1">
-                                    <span class="text-warning">★★★★</span><span class="text-gray-300 dark:text-gray-600">★</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-light-ink mb-4 flex-grow">Elements of Reusable Object-Oriented Software. A classic book on design patterns in software development.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                            <div class="flex gap-1">
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                    <i class="ri-file-list-line"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 2 -->
-                <div class="bg-white dark:bg-dark-paper rounded-lg shadow-card p-4 hover:shadow-card-hover transition-shadow">
-                    <div class="flex flex-col h-full">
-                        <div class="flex items-start mb-4">
-                            <div class="bg-gray-100 w-16 h-24 rounded mr-3 flex-shrink-0"></div>
-                            <div>
-                                <h3 class="text-lg font-typewriter">Clean Code</h3>
-                                <p class="text-sm text-light-ink">Robert C. Martin</p>
-                                <div class="flex items-center mt-1">
-                                    <span class="text-warning">★★★★★</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-light-ink mb-4 flex-grow">A Handbook of Agile Software Craftsmanship. Practical advice on writing clean, maintainable code.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                            <div class="flex gap-1">
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                    <i class="ri-file-list-line"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 3 -->
-                <div class="bg-white dark:bg-dark-paper rounded-lg shadow-card p-4 hover:shadow-card-hover transition-shadow">
-                    <div class="flex flex-col h-full">
-                        <div class="flex items-start mb-4">
-                            <div class="bg-gray-100 w-16 h-24 rounded mr-3 flex-shrink-0"></div>
-                            <div>
-                                <h3 class="text-lg font-typewriter">The Pragmatic Programmer</h3>
-                                <p class="text-sm text-light-ink">Andrew Hunt, David Thomas</p>
-                                <div class="flex items-center mt-1">
-                                    <span class="text-warning">★★★★</span><span class="text-gray-300 dark:text-gray-600">★</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-light-ink mb-4 flex-grow">Your Journey to Mastery. A collection of practical advice for software developers.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                            <div class="flex gap-1">
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                    <i class="ri-file-list-line"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 4 -->
-                <div class="bg-white dark:bg-dark-paper rounded-lg shadow-card p-4 hover:shadow-card-hover transition-shadow">
-                    <div class="flex flex-col h-full">
-                        <div class="flex items-start mb-4">
-                            <div class="bg-gray-100 w-16 h-24 rounded mr-3 flex-shrink-0"></div>
-                            <div>
-                                <h3 class="text-lg font-typewriter">Don't Make Me Think</h3>
-                                <p class="text-sm text-light-ink">Steve Krug</p>
-                                <div class="flex items-center mt-1">
-                                    <span class="text-warning">★★★★★</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-light-ink mb-4 flex-grow">A Common Sense Approach to Web Usability. Essential guide to usability and user experience design.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Design</span>
-                            <div class="flex gap-1">
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                    <i class="ri-file-list-line"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- List View -->
-            <div class="list-books hidden">
-                <div class="bg-white dark:bg-dark-paper rounded-lg shadow-card overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 text-left">
-                            <tr>
-                                <th class="px-4 py-3 text-sm font-medium text-light-ink">Title</th>
-                                <th class="px-4 py-3 text-sm font-medium text-light-ink hidden md:table-cell">Author</th>
-                                <th class="px-4 py-3 text-sm font-medium text-light-ink hidden md:table-cell">Category</th>
-                                <th class="px-4 py-3 text-sm font-medium text-light-ink hidden md:table-cell">Rating</th>
-                                <th class="px-4 py-3 text-sm font-medium text-light-ink text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-100 w-10 h-14 rounded mr-3 flex-shrink-0 hidden sm:block"></div>
-                                        <div>
-                                            <div class="font-medium">Design Patterns</div>
-                                            <div class="text-sm text-light-ink md:hidden">Erich Gamma et al.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-light-ink hidden md:table-cell">Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides</td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                                </td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="text-warning">★★★★</span><span class="text-gray-300 dark:text-gray-600">★</span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                            <i class="ri-edit-line"></i>
-                                        </button>
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                            <i class="ri-file-list-line"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-100 w-10 h-14 rounded mr-3 flex-shrink-0 hidden sm:block"></div>
-                                        <div>
-                                            <div class="font-medium">Clean Code</div>
-                                            <div class="text-sm text-light-ink md:hidden">Robert C. Martin</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-light-ink hidden md:table-cell">Robert C. Martin</td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                                </td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="text-warning">★★★★★</span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                            <i class="ri-edit-line"></i>
-                                        </button>
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                            <i class="ri-file-list-line"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-100 w-10 h-14 rounded mr-3 flex-shrink-0 hidden sm:block"></div>
-                                        <div>
-                                            <div class="font-medium">The Pragmatic Programmer</div>
-                                            <div class="text-sm text-light-ink md:hidden">Andrew Hunt, David Thomas</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-light-ink hidden md:table-cell">Andrew Hunt, David Thomas</td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Programming</span>
-                                </td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="text-warning">★★★★</span><span class="text-gray-300 dark:text-gray-600">★</span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                            <i class="ri-edit-line"></i>
-                                        </button>
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                            <i class="ri-file-list-line"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-100 w-10 h-14 rounded mr-3 flex-shrink-0 hidden sm:block"></div>
-                                        <div>
-                                            <div class="font-medium">Don't Make Me Think</div>
-                                            <div class="text-sm text-light-ink md:hidden">Steve Krug</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-light-ink hidden md:table-cell">Steve Krug</td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-light-ink">Design</span>
-                                </td>
-                                <td class="px-4 py-3 hidden md:table-cell">
-                                    <span class="text-warning">★★★★★</span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Edit">
-                                            <i class="ri-edit-line"></i>
-                                        </button>
-                                        <button class="p-1 text-light-ink hover:text-highlight transition-colors" title="Notes">
-                                            <i class="ri-file-list-line"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
+        </div>
 
-    <script src="../js/main.js"></script>
+        <!-- Search and Filter -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="relative flex-grow">
+                <input type="text" placeholder="Search books..." class="w-full px-4 py-2 pl-10 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
+                <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+            </div>
+            <select class="w-full md:w-auto px-4 py-2 border border-gray-200 rounded bg-white focus:outline-none focus:ring-2 focus:ring-highlight focus:border-highlight">
+                <option>All Categories</option>
+                <option>Fiction</option>
+                <option>Non-Fiction</option>
+                <option>Programming</option>
+                <option>Design</option>
+                <option>Business</option>
+            </select>
+        </div>
+
+        <!-- Grid View -->
+        <div class="grid-books grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <!-- Book 1 -->
+            <div class="bg-white rounded-lg shadow-card p-4 flex flex-col items-center hover:shadow-card-hover transition-shadow">
+                <div class="w-24 h-32 bg-gray-100 flex items-center justify-center mb-4 relative">
+                    <i class="ri-book-2-line text-3xl text-light-ink"></i>
+                    <div class="absolute top-0 right-0 w-3 h-full bg-blue-500"></div>
+                </div>
+                <h3 class="text-center font-medium">Design Patterns</h3>
+                <p class="text-sm text-light-ink text-center">Erich Gamma et al.</p>
+                <div class="mt-2 flex space-x-2">
+                    <span class="badge badge-primary">Programming</span>
+                </div>
+            </div>
+
+            <!-- Book 2 -->
+            <div class="bg-white rounded-lg shadow-card p-4 flex flex-col items-center hover:shadow-card-hover transition-shadow">
+                <div class="w-24 h-32 bg-gray-100 flex items-center justify-center mb-4 relative">
+                    <i class="ri-book-2-line text-3xl text-light-ink"></i>
+                    <div class="absolute top-0 right-0 w-3 h-full bg-red-500"></div>
+                </div>
+                <h3 class="text-center font-medium">Clean Code</h3>
+                <p class="text-sm text-light-ink text-center">Robert C. Martin</p>
+                <div class="mt-2 flex space-x-2">
+                    <span class="badge badge-primary">Programming</span>
+                </div>
+            </div>
+
+            <!-- Book 3 -->
+            <div class="bg-white rounded-lg shadow-card p-4 flex flex-col items-center hover:shadow-card-hover transition-shadow">
+                <div class="w-24 h-32 bg-gray-100 flex items-center justify-center mb-4 relative">
+                    <i class="ri-book-2-line text-3xl text-light-ink"></i>
+                    <div class="absolute top-0 right-0 w-3 h-full bg-green-500"></div>
+                </div>
+                <h3 class="text-center font-medium">The Pragmatic Programmer</h3>
+                <p class="text-sm text-light-ink text-center">Andrew Hunt, David Thomas</p>
+                <div class="mt-2 flex space-x-2">
+                    <span class="badge badge-primary">Programming</span>
+                </div>
+            </div>
+
+            <!-- Additional books would go here -->
+        </div>
+
+        <!-- List View (hidden by default) -->
+        <div class="list-books hidden">
+            <div class="bg-white rounded-lg shadow-card">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-light-ink uppercase tracking-wider">Title</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-light-ink uppercase tracking-wider">Author</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-light-ink uppercase tracking-wider">Category</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-light-ink uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-light-ink uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-10 bg-gray-100 flex items-center justify-center relative mr-3">
+                                        <div class="absolute top-0 right-0 w-1 h-full bg-blue-500"></div>
+                                    </div>
+                                    <div>Design Patterns</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">Erich Gamma et al.</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-primary">Programming</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-success">Read</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex gap-2">
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Delete">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-10 bg-gray-100 flex items-center justify-center relative mr-3">
+                                        <div class="absolute top-0 right-0 w-1 h-full bg-red-500"></div>
+                                    </div>
+                                    <div>Clean Code</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">Robert C. Martin</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-primary">Programming</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-warning">Reading</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex gap-2">
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Delete">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-10 bg-gray-100 flex items-center justify-center relative mr-3">
+                                        <div class="absolute top-0 right-0 w-1 h-full bg-green-500"></div>
+                                    </div>
+                                    <div>The Pragmatic Programmer</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">Andrew Hunt, David Thomas</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-primary">Programming</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="badge badge-secondary">To Read</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex gap-2">
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="p-2 text-light-ink hover:text-highlight transition-colors" title="Delete">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // View toggle functionality
+            const gridView = document.querySelector('.grid-view');
+            const listView = document.querySelector('.list-view');
+            const gridBooks = document.querySelector('.grid-books');
+            const listBooks = document.querySelector('.list-books');
+            
+            if (gridView && listView && gridBooks && listBooks) {
+                // Set initial active state
+                gridView.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                
+                gridView.addEventListener('click', function() {
+                    gridView.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                    listView.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                    gridBooks.classList.remove('hidden');
+                    listBooks.classList.add('hidden');
+                });
+                
+                listView.addEventListener('click', function() {
+                    listView.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                    gridView.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                    listBooks.classList.remove('hidden');
+                    gridBooks.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+
 </body>
-</html> 
+</html>

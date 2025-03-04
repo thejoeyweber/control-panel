@@ -10,12 +10,34 @@ const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 
-// Configuration
+// Import shared config and utilities from main build script
+let buildConfig;
+let copyFile;
+try {
+  const buildModule = require('../build');
+  buildConfig = buildModule.config;
+  copyFile = buildModule.copyFile;
+} catch (error) {
+  console.error('Error importing build module:', error);
+  // Fallback configuration in case we're run directly
+  buildConfig = {
+    templatePath: 'templates/base.html',
+    pagesDir: 'pages',
+    outputDir: 'dist',
+    rootDir: '..'
+  };
+  // Fallback copyFile function
+  copyFile = function(src, dest) {
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
+    }
+  };
+}
+
+// Local configuration
 const config = {
-  templatePath: 'templates/base.html',
-  pagesDir: 'pages',
-  outputDir: 'dist',
-  rootDir: '.'
+  ...buildConfig,
+  rootDir: '.' // rootDir is relative to this file, not build.js
 };
 
 /**
@@ -103,7 +125,7 @@ async function buildPage(pageName, template, pageDir, cleanUrlPath = null) {
     const pageContent = fs.readFileSync(inputPath, 'utf8');
     
     // Extract page title and content
-    const { title, content } = extractContent(pageContent, pageName);
+    const { title, content, extraHead, extraScripts } = extractContent(pageContent, pageName);
     
     // Ensure the page title matches the expected page name
     const expectedTitle = cleanUrlPath ? 
@@ -120,12 +142,12 @@ async function buildPage(pageName, template, pageDir, cleanUrlPath = null) {
     
     // Replace placeholders
     processedTemplate = processedTemplate.replace('{{PAGE_TITLE}}', title || expectedTitle);
-    processedTemplate = processedTemplate.replace('{{CSS_PATH}}', `${relativePath}css`);
-    processedTemplate = processedTemplate.replace('{{JS_PATH}}', `${relativePath}js`);
-    processedTemplate = processedTemplate.replace('{{ROOT_PATH}}', relativePath ? relativePath.slice(0, -1) : '.');
+    processedTemplate = processedTemplate.replace(/\{\{CSS_PATH\}\}/g, `${relativePath}css`);
+    processedTemplate = processedTemplate.replace(/\{\{JS_PATH\}\}/g, `${relativePath}js`);
+    processedTemplate = processedTemplate.replace(/\{\{ROOT_PATH\}\}/g, relativePath ? relativePath.slice(0, -1) : '.');
     processedTemplate = processedTemplate.replace('{{PAGE_CONTENT}}', content);
-    processedTemplate = processedTemplate.replace('{{EXTRA_HEAD}}', '');
-    processedTemplate = processedTemplate.replace('{{EXTRA_SCRIPTS}}', '');
+    processedTemplate = processedTemplate.replace('{{EXTRA_HEAD}}', extraHead || '');
+    processedTemplate = processedTemplate.replace('{{EXTRA_SCRIPTS}}', extraScripts || '');
     
     // Set active navigation item based on page
     const pageType = cleanUrlPath || (pageName === 'index.html' ? 'dashboard' : pageName.replace('.html', ''));
@@ -133,9 +155,6 @@ async function buildPage(pageName, template, pageDir, cleanUrlPath = null) {
     // Replace Handlebars-style conditionals with actual active classes
     processedTemplate = processedTemplate.replace(new RegExp(`{{#if active\\.${pageType}}}active{{/if}}`, 'g'), 'active');
     processedTemplate = processedTemplate.replace(/{{#if active\.[^}]+}}active{{\/if}}/g, '');
-    
-    // Make sure all placeholders are replaced (including in navigation links)
-    processedTemplate = replaceTemplatePlaceholders(processedTemplate, relativePath);
     
     // Write the processed template to the output file
     fs.writeFileSync(outputPath, processedTemplate);
@@ -150,7 +169,7 @@ async function buildPage(pageName, template, pageDir, cleanUrlPath = null) {
  * Extract title and content from a page
  * @param {string} html - The HTML content of the page
  * @param {string} pageName - The name of the page file
- * @returns {Object} - Object containing title and content
+ * @returns {Object} - Object containing title, content, extraHead, and extraScripts
  */
 function extractContent(html, pageName) {
   try {
@@ -185,34 +204,35 @@ function extractContent(html, pageName) {
       console.error(`No main element found in ${pageName}`);
     }
     
-    return { title, content };
+    // Extract any extra head content (might be in a script or style tag)
+    let extraHead = '';
+    const headScripts = document.querySelectorAll('head script:not([src])');
+    const headStyles = document.querySelectorAll('head style');
+    
+    if (headScripts.length > 0 || headStyles.length > 0) {
+      Array.from(headScripts).forEach(script => {
+        extraHead += script.outerHTML + '\n';
+      });
+      
+      Array.from(headStyles).forEach(style => {
+        extraHead += style.outerHTML + '\n';
+      });
+    }
+    
+    // Extract any extra scripts at the end of the body
+    let extraScripts = '';
+    const bodyScripts = document.querySelectorAll('body > script:not([src])');
+    
+    if (bodyScripts.length > 0) {
+      Array.from(bodyScripts).forEach(script => {
+        extraScripts += script.outerHTML + '\n';
+      });
+    }
+    
+    return { title, content, extraHead, extraScripts };
   } catch (error) {
     console.error('Error extracting content:', error);
-    return { title: '', content: '' };
-  }
-}
-
-/**
- * Add a function to replace template placeholders in the HTML
- * @param {string} html - The HTML content
- * @param {string} relativePath - The relative path to the root directory
- * @returns {string} - The HTML with placeholders replaced
- */
-function replaceTemplatePlaceholders(html, relativePath = '.') {
-  // Fix navigation links for pages in subdirectories
-  if (relativePath === '../') {
-    return html
-      .replace(/\{\{ROOT_PATH\}\}/g, '..')
-      .replace(/\{\{PAGE_TITLE\}\}/g, 'Control Panel')
-      .replace(/\{\{CSS_PATH\}\}/g, '../css')
-      .replace(/\{\{JS_PATH\}\}/g, '../js')
-      .replace(/href="\.\/pages\//g, 'href="../'); // Fix links to other pages from a page
-  } else {
-    return html
-      .replace(/\{\{ROOT_PATH\}\}/g, '.')
-      .replace(/\{\{PAGE_TITLE\}\}/g, 'Control Panel')
-      .replace(/\{\{CSS_PATH\}\}/g, 'css')
-      .replace(/\{\{JS_PATH\}\}/g, 'js');
+    return { title: '', content: '', extraHead: '', extraScripts: '' };
   }
 }
 
@@ -249,5 +269,10 @@ function createRedirect(filePath, targetUrl) {
   fs.writeFileSync(filePath, redirectHtml);
 }
 
-// Run the build process
-buildPages(); 
+// Run the build pages function if this script is called directly
+if (require.main === module) {
+  buildPages();
+} else {
+  // Export the buildPages function for use in other scripts
+  module.exports = buildPages();
+} 

@@ -536,6 +536,39 @@
     
     <!-- Scripts -->
     <script src="../js/main.js"></script>
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logActivityBtn = document.getElementById('log-activity-btn');
+            const modal = document.getElementById('activity-log-modal');
+            const closeBtn = modal.querySelector('.modal-close');
+            const cancelBtn = modal.querySelector('[data-close-modal]');
+            
+            function openModal() {
+                modal.classList.add('show');
+            }
+            
+            function closeModal() {
+                modal.classList.remove('show');
+            }
+            
+            // Event listeners
+            logActivityBtn.addEventListener('click', openModal);
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            
+            // Close when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Prevent clicks inside modal from closing it
+            modal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
+
 </body>
 </html> 

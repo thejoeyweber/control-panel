@@ -634,6 +634,46 @@
     
     <!-- Scripts -->
     <script src="../js/main.js"></script>
-    
+    <script>
+        // View toggling functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('toggle-view-btn');
+            const listView = document.getElementById('projects-list-view');
+            const gridView = document.getElementById('projects-grid-view');
+            const listButton = document.querySelector('[data-mode="list"]');
+            const gridButton = document.querySelector('[data-mode="grid"]');
+            
+            function toggleView() {
+                if (listView.classList.contains('active')) {
+                    // Switch to grid view
+                    listView.classList.remove('active');
+                    listView.classList.add('hidden');
+                    gridView.classList.remove('hidden');
+                    gridView.classList.add('active');
+                    
+                    listButton.classList.remove('active');
+                    gridButton.classList.add('active');
+                } else {
+                    // Switch to list view
+                    gridView.classList.remove('active');
+                    gridView.classList.add('hidden');
+                    listView.classList.remove('hidden');
+                    listView.classList.add('active');
+                    
+                    gridButton.classList.remove('active');
+                    listButton.classList.add('active');
+                }
+            }
+            
+            toggleBtn.addEventListener('click', toggleView);
+            listButton.addEventListener('click', function() {
+                if (!listView.classList.contains('active')) toggleView();
+            });
+            gridButton.addEventListener('click', function() {
+                if (!gridView.classList.contains('active')) toggleView();
+            });
+        });
+    </script>
+
 </body>
 </html> 

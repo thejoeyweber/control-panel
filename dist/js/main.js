@@ -1,5 +1,6 @@
 /**
  * Main JavaScript file for the Control Panel application
+ * Centralized client-side functionality for all pages
  */
 
 // Wait for the DOM to be fully loaded
@@ -9,34 +10,47 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[MAIN] Current pathname:', window.location.pathname);
     console.log('[MAIN] Document readyState:', document.readyState);
     
-    // Initialize mobile menu
-    initMobileMenu();
-    
-    // Set active navigation item based on current URL
-    setActiveNavItem();
-    
-    // Setup smooth page transitions
-    setupSmoothPageTransitions();
+    // Initialize application features
+    initApp();
     
     console.log('[MAIN] Initialization complete');
 });
 
 /**
+ * Initialize all application features
+ */
+function initApp() {
+    // Core functionality
+    initMobileMenu();
+    setActiveNavItem();
+    setupSmoothPageTransitions();
+    
+    // Page-specific functionality (will only run if elements exist)
+    initializeCharts();
+    setupBookViewToggle();
+    setupPromptViewToggle();
+}
+
+/**
  * Initializes charts if they exist on the page
  */
 function initializeCharts() {
-  const revenueChartElement = document.getElementById('revenue-chart');
-  if (revenueChartElement) {
-    createPlaceholderChart('revenue-chart', [30, 40, 45, 50, 49, 60, 70, 91, 125]);
-  }
-  
-  const wordCountChartElement = document.getElementById('word-count-chart');
-  if (wordCountChartElement) {
-    createPlaceholderChart('word-count-chart', [120, 115, 130, 100, 75, 90, 95]);
-  }
+    const revenueChartElement = document.getElementById('revenue-chart');
+    if (revenueChartElement) {
+        console.log('[CHARTS] Initializing revenue chart');
+        createPlaceholderChart('revenue-chart', [30, 40, 45, 50, 49, 60, 70, 91, 125]);
+    }
+    
+    const wordCountChartElement = document.getElementById('word-count-chart');
+    if (wordCountChartElement) {
+        console.log('[CHARTS] Initializing word count chart');
+        createPlaceholderChart('word-count-chart', [120, 115, 130, 100, 75, 90, 95]);
+    }
 }
 
-// Set active navigation item based on current URL
+/**
+ * Set active navigation item based on current URL
+ */
 function setActiveNavItem() {
     console.log('[NAV] Setting active navigation item');
     console.log('[NAV] Current pathname:', window.location.pathname);
@@ -100,7 +114,9 @@ function setActiveNavItem() {
     });
 }
 
-// Initialize mobile menu
+/**
+ * Initialize mobile menu functionality
+ */
 function initMobileMenu() {
     console.log('[MOBILE] Initializing mobile menu');
     
@@ -197,272 +213,213 @@ function initMobileMenu() {
  * Sets up book view toggle functionality
  */
 function setupBookViewToggle() {
-  const gridViewButton = document.querySelector('.grid-view');
-  const listViewButton = document.querySelector('.list-view');
-  const gridBooks = document.querySelector('.grid-books');
-  const listBooks = document.querySelector('.list-books');
-  
-  if (!gridViewButton || !listViewButton || !gridBooks || !listBooks) return;
-  
-  // Set initial active state
-  gridViewButton.classList.add('bg-gray-200', 'dark:bg-gray-700');
-  
-  gridViewButton.addEventListener('click', () => {
-    // Update button states
+    const gridViewButton = document.querySelector('.grid-view');
+    const listViewButton = document.querySelector('.list-view');
+    const gridBooks = document.querySelector('.grid-books');
+    const listBooks = document.querySelector('.list-books');
+    
+    if (!gridViewButton || !listViewButton || !gridBooks || !listBooks) {
+        console.log('[BOOKS] Book view toggle elements not found');
+        return;
+    }
+    
+    console.log('[BOOKS] Setting up book view toggle');
+    
+    // Set initial active state
     gridViewButton.classList.add('bg-gray-200', 'dark:bg-gray-700');
-    listViewButton.classList.remove('bg-gray-200', 'dark:bg-gray-700');
     
-    // Show grid view, hide list view
-    gridBooks.classList.remove('hidden');
-    listBooks.classList.add('hidden');
-  });
-  
-  listViewButton.addEventListener('click', () => {
-    // Update button states
-    listViewButton.classList.add('bg-gray-200', 'dark:bg-gray-700');
-    gridViewButton.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+    gridViewButton.addEventListener('click', () => {
+        setActiveViewToggle(gridViewButton, listViewButton, 'grid');
+        
+        // Show grid view, hide list view
+        gridBooks.classList.remove('hidden');
+        listBooks.classList.add('hidden');
+    });
     
-    // Show list view, hide grid view
-    listBooks.classList.remove('hidden');
-    gridBooks.classList.add('hidden');
-  });
+    listViewButton.addEventListener('click', () => {
+        setActiveViewToggle(listViewButton, gridViewButton, 'list');
+        
+        // Show list view, hide grid view
+        listBooks.classList.remove('hidden');
+        gridBooks.classList.add('hidden');
+    });
 }
 
 /**
- * Creates a placeholder chart
+ * Sets up prompt view toggle functionality for the AI Library
+ */
+function setupPromptViewToggle() {
+    const gridView = document.querySelector('.prompt-grid-view');
+    const listView = document.querySelector('.prompt-list-view');
+    const promptGrid = document.querySelector('.prompt-grid');
+    const promptList = document.querySelector('.prompt-list');
+    
+    if (!gridView || !listView || !promptGrid || !promptList) {
+        console.log('[PROMPTS] Prompt view toggle elements not found');
+        return;
+    }
+    
+    console.log('[PROMPTS] Setting up prompt view toggle');
+    
+    // Set initial active state
+    gridView.classList.add('bg-gray-200', 'dark:bg-gray-700');
+    
+    gridView.addEventListener('click', () => {
+        setActiveViewToggle(gridView, listView, 'grid');
+        
+        // Show grid view, hide list view
+        promptGrid.classList.remove('hidden');
+        promptList.classList.add('hidden');
+    });
+    
+    listView.addEventListener('click', () => {
+        setActiveViewToggle(listView, gridView, 'list');
+        
+        // Show list view, hide grid view
+        promptList.classList.remove('hidden');
+        promptGrid.classList.add('hidden');
+    });
+}
+
+/**
+ * Set active view toggle (helper function)
+ * @param {Element} activeButton - The button to make active
+ * @param {Element} inactiveButton - The button to make inactive
+ * @param {string} viewMode - The view mode ('grid' or 'list')
+ */
+function setActiveViewToggle(activeButton, inactiveButton, viewMode) {
+    // Update button states
+    activeButton.classList.add('bg-gray-200', 'dark:bg-gray-700');
+    inactiveButton.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+    
+    console.log(`[VIEW] Switched to ${viewMode} view`);
+}
+
+/**
+ * Creates a placeholder chart for demonstration purposes
  * @param {string} selector - The ID of the element to create the chart in
  * @param {Array} data - The data for the chart
  */
 function createPlaceholderChart(selector, data) {
-  const canvas = document.getElementById(selector);
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext('2d');
-  const width = canvas.width;
-  const height = canvas.height;
-  const maxValue = Math.max(...data);
-  
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // Draw chart
-  ctx.beginPath();
-  ctx.moveTo(0, height - (data[0] / maxValue) * height);
-  
-  for (let i = 1; i < data.length; i++) {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - (data[i] / maxValue) * height;
-    ctx.lineTo(x, y);
-  }
-  
-  ctx.strokeStyle = '#3498db';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-// Helper function for view toggles
-function setActiveViewToggle(activeButton, inactiveButton, viewMode) {
-  // Update active/inactive states
-  activeButton.classList.add('active');
-  inactiveButton.classList.remove('active');
-  
-  // Set background color for inactive button
-  if (viewMode === 'grid') {
-    gridViewButton.classList.add('bg-gray-200');
-    listViewButton.classList.remove('bg-gray-200');
-  } else {
-    listViewButton.classList.add('bg-gray-200');
-    gridViewButton.classList.remove('bg-gray-200');
-  }
-  
-  // Save preference
-  localStorage.setItem('bookViewMode', viewMode);
-}
-
-// Modal element creation - utility function
-function createModalElement(tag, className, content) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (content) {
-    if (typeof content === 'string') {
-      element.textContent = content;
-    } else {
-      element.appendChild(content);
+    const canvas = document.getElementById(selector);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const maxValue = Math.max(...data);
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Draw chart background
+    ctx.fillStyle = '#f9fafb';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Draw chart grid
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+        const y = height / 5 * i;
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
     }
-  }
-  return element;
+    ctx.stroke();
+    
+    // Draw chart line
+    ctx.strokeStyle = '#4361ee';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < data.length; i++) {
+        const x = width / (data.length - 1) * i;
+        const y = height - (data[i] / maxValue) * height * 0.9;
+        
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.stroke();
+    
+    // Draw data points
+    ctx.fillStyle = '#4361ee';
+    for (let i = 0; i < data.length; i++) {
+        const x = width / (data.length - 1) * i;
+        const y = height - (data[i] / maxValue) * height * 0.9;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
-// Create modal dialog
-function createModal(title, content, onSave) {
-  // Create modal container
-  const modal = createModalElement('div', 'modal');
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  
-  // Create modal content
-  const modalContent = createModalElement('div', 'modal-content');
-  
-  // Create header
-  const modalHeader = createModalElement('div', 'modal-header');
-  const modalTitle = createModalElement('h3', '', title);
-  const closeButton = createModalElement('button', 'modal-close', '×');
-  closeButton.setAttribute('aria-label', 'Close');
-  
-  modalHeader.appendChild(modalTitle);
-  modalHeader.appendChild(closeButton);
-  
-  // Create body
-  const modalBody = createModalElement('div', 'modal-body');
-  
-  if (typeof content === 'string') {
-    modalBody.innerHTML = content;
-  } else {
-    modalBody.appendChild(content);
-  }
-  
-  // Create footer
-  const modalFooter = createModalElement('div', 'modal-footer');
-  const cancelButton = createModalElement('button', 'btn btn-secondary', 'Cancel');
-  const saveButton = createModalElement('button', 'btn btn-primary', 'Save');
-  
-  modalFooter.appendChild(cancelButton);
-  modalFooter.appendChild(saveButton);
-  
-  // Assemble modal
-  modalContent.appendChild(modalHeader);
-  modalContent.appendChild(modalBody);
-  modalContent.appendChild(modalFooter);
-  modal.appendChild(modalContent);
-  
-  // Add event listeners
-  closeButton.addEventListener('click', () => {
-    closeModal(modal);
-  });
-  
-  cancelButton.addEventListener('click', () => {
-    closeModal(modal);
-  });
-  
-  saveButton.addEventListener('click', () => {
-    if (onSave) {
-      onSave();
-    }
-    closeModal(modal);
-  });
-  
-  // Close on backdrop click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal(modal);
-    }
-  });
-  
-  // Add to DOM
-  document.body.appendChild(modal);
-  
-  // Show modal
-  setTimeout(() => {
-    modal.classList.add('show');
-  }, 10);
-  
-  return modal;
-}
-
-// Setup smooth page transitions
+/**
+ * Sets up smooth page transitions
+ */
 function setupSmoothPageTransitions() {
-    console.log('[TRANSITIONS] Setting up page transitions');
-    
-    // Check if we're using the file protocol (local file)
-    const isFileProtocol = window.location.protocol === 'file:';
-    console.log('[TRANSITIONS] Using file protocol:', isFileProtocol);
-    
-    // If using file protocol, don't use AJAX navigation
-    if (isFileProtocol) {
-        console.log('[TRANSITIONS] Skipping AJAX navigation setup due to file protocol');
-        return;
-    }
+    console.log('[TRANSITIONS] Setting up smooth page transitions');
     
     // Get all internal links
-    const internalLinks = document.querySelectorAll('a[href^="/"], a[href^="./"], a[href^="../"], a[href^="' + window.location.origin + '"]');
-    console.log('[TRANSITIONS] Found', internalLinks.length, 'internal links');
+    const internalLinks = document.querySelectorAll('a[href^="/"], a[href^="./"], a[href^="../"], a[href^="index.html"], a[href^="pages/"]');
     
-    // Add click event listener to each internal link
     internalLinks.forEach(link => {
+        // Skip links with target="_blank" or download attribute
+        if (link.target === '_blank' || link.hasAttribute('download')) return;
+        
         link.addEventListener('click', handleLinkClick);
     });
-    
-    // Handle popstate event (browser back/forward buttons)
-    window.addEventListener('popstate', function(event) {
-        console.log('[TRANSITIONS] Popstate event fired');
-        console.log('[TRANSITIONS] State:', event.state);
-        
-        if (event.state && event.state.url) {
-            console.log('[TRANSITIONS] Navigating to:', event.state.url);
-            window.location.href = event.state.url;
-        }
-    });
-    
-    console.log('[TRANSITIONS] Page transitions setup complete');
 }
 
-// Handle link click
+/**
+ * Handle link click for smooth page transitions
+ * @param {Event} event - The click event
+ */
 function handleLinkClick(event) {
-    console.log('[TRANSITIONS] Link clicked:', this.href);
-    console.log('[TRANSITIONS] Link text:', this.textContent.trim());
+    // Skip if modifier keys are pressed (user might want to open in new tab)
+    if (event.metaKey || event.ctrlKey || event.shiftKey) return;
     
-    // Get the href attribute
     const href = this.getAttribute('href');
-    console.log('[TRANSITIONS] Href attribute:', href);
     
-    // Skip if it's an external link or has a target attribute
-    if (this.hasAttribute('target') || !href.startsWith('/')) {
-        console.log('[TRANSITIONS] Skipping - external link or has target attribute');
-        return;
-    }
+    // Skip if it's an anchor link
+    if (href.startsWith('#')) return;
     
-    // Update active navigation immediately
+    // Prevent default navigation
+    event.preventDefault();
+    
+    console.log('[TRANSITIONS] Link clicked:', href);
+    
+    // Update active navigation before transition
     updateActiveNavigationFromLink(this);
     
-    // Let the browser handle the navigation normally
-    console.log('[TRANSITIONS] Proceeding with normal navigation');
+    // Add a transition effect
+    document.body.classList.add('page-transition');
+    
+    // Navigate after a short delay
+    setTimeout(() => {
+        window.location.href = href;
+    }, 300);
 }
 
-// Update active navigation based on clicked link
+/**
+ * Updates active navigation items based on the clicked link
+ * @param {Element} link - The clicked link element
+ */
 function updateActiveNavigationFromLink(link) {
-    console.log('[NAV] Updating active navigation from link');
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-dashboard, .nav-projects, .nav-revenue, .nav-writing, .nav-ai-library, .nav-resources, .nav-books')
+        .forEach(item => item.classList.remove('active'));
     
-    // Remove active class from all navigation items
-    const navItems = document.querySelectorAll('.nav-dashboard, .nav-projects, .nav-revenue, .nav-writing, .nav-ai-library, .nav-resources, .nav-books');
-    navItems.forEach(item => {
-        if (item.classList.contains('active')) {
-            console.log('[NAV] Removing active class from:', item.textContent.trim());
-            item.classList.remove('active');
-        }
-    });
-    
-    // Determine which navigation class to use based on the link
-    let navClass = '';
-    
-    if (link.classList.contains('nav-dashboard')) navClass = 'nav-dashboard';
-    else if (link.classList.contains('nav-projects')) navClass = 'nav-projects';
-    else if (link.classList.contains('nav-revenue')) navClass = 'nav-revenue';
-    else if (link.classList.contains('nav-writing')) navClass = 'nav-writing';
-    else if (link.classList.contains('nav-ai-library')) navClass = 'nav-ai-library';
-    else if (link.classList.contains('nav-resources')) navClass = 'nav-resources';
-    else if (link.classList.contains('nav-books')) navClass = 'nav-books';
-    
-    console.log('[NAV] Derived navigation class from link:', navClass);
-    
-    if (navClass) {
-        // Add active class to the current navigation item
-        const currentNavItems = document.querySelectorAll('.' + navClass);
-        currentNavItems.forEach(item => {
-            console.log('[NAV] Adding active class to:', item.textContent.trim());
-            item.classList.add('active');
-        });
-    } else {
-        console.log('[NAV] No matching navigation class found for link');
+    // Try to add active class to the clicked nav item
+    if (link.classList.contains('nav-dashboard') || 
+        link.classList.contains('nav-projects') || 
+        link.classList.contains('nav-revenue') || 
+        link.classList.contains('nav-writing') || 
+        link.classList.contains('nav-ai-library') || 
+        link.classList.contains('nav-resources') || 
+        link.classList.contains('nav-books')) {
+        
+        link.classList.add('active');
     }
 }
 
