@@ -9,7 +9,8 @@
     "build:pages": "node js/build-pages.js",
     "build:all": "node build.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "serve dist -p 3000"
+    "start": "npm run build:all && serve dist -p 3000",
+    "serve": "serve dist -p 3000"
   },
   "keywords": [
     "dashboard",

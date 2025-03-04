@@ -4,49 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Detail - Control Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/styles.css">
+    <!-- Preload fonts to prevent FOUT (Flash of Unstyled Text) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+    <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
-    <!-- Template Loader Script -->
-    <script src="../../js/template-loader.js"></script>
+    <style>
+        /* Critical CSS to prevent layout shifts */
+        html {
+            overflow-y: scroll; /* Always show scrollbar to prevent layout shifts */
+        }
+        
+        body {
+            font-family: 'Special Elite', cursive;
+            font-display: optional;
+            color: #333333;
+            background-color: #f0f4f8;
+        }
+        
+        header {
+            min-height: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+        
+        main {
+            width: 100%;
+            max-width: 100%;
+            min-height: 500px;
+            padding: 1.5rem 0;
+        }
+        
+        /* Navigation styles */
+        .nav-dashboard, .nav-projects, .nav-revenue, .nav-writing, 
+        .nav-ai-library, .nav-resources, .nav-books {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+            color: #777777;
+        }
+        
+        .nav-dashboard:hover, .nav-projects:hover, .nav-revenue:hover, 
+        .nav-writing:hover, .nav-ai-library:hover, .nav-resources:hover, 
+        .nav-books:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Active navigation styles applied directly */
+        .nav-dashboard.active, .nav-projects.active, .nav-revenue.active,
+        .nav-writing.active, .nav-ai-library.active, .nav-resources.active,
+        .nav-books.active {
+            background-color: #4361ee;
+            color: white;
+        }
+        
+        /* Hide content until fonts are loaded */
+        .fonts-loading {
+            visibility: hidden;
+        }
+        
+        .fonts-loaded {
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+    <script>
+        // Font loading diagnostics
+        console.log('[FONTS] Starting font loading diagnostics');
+        
+        // Add class to indicate fonts are loading
+        document.documentElement.classList.add('fonts-loading');
+        
+        // Check if the browser supports the Font Loading API
+        if ('fonts' in document) {
+            console.log('[FONTS] Font Loading API is supported');
+            
+            // Create a promise that resolves when the font is loaded
+            document.fonts.ready.then(function() {
+                console.log('[FONTS] All fonts are loaded');
+                document.documentElement.classList.remove('fonts-loading');
+                document.documentElement.classList.add('fonts-loaded');
+            });
+            
+            // Log individual font loading status
+            document.fonts.forEach(function(font) {
+                console.log('[FONTS] Font:', font.family, 'Status:', font.status);
+                font.loaded.then(function() {
+                    console.log('[FONTS] Font loaded:', font.family);
+                }).catch(function(error) {
+                    console.error('[FONTS] Font loading error:', font.family, error);
+                });
+            });
+        } else {
+            console.log('[FONTS] Font Loading API is not supported');
+            
+            // Fallback for browsers that don't support the Font Loading API
+            // Remove the loading class after a short delay
+            setTimeout(function() {
+                console.log('[FONTS] Fallback timeout completed');
+                document.documentElement.classList.remove('fonts-loading');
+                document.documentElement.classList.add('fonts-loaded');
+            }, 500);
+        }
+        
+        // Log page load events
+        console.log('[PAGE] Document readyState:', document.readyState);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[PAGE] DOMContentLoaded event fired');
+        });
+        window.addEventListener('load', function() {
+            console.log('[PAGE] Window load event fired');
+        });
+    </script>
+    
 </head>
-<body class="text-ink bg-paper">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="font-typewriter text-2xl font-bold">Control Panel</div>
-            <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 cursor-pointer">
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-                <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
-            </button>
-            <nav class="site-nav hidden md:block">
-                <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-                    <li><a href="../../index.html" class="nav-dashboard flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                    <li><a href="../projects.html" class="nav-projects active flex items-center text-highlight hover:text-highlight transition-colors"><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                    <li><a href="../revenue.html" class="nav-revenue flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                    <li><a href="../writing.html" class="nav-writing flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                    <li><a href="../ai-library.html" class="nav-ai-library flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                    <li><a href="../resources.html" class="nav-resources flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-link mr-2"></i> Resources</a></li>
-                    <li><a href="../books.html" class="nav-books flex items-center text-light-ink hover:text-highlight transition-colors"><i class="ri-book-read-line mr-2"></i> Books</a></li>
+<body class="text-ink bg-paper min-h-screen font-typewriter">
+    <div class="wrapper mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Header -->
+        <header class="py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <a href="../" class="text-2xl font-bold hover:text-highlight transition-colors">Control Panel</a>
+                
+                <!-- Navigation for desktop -->
+                <nav id="nav-menu" class="hidden md:block">
+                    <ul class="flex space-x-4">
+                        <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                        <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                        <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                        <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                        <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                        <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                        <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
+                    </ul>
+                </nav>
+                
+                <!-- Hamburger button for mobile -->
+                <button id="hamburger" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-2 cursor-pointer z-50">
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                    <span class="hamburger-line block w-6 h-0.5 bg-ink dark:bg-white rounded-full origin-center transition-all duration-300"></span>
+                </button>
+            </div>
+            
+            <!-- Mobile navigation menu - Will push content down when opened -->
+            <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
+                <ul class="flex flex-col space-y-2">
+                    <li><a href="../" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
+                    <li><a href="../projects" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-folder-line mr-2"></i> Projects</a></li>
+                    <li><a href="../revenue" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
+                    <li><a href="../writing" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-edit-line mr-2"></i> Writing</a></li>
+                    <li><a href="../ai-library" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-robot-line mr-2"></i> AI Library</a></li>
+                    <li><a href="../resources" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-link-m mr-2"></i> Resources</a></li>
+                    <li><a href="../books" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded "><i class="ri-book-read-line mr-2"></i> Books</a></li>
                 </ul>
-            </nav>
+            </div>
         </header>
-        <div class="menu-backdrop fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
         
-        <!-- Mobile navigation menu -->
-        <div id="mobile-menu" class="md:hidden hidden mt-4 transition-all duration-300 ease-in-out border-t border-gray-200 pt-4">
-            <ul class="flex flex-col space-y-2">
-                <li><a href="../index.html" class="nav-dashboard flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-dashboard-line mr-2"></i> Dashboard</a></li>
-                <li><a href="projects.html" class="nav-projects flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded active"><i class="ri-folder-line mr-2"></i> Projects</a></li>
-                <li><a href="revenue.html" class="nav-revenue flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-money-dollar-circle-line mr-2"></i> Revenue</a></li>
-                <li><a href="writing.html" class="nav-writing flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-edit-line mr-2"></i> Writing</a></li>
-                <li><a href="ai-library.html" class="nav-ai-library flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-robot-line mr-2"></i> AI Library</a></li>
-                <li><a href="resources.html" class="nav-resources flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-link mr-2"></i> Resources</a></li>
-                <li><a href="books.html" class="nav-books flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded"><i class="ri-book-read-line mr-2"></i> Books</a></li>
-            </ul>
-        </div>
-        
-        <main class="py-8">
+        <!-- Main content -->
+        <main class="py-6">
+            
             <!-- Project Header -->
             <div class="card mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start mb-4">
@@ -406,171 +525,17 @@
                     </div>
                 </div>
             </div>
+        
         </main>
+        
+        <!-- Footer -->
+        <footer class="py-4 text-center text-sm text-light-ink border-t border-gray-200 dark:border-gray-700">
+            <p>© 2025 Control Panel - Personal Dashboard</p>
+        </footer>
     </div>
     
-    <!-- Activity Logging Modal -->
-    <div id="activity-log-modal" class="modal">
-        <div class="modal-content max-w-lg">
-            <div class="modal-header">
-                <h2 class="modal-title text-xl font-typewriter">Log Activity</h2>
-                <button class="modal-close text-2xl">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <form id="activity-log-form">
-                    <div class="form-group mb-4">
-                        <label for="log-type" class="block mb-2">Log Type</label>
-                        <select id="log-type" class="form-control w-full">
-                            <option>Work Log</option>
-                            <option>Research</option>
-                            <option>Meeting Notes</option>
-                            <option>Problem-Solution</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        <label for="activity-content" class="block mb-2">Content</label>
-                        <div class="border border-gray-300 rounded">
-                            <div class="flex border-b border-gray-300 p-2 bg-gray-50">
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-bold"></i>
-                                </button>
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-italic"></i>
-                                </button>
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-link"></i>
-                                </button>
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-list-unordered"></i>
-                                </button>
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-list-ordered"></i>
-                                </button>
-                                <button type="button" class="p-1 text-light-ink hover:text-ink">
-                                    <i class="ri-code-line"></i>
-                                </button>
-                            </div>
-                            <textarea id="activity-content" class="form-control w-full border-none" rows="6" placeholder="What did you work on?"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-end">
-                        <button type="button" class="btn-secondary mr-2" data-close-modal>Cancel</button>
-                        <button type="submit" class="btn">Save Activity</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
     
-    <!-- Add Modal CSS -->
-    <style>
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .modal-content {
-            background-color: white;
-            border-radius: 0.375rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(20px);
-            transition: transform 0.3s;
-        }
-        
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
-        
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .modal-close {
-            background: transparent;
-            border: 0;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6b7280;
-            transition: color 0.2s;
-        }
-        
-        .modal-close:hover {
-            color: #ef4444;
-        }
-        
-        .modal-body {
-            padding: 1rem;
-        }
-        
-        .dark .modal-content {
-            background-color: #1f2937;
-            color: #f3f4f6;
-        }
-        
-        .dark .modal-header {
-            border-color: #374151;
-        }
-    </style>
-    
-    <!-- Modal script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const logActivityBtn = document.getElementById('log-activity-btn');
-            const modal = document.getElementById('activity-log-modal');
-            const closeBtn = modal.querySelector('.modal-close');
-            const cancelBtn = modal.querySelector('[data-close-modal]');
-            
-            function openModal() {
-                modal.classList.add('show');
-            }
-            
-            function closeModal() {
-                modal.classList.remove('show');
-            }
-            
-            // Event listeners
-            logActivityBtn.addEventListener('click', openModal);
-            closeBtn.addEventListener('click', closeModal);
-            cancelBtn.addEventListener('click', closeModal);
-            
-            // Close when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-            
-            // Prevent clicks inside modal from closing it
-            modal.querySelector('.modal-content').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        });
-    </script>
-    
-    <script src="../../js/main.js"></script>
 </body>
 </html> 

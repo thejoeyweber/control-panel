@@ -51,8 +51,8 @@ async function createPage() {
         </button>
     </div>
     
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-        <p class="text-gray-600 dark:text-gray-400 mb-4">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <p class="text-gray-600 mb-4">
             This is a new page created with the template system. You can customize it to fit your needs.
         </p>
         
