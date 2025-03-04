@@ -9,9 +9,7 @@
     "build:pages": "node js/build-pages.js",
     "build:all": "node build.js",
     "create-page": "node js/create-page.js",
-    "convert-pages": "node js/convert-pages.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "tailwindcss -i ./src/input.css -o ./css/styles.css",
     "start": "serve dist -p 3000"
   },
   "keywords": [
@@ -33,13 +31,7 @@
     "caniuse-lite": "^1.0.30001701",
     "electron-to-chromium": "^1.5.109",
     "escalade": "^3.2.0",
-    "fraction.js": "^4.3.7",
-    "nanoid": "^3.3.8",
-    "node-releases": "^2.0.19",
-    "normalize-range": "^0.1.2",
-    "picocolors": "^1.1.1",
     "postcss-value-parser": "^4.2.0",
-    "source-map-js": "^1.2.1",
     "update-browserslist-db": "^1.1.3"
   }
 }

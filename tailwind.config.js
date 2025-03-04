@@ -4,22 +4,22 @@ module.exports = {
     './*.html',
     './pages/**/*.html',
     './js/**/*.js',
+    './dist/**/*.html'
   ],
   theme: {
     extend: {
       colors: {
-        'paper': '#f0f4f8', // Light slate grey/blue tint
-        'dark-paper': '#1a1a1a', // Dark theme background
-        'ink': '#333333', // Text color
-        'light-ink': '#777777', // Lighter text color
-        'highlight': '#4361ee', // Highlight/accent color
-        'success': '#4ade80', // Success color
-        'warning': '#fbbf24', // Warning color
-        'danger': '#f87171', // Danger/error color
+        'paper': 'var(--color-paper)',
+        'ink': 'var(--color-ink)',
+        'light-ink': 'var(--color-light-ink)',
+        'highlight': 'var(--color-highlight)',
+        'success': 'var(--color-success)',
+        'warning': 'var(--color-warning)',
+        'danger': 'var(--color-danger)',
         'shadow': 'rgba(0, 0, 0, 0.1)', // Shadow color
       },
       fontFamily: {
-        'typewriter': ['"Special Elite"', 'cursive'],
+        'typewriter': ['"Special Elite"', 'monospace'],
         'sans': ['Arial', 'sans-serif'],
       },
       fontSize: {
@@ -74,12 +74,18 @@ module.exports = {
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+          'from': { opacity: '0' },
+          'to': { opacity: '1' },
         },
         slideIn: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+          'from': {
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          'to': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
         },
       },
     },

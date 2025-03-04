@@ -15,7 +15,9 @@ const config = {
   cssDir: 'css',
   jsDir: 'js',
   pagesDir: 'pages',
-  templatesDir: 'templates'
+  templatesDir: 'templates',
+  assetsDir: 'assets',
+  imgDir: 'img'
 };
 
 /**
@@ -46,9 +48,26 @@ async function build() {
     console.log('Building pages...');
     require('./js/build-pages');
     
+    // Copy index.html to dist
+    console.log('Copying index.html to output directory...');
+    copyFile('index.html', path.join(config.outputDir, 'index.html'));
+    
+    // Copy asset directories
+    console.log('Copying assets...');
+    if (fs.existsSync(config.assetsDir)) {
+      copyDirectory(config.assetsDir, path.join(config.outputDir, config.assetsDir));
+    }
+    
+    console.log('Copying images...');
+    if (fs.existsSync(config.imgDir)) {
+      copyDirectory(config.imgDir, path.join(config.outputDir, config.imgDir));
+    }
+    
     // Copy other assets
     console.log('Copying other assets...');
-    copyFile('favicon.ico', path.join(config.outputDir, 'favicon.ico'));
+    if (fs.existsSync('favicon.ico')) {
+      copyFile('favicon.ico', path.join(config.outputDir, 'favicon.ico'));
+    }
     
     console.log('Build process completed successfully!');
   } catch (error) {
