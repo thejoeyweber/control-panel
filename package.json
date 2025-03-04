@@ -1,0 +1,11 @@
+{
+  "name": "controlpanel",
+  "type": "module",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node start.js"
+  },
+  "dependencies": {
+    "inquirer": "^9.3.7"
+  }
+}
