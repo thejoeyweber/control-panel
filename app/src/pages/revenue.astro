@@ -1,0 +1,200 @@
+---
+/*
+  File: src/pages/revenue.astro
+  Purpose: Displays revenue data, income sources, and financial goals
+  Dependencies: BaseLayout
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getVisibleContent } from '../utils/auth';
+---
+
+<BaseLayout title="Revenue" activePage="revenue">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold mb-4 md:mb-0">Revenue</h1>
+      <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+        <i class="ri-add-line mr-1"></i> Add Income
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Monthly Revenue Chart -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-card overflow-hidden">
+          <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <h3 class="text-lg font-bold">Monthly Revenue</h3>
+            <div class="flex gap-2">
+              <select class="border rounded px-2 py-1 text-sm">
+                <option>Last 6 Months</option>
+                <option>Last Year</option>
+                <option>All Time</option>
+              </select>
+            </div>
+          </div>
+          <div class="h-64 bg-gray-100 flex items-center justify-center text-light-ink p-4">
+            [Revenue Chart Placeholder]
+          </div>
+        </div>
+      </div>
+      
+      <!-- Revenue Summary Card -->
+      <div>
+        <div class="bg-white rounded-lg shadow-card p-4">
+          <h3 class="text-lg font-bold mb-4">Summary</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Monthly Goal</span>
+                <span class="font-bold">$4,000</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-highlight h-2 rounded-full" style="width: 62.5%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-light-ink mt-1">
+                <span>Current: $2,500</span>
+                <span>62.5%</span>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Annual Goal</span>
+                <span class="font-bold">$48,000</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-success h-2 rounded-full" style="width: 28%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-light-ink mt-1">
+                <span>YTD: $13,500</span>
+                <span>28%</span>
+              </div>
+            </div>
+            
+            <div class="pt-2 border-t border-gray-200">
+              <div class="flex justify-between mb-2">
+                <span>This Month</span>
+                <span class="font-bold text-highlight">$2,500</span>
+              </div>
+              <div class="flex justify-between mb-2">
+                <span>Last Month</span>
+                <span>$3,200</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Average (6mo)</span>
+                <span>$2,800</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Transactions -->
+    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Recent Transactions</h3>
+        <button class="text-highlight hover:underline text-sm">View All</button>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr class="text-left text-light-ink">
+              <th class="p-4 font-medium">Date</th>
+              <th class="p-4 font-medium">Source</th>
+              <th class="p-4 font-medium">Description</th>
+              <th class="p-4 font-medium text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr class="hover:bg-gray-50">
+              <td class="p-4">Mar 1, 2025</td>
+              <td class="p-4">Consulting</td>
+              <td class="p-4">Website Audit for Client A</td>
+              <td class="p-4 text-right font-bold">$700</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="p-4">Feb 28, 2025</td>
+              <td class="p-4">Digital Products</td>
+              <td class="p-4">E-book Sales</td>
+              <td class="p-4 text-right font-bold">$350</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="p-4">Feb 25, 2025</td>
+              <td class="p-4">Affiliate</td>
+              <td class="p-4">Software Referrals</td>
+              <td class="p-4 text-right font-bold">$120</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="p-4">Feb 22, 2025</td>
+              <td class="p-4">Consulting</td>
+              <td class="p-4">Technical Consultation</td>
+              <td class="p-4 text-right font-bold">$500</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Income Sources Breakdown -->
+    <div class="bg-white rounded-lg shadow-card overflow-hidden">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Income Sources</h3>
+        <div>
+          <select class="border rounded px-2 py-1 text-sm">
+            <option>This Month</option>
+            <option>Last Month</option>
+            <option>Year to Date</option>
+            <option>Last Year</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr class="text-left text-light-ink">
+              <th class="p-4 font-medium">Source</th>
+              <th class="p-4 font-medium text-right">This Month</th>
+              <th class="p-4 font-medium text-right">Last Month</th>
+              <th class="p-4 font-medium text-right">YTD</th>
+              <th class="p-4 font-medium text-right">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="py-3 px-4">Consulting</td>
+              <td class="text-right py-3 px-4">$1,200</td>
+              <td class="text-right py-3 px-4">$1,200</td>
+              <td class="text-right py-3 px-4">$7,200</td>
+              <td class="text-right py-3 px-4">48%</td>
+            </tr>
+            <tr class="border-b">
+              <td class="py-3 px-4">Digital Products</td>
+              <td class="text-right py-3 px-4">$850</td>
+              <td class="text-right py-3 px-4">$650</td>
+              <td class="text-right py-3 px-4">$4,800</td>
+              <td class="text-right py-3 px-4">32%</td>
+            </tr>
+            <tr class="border-b">
+              <td class="py-3 px-4">Affiliate</td>
+              <td class="text-right py-3 px-4">$320</td>
+              <td class="text-right py-3 px-4">$150</td>
+              <td class="text-right py-3 px-4">$1,500</td>
+              <td class="text-right py-3 px-4">10%</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4">Other</td>
+              <td class="text-right py-3 px-4">$130</td>
+              <td class="text-right py-3 px-4">$0</td>
+              <td class="text-right py-3 px-4">$1,000</td>
+              <td class="text-right py-3 px-4">10%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</BaseLayout> 

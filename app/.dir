@@ -1,0 +1,19 @@
+# Project Directory Structure
+
+This file serves as a reminder that all commands should be run from:
+/app/
+
+NOT from the root directory.
+
+## Common Commands:
+- npm run dev     # Run from /app/ directory
+- npm run build   # Run from /app/ directory
+- npx astro ...   # Run from /app/ directory
+
+## Project Structure
+/controlpanel          # Root directory
+  /app                 # Astro project directory (RUN COMMANDS HERE)
+    /src               # Source files 
+    package.json       # Dependencies
+    astro.config.mjs   # Astro configuration
+  /prototype           # Original prototype (reference only) 

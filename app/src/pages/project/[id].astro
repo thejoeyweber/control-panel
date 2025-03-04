@@ -1,0 +1,205 @@
+---
+/*
+  File: src/pages/project/[id].astro
+  Purpose: Displays detailed information for a specific project
+  Dependencies: BaseLayout
+*/
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// In a real implementation, this would fetch from a database or JSON file
+// based on the project ID
+
+// Get the project ID from the URL
+const { id } = Astro.params;
+
+// Mock project data - in a real app, this would come from a data store
+const project = {
+  id: id,
+  title: 'Control Panel Rebuild',
+  description: 'Rebuilding the personal dashboard with Astro and Tailwind CSS to improve performance and maintainability.',
+  status: 'in-progress',
+  category: 'development',
+  progress: 35,
+  startDate: '2025-02-15',
+  dueDate: '2025-04-30',
+  tags: ['web development', 'astro', 'tailwind css'],
+  visibility: 'public',
+  notes: 'This project involves rebuilding the existing prototype with a modern stack for better performance and maintainability.',
+  nextSteps: [
+    'Complete the base layout',
+    'Implement all page templates',
+    'Add data loading from JSON/Markdown',
+    'Implement authentication'
+  ],
+  activities: [
+    {
+      date: '2025-03-04',
+      description: 'Initialized Astro project with Tailwind CSS'
+    },
+    {
+      date: '2025-03-01',
+      description: 'Created project plan and technical specifications'
+    },
+    {
+      date: '2025-02-15',
+      description: 'Project started'
+    }
+  ]
+};
+
+// Format dates for display
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+---
+
+<BaseLayout title={project.title} activePage="projects">
+  <div class="container mx-auto px-4">
+    <div class="mb-6">
+      <a href="/projects" class="text-highlight hover:underline inline-flex items-center">
+        <i class="ri-arrow-left-line mr-1"></i> Back to Projects
+      </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-card overflow-hidden">
+      <!-- Project Header -->
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+          <div>
+            <h1 class="text-3xl font-bold mb-2">{project.title}</h1>
+            <p class="text-light-ink">{project.description}</p>
+          </div>
+          
+          <div class="flex gap-2">
+            <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+              <i class="ri-edit-line mr-1"></i> Edit
+            </button>
+            <button class="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+              <i class="ri-delete-bin-line mr-1"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Project Details -->
+      <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Main Details -->
+        <div class="lg:col-span-2">
+          <!-- Status and Progress -->
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Status & Progress</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm text-light-ink mb-1">Status</h3>
+                <p class="font-bold capitalize">{project.status.replace('-', ' ')}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm text-light-ink mb-1">Category</h3>
+                <p class="font-bold capitalize">{project.category}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm text-light-ink mb-1">Start Date</h3>
+                <p class="font-bold">{formatDate(project.startDate)}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm text-light-ink mb-1">Due Date</h3>
+                <p class="font-bold">{formatDate(project.dueDate)}</p>
+              </div>
+            </div>
+            
+            <div class="mb-2">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold">Progress: {project.progress}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4">
+                <div 
+                  class="bg-highlight h-4 rounded-full" 
+                  style={`width: ${project.progress}%`}
+                ></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Notes -->
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Notes</h2>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p>{project.notes}</p>
+            </div>
+          </div>
+          
+          <!-- Activities -->
+          <div>
+            <h2 class="text-xl font-bold mb-4">Activity Log</h2>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <ul class="divide-y divide-gray-200">
+                {project.activities.map((activity) => (
+                  <li class="py-3">
+                    <div class="flex items-start">
+                      <span class="text-highlight mr-2"><i class="ri-time-line"></i></span>
+                      <div>
+                        <p class="font-medium">{activity.description}</p>
+                        <p class="text-sm text-light-ink">{formatDate(activity.date)}</p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <button class="mt-4 text-highlight hover:underline inline-flex items-center">
+                <i class="ri-add-line mr-1"></i> Add Activity
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Column - Tags and Next Steps -->
+        <div>
+          <!-- Tags -->
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Tags</h2>
+            <div class="flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <span class="bg-gray-100 text-light-ink px-3 py-1 rounded-full text-sm">
+                  {tag}
+                </span>
+              ))}
+              
+              <button class="text-highlight hover:underline text-sm">
+                <i class="ri-add-line"></i> Add Tag
+              </button>
+            </div>
+          </div>
+          
+          <!-- Next Steps -->
+          <div>
+            <h2 class="text-xl font-bold mb-4">Next Steps</h2>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <ul class="space-y-2">
+                {project.nextSteps.map((step) => (
+                  <li class="flex items-start">
+                    <span class="text-highlight mr-2 mt-0.5"><i class="ri-checkbox-blank-circle-line"></i></span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <button class="mt-4 text-highlight hover:underline inline-flex items-center">
+                <i class="ri-add-line mr-1"></i> Add Step
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout> 

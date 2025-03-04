@@ -1,0 +1,86 @@
+# .cursorrules
+
+## Project Background
+- This is a **personal control panel** application for managing projects, revenue, writing, AI tools, resources, and books.
+- We plan to **rebuild** using **Astro** (for static generation) and **Tailwind CSS** (for utility-first styling).
+- The application will support **public** (viewable by anyone) and **private** (viewable only when logged in) content.
+
+## Coding Standards
+- Use **functional** approaches wherever possible; avoid unnecessary complexity.
+- Rely on **minimal** JavaScript and dependencies—only import libraries we absolutely need.
+- **Variable Declarations**: Prefer `const` or `let` over `var`. Use `const` for immutable bindings.
+- **Naming Conventions**: 
+  - camelCase for variables and functions
+  - PascalCase for components (when we have React or Astro components with frontmatter)
+  - Kebab-case for file names
+
+### Inline Documentation & File-Level Comments
+
+- **Top-of-File Commentary**  
+  - Begin every source file with a brief comment describing its purpose, what functionality it provides, and any dependencies.  
+  - Example (in an Astro file):
+    ```js
+    /*
+      File: src/pages/projects.astro
+      Purpose: Displays user projects with status, filters, and links to project details.
+      Dependencies: Uses data from `data/projects.json`
+      Notes: This page is partially hydrated only for the project filtering UI.
+    */
+    ```
+
+- **Function/Component Docstrings**  
+  - For each major function or component, include a JSDoc-style comment (or similarly structured comment) above it.  
+  - Mention parameters, return type, and a short description of what it does.
+  - Example (in a .js or .ts file):
+    ```js
+    /**
+     * fetchProjects - Fetches project data from the local JSON file.
+     * @returns {Promise<Array>} A promise that resolves to an array of project objects.
+     */
+    async function fetchProjects() { ... }
+    ```
+
+- **Inline Explanations**  
+  - Where logic might be unclear, add small inline comments to explain the reasoning or any potential pitfalls.
+  - Avoid over-commenting obvious lines; focus on clarifying non-trivial logic, performance considerations, or domain-specific details.
+
+## Preferred Libraries & Frameworks
+- **Astro** for site generation:
+  - Keep the site primarily static, only hydrate interactivity where needed.
+- **Tailwind CSS** for styling:
+  - Rely on utility classes; do not integrate large component libraries by default.
+- **Optional**: If we need any minimal server routes (e.g., authentication), we can add Astro server endpoints or small serverless functions.
+
+## File Structure
+- `src/` folder (or root-level) with:
+  - `layouts/` for shared Astro layouts
+  - `pages/` for top-level routes
+  - `components/` for reusable UI parts (navigation, headers, modals)
+  - `data/` for JSON or Markdown files holding project/revenue/writing data
+- Each data entity can be `*.json` or `*.md` with a “visibility” field set to `public` or `private`.
+
+## Performance Optimization Guidelines
+- Keep **JavaScript** minimal. In Astro, default to partial hydration.
+- Use **lazy-loading** or **client:idle** only if a component truly needs it.
+- Provide minimal images and optimize assets (compress or host statically).
+
+## Testing Requirements
+- Any **unit tests** or integration tests can be done with a simple setup (e.g., Vitest or Jest) if needed.
+- For UI verification, rely on manual checks or a simple e2e framework (Playwright/Cypress), but only if we want additional coverage.
+
+## Documentation Standards
+- Keep high-level project documentation in `README.md` (root directory).
+- For each major folder (`pages/`, `data/`, etc.), include short usage instructions if needed.
+- Maintain short in-line comments for logic that isn’t self-explanatory.
+
+## Error Handling
+- For code that fetches data (e.g., from a serverless route), wrap in `try/catch`.
+- Show user-friendly fallback if any fetch fails.
+- Keep error boundaries minimal—this is a single-user, personal system.
+
+## Authentication & Access
+- If implementing auth, use a **simple** approach (session tokens, cookies).
+- Keep the login flow minimal (a single protected route or small serverless function).
+
+## Summary
+This `.cursorrules` file directs the AI to keep the rebuild minimal, focusing on Astro + Tailwind, low overhead, and a straightforward data-driven approach using JSON/Markdown for content storage.

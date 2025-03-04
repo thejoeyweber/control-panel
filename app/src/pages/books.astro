@@ -1,0 +1,342 @@
+---
+/*
+  File: src/pages/books.astro
+  Purpose: Displays user's book collection, reading progress, and wishlists
+  Dependencies: BaseLayout
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getVisibleContent } from '../utils/auth';
+---
+
+<BaseLayout title="Books" activePage="books">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold mb-4 md:mb-0">Books</h1>
+      <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+        <i class="ri-add-line mr-1"></i> Add Book
+      </button>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow-card p-4">
+        <h3 class="text-sm text-light-ink mb-1">Currently Reading</h3>
+        <p class="text-2xl font-bold">3</p>
+      </div>
+      <div class="bg-white rounded-lg shadow-card p-4">
+        <h3 class="text-sm text-light-ink mb-1">Books Read (2025)</h3>
+        <p class="text-2xl font-bold">7</p>
+      </div>
+      <div class="bg-white rounded-lg shadow-card p-4">
+        <h3 class="text-sm text-light-ink mb-1">Total Collection</h3>
+        <p class="text-2xl font-bold">126</p>
+      </div>
+      <div class="bg-white rounded-lg shadow-card p-4">
+        <h3 class="text-sm text-light-ink mb-1">On Wishlist</h3>
+        <p class="text-2xl font-bold">14</p>
+      </div>
+    </div>
+    
+    <!-- Reading Progress -->
+    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Current Reading Progress</h3>
+        <button class="text-highlight hover:underline text-sm">Update Progress</button>
+      </div>
+      
+      <div class="divide-y">
+        <div class="p-4 hover:bg-gray-50">
+          <div class="flex items-start gap-4">
+            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
+              <img src="https://placehold.co/120x160/e0f2fe/1e40af?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-semibold">Atomic Habits</h4>
+              <p class="text-xs text-light-ink">James Clear • 320 pages</p>
+              <div class="flex justify-between text-xs mt-2 mb-1">
+                <span>Progress</span>
+                <span>245/320 pages (76%)</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-highlight h-2 rounded-full" style="width: 76%"></div>
+              </div>
+              <p class="text-xs text-light-ink mt-2">Last read: Yesterday</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 hover:bg-gray-50">
+          <div class="flex items-start gap-4">
+            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
+              <img src="https://placehold.co/120x160/f0fdf4/166534?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-semibold">The Pragmatic Programmer</h4>
+              <p class="text-xs text-light-ink">Andrew Hunt, David Thomas • 352 pages</p>
+              <div class="flex justify-between text-xs mt-2 mb-1">
+                <span>Progress</span>
+                <span>140/352 pages (40%)</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-highlight h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <p class="text-xs text-light-ink mt-2">Last read: 3 days ago</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 hover:bg-gray-50">
+          <div class="flex items-start gap-4">
+            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
+              <img src="https://placehold.co/120x160/fef2f2/991b1b?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-semibold">The Psychology of Money</h4>
+              <p class="text-xs text-light-ink">Morgan Housel • 256 pages</p>
+              <div class="flex justify-between text-xs mt-2 mb-1">
+                <span>Progress</span>
+                <span>52/256 pages (20%)</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-highlight h-2 rounded-full" style="width: 20%"></div>
+              </div>
+              <p class="text-xs text-light-ink mt-2">Last read: Today</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Filter Controls -->
+    <div class="bg-paper border border-gray-200 rounded-lg p-4 mb-8">
+      <div class="flex flex-wrap gap-4">
+        <div>
+          <label class="block text-sm text-light-ink mb-1">Category</label>
+          <select class="border rounded px-3 py-2 w-full">
+            <option>All Categories</option>
+            <option>Fiction</option>
+            <option>Non-Fiction</option>
+            <option>Technical</option>
+            <option>Business</option>
+            <option>Self-Improvement</option>
+            <option>Philosophy</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-light-ink mb-1">Status</label>
+          <select class="border rounded px-3 py-2 w-full">
+            <option>All</option>
+            <option>Reading</option>
+            <option>Completed</option>
+            <option>To Read</option>
+            <option>Wish List</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-light-ink mb-1">Rating</label>
+          <select class="border rounded px-3 py-2 w-full">
+            <option>Any Rating</option>
+            <option>⭐⭐⭐⭐⭐</option>
+            <option>⭐⭐⭐⭐ & up</option>
+            <option>⭐⭐⭐ & up</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-light-ink mb-1">Search</label>
+          <input type="text" placeholder="Search books..." class="border rounded px-3 py-2 w-full" />
+        </div>
+        <div class="flex-1"></div>
+        <div class="flex items-end">
+          <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Book Collection -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
+      <!-- Book 1 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/e0f2fe/1e40af?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              ⭐⭐⭐⭐⭐
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">Atomic Habits</h4>
+        <p class="text-xs text-light-ink truncate">James Clear</p>
+      </div>
+      
+      <!-- Book 2 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/f0fdf4/166534?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              ⭐⭐⭐⭐
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">Reading</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">The Pragmatic Programmer</h4>
+        <p class="text-xs text-light-ink truncate">Andrew Hunt, David Thomas</p>
+      </div>
+      
+      <!-- Book 3 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/fef2f2/991b1b?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              ⭐⭐⭐⭐⭐
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">Reading</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">The Psychology of Money</h4>
+        <p class="text-xs text-light-ink truncate">Morgan Housel</p>
+      </div>
+      
+      <!-- Book 4 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/eff6ff/1e3a8a?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              ⭐⭐⭐⭐
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">Deep Work</h4>
+        <p class="text-xs text-light-ink truncate">Cal Newport</p>
+      </div>
+      
+      <!-- Book 5 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/f0fdfa/134e4a?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              ⭐⭐⭐⭐⭐
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">Designing Data-Intensive Applications</h4>
+        <p class="text-xs text-light-ink truncate">Martin Kleppmann</p>
+      </div>
+      
+      <!-- Book 6 -->
+      <div class="group">
+        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
+          <img src="https://placehold.co/240x360/faf5ff/5b21b6?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+            <div class="text-amber-400 text-xs">
+              Not rated
+            </div>
+          </div>
+          <div class="absolute top-2 right-2">
+            <span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">To Read</span>
+          </div>
+        </div>
+        <h4 class="font-medium text-sm truncate">Four Thousand Weeks</h4>
+        <p class="text-xs text-light-ink truncate">Oliver Burkeman</p>
+      </div>
+      
+    </div>
+    
+    <!-- Reading Challenges -->
+    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Reading Challenges</h3>
+        <button class="text-highlight hover:underline text-sm">View All</button>
+      </div>
+      
+      <div class="divide-y">
+        <div class="p-4">
+          <h4 class="font-semibold">2025 Reading Goal</h4>
+          <p class="text-sm text-light-ink mb-2">Read 24 books in 2025</p>
+          <div class="flex justify-between text-xs mb-1">
+            <span>Progress</span>
+            <span>7/24 books (29%)</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-highlight h-2 rounded-full" style="width: 29%"></div>
+          </div>
+          <p class="text-xs text-light-ink mt-2">On track: 2 books ahead of schedule</p>
+        </div>
+        <div class="p-4">
+          <h4 class="font-semibold">Technical Reading</h4>
+          <p class="text-sm text-light-ink mb-2">Read 10 technical books this year</p>
+          <div class="flex justify-between text-xs mb-1">
+            <span>Progress</span>
+            <span>3/10 books (30%)</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-highlight h-2 rounded-full" style="width: 30%"></div>
+          </div>
+        </div>
+        <div class="p-4">
+          <h4 class="font-semibold">Author Diversity</h4>
+          <p class="text-sm text-light-ink mb-2">Read books from 12 different countries</p>
+          <div class="flex justify-between text-xs mb-1">
+            <span>Progress</span>
+            <span>4/12 countries (33%)</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-highlight h-2 rounded-full" style="width: 33%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Reading Lists -->
+    <div class="bg-white rounded-lg shadow-card overflow-hidden">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Reading Lists</h3>
+        <button class="text-highlight hover:underline text-sm">Manage Lists</button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+          <h4 class="font-semibold mb-1">Technical Growth</h4>
+          <p class="text-xs text-light-ink mb-2">12 books • Last updated Mar 1, 2025</p>
+          <div class="flex justify-between text-xs">
+            <span>3 currently reading</span>
+            <span>5 completed</span>
+          </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+          <h4 class="font-semibold mb-1">Productivity & Focus</h4>
+          <p class="text-xs text-light-ink mb-2">8 books • Last updated Feb 15, 2025</p>
+          <div class="flex justify-between text-xs">
+            <span>0 currently reading</span>
+            <span>6 completed</span>
+          </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+          <h4 class="font-semibold mb-1">Spring 2025 Reading</h4>
+          <p class="text-xs text-light-ink mb-2">6 books • Last updated Mar 10, 2025</p>
+          <div class="flex justify-between text-xs">
+            <span>2 currently reading</span>
+            <span>1 completed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout> 
