@@ -2,11 +2,19 @@
 /*
   File: src/pages/ai-library.astro
   Purpose: Displays collection of AI tools, models and resources
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, AI tools data
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent } from '../utils/auth';
+import { getVisibleAITools, getAIToolStats, getFavoriteAITools } from '../data/ai-tools';
+
+// Get visible AI tools and stats
+const aiTools = getVisibleAITools();
+const stats = getAIToolStats();
+const favorites = getFavoriteAITools();
+
+// Get unique categories for filtering
+const categories = [...new Set(aiTools.map(tool => tool.category))];
 ---
 
 <BaseLayout title="AI Library" activePage="ai-library">
@@ -25,12 +33,9 @@ import { getVisibleContent } from '../utils/auth';
           <label class="block text-sm text-light-ink mb-1">Category</label>
           <select class="border rounded px-3 py-2 w-full">
             <option>All Categories</option>
-            <option>Text Generation</option>
-            <option>Image Generation</option>
-            <option>Code Assistance</option>
-            <option>Data Analysis</option>
-            <option>Productivity</option>
-            <option>Research</option>
+            {categories.map(category => (
+              <option>{category}</option>
+            ))}
           </select>
         </div>
         <div>

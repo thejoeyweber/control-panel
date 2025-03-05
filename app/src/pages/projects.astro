@@ -15,8 +15,7 @@ import RecentActivity from '../components/projects/RecentActivity.astro';
 import TechStack from '../components/projects/TechStack.astro';
 
 // Filter projects based on authentication status
-// For now, assume the user is authenticated
-const visibleProjects = getVisibleContent(true);
+const visibleProjects = getVisibleContent();
 
 // Status color mapping for consistency
 const statusColors = {

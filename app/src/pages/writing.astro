@@ -2,11 +2,20 @@
 /*
   File: src/pages/writing.astro
   Purpose: Displays user's writing projects, notes, and drafts
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, writing data
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent } from '../utils/auth';
+import { getVisibleWriting, getWritingStats } from '../data/writing';
+
+// Get visible writing content and stats
+const writingPieces = getVisibleWriting();
+const stats = getWritingStats();
+
+// Filter pieces by status
+const published = writingPieces.filter(piece => piece.status === 'published');
+const drafts = writingPieces.filter(piece => piece.status === 'draft');
+const scheduled = writingPieces.filter(piece => piece.status === 'scheduled');
 ---
 
 <BaseLayout title="Writing" activePage="writing">
@@ -27,19 +36,19 @@ import { getVisibleContent } from '../utils/auth';
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-lg shadow-card p-4">
         <h3 class="text-sm text-light-ink mb-1">Active Projects</h3>
-        <p class="text-2xl font-bold">8</p>
+        <p class="text-2xl font-bold">{stats.total}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Words This Month</h3>
-        <p class="text-2xl font-bold">24,385</p>
+        <h3 class="text-sm text-light-ink mb-1">Published</h3>
+        <p class="text-2xl font-bold">{stats.published}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Published Pieces</h3>
-        <p class="text-2xl font-bold">42</p>
+        <h3 class="text-sm text-light-ink mb-1">In Draft</h3>
+        <p class="text-2xl font-bold">{stats.drafts}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Draft Ideas</h3>
-        <p class="text-2xl font-bold">17</p>
+        <h3 class="text-sm text-light-ink mb-1">Total Words</h3>
+        <p class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</p>
       </div>
     </div>
     

@@ -1,35 +1,12 @@
 /*
   File: src/data/projects.ts
   Purpose: Provides mock project data for the control panel
-  Dependencies: None
+  Dependencies: Project and Activity types from types/index.ts
 */
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: 'active' | 'completed' | 'planning' | 'paused';
-  category: string;
-  startDate: string;
-  lastUpdated: string;
-  progress: number;
-  tags: string[];
-  techStack: string[];
-  nextSteps?: string[];
-  notes?: string;
-  githubUrl?: string;
-  liveUrl?: string;
-  visibility: 'public' | 'private';
-  activities?: Activity[];
-}
-
-export interface Activity {
-  id: string;
-  projectId: string;
-  type: 'commit' | 'pr' | 'manual';
-  date: string;
-  description: string;
-}
+import type { Project, Activity } from '../types';
+import { isAuthenticated } from '../utils/auth';
+import * as dataUtils from '../utils/data';
 
 // Mock project data
 export const projects: Project[] = [
@@ -183,14 +160,10 @@ export const projects: Project[] = [
 
 /**
  * Get projects filtered by visibility
- * @param isAuthenticated Whether the user is authenticated
  * @returns Array of projects visible to the user
  */
-export function getVisibleContent(isAuthenticated: boolean): Project[] {
-  if (isAuthenticated) {
-    return projects;
-  }
-  return projects.filter(project => project.visibility === 'public');
+export function getVisibleContent(): Project[] {
+  return dataUtils.getVisibleContent(projects, isAuthenticated());
 }
 
 /**
@@ -199,7 +172,7 @@ export function getVisibleContent(isAuthenticated: boolean): Project[] {
  * @returns The project or undefined if not found
  */
 export function getProjectById(id: string): Project | undefined {
-  return projects.find(project => project.id === id);
+  return dataUtils.getItemById(projects, id);
 }
 
 /**
