@@ -1,0 +1,420 @@
+---
+/*
+  File: src/components/writing/WritingForm.astro
+  Purpose: Form component for creating and editing writing pieces
+  Dependencies: WritingPiece type
+*/
+
+import { WritingPiece } from '../../types';
+
+interface Props {
+  writing?: WritingPiece;
+  mode: 'create' | 'edit';
+}
+
+const { writing, mode } = Astro.props;
+
+// Set up initial values
+const initialWriting = writing || {
+  id: '',
+  title: '',
+  summary: '',
+  status: 'draft',
+  category: 'blog',
+  tags: [],
+  createdDate: new Date().toISOString().split('T')[0],
+  lastUpdated: new Date().toISOString().split('T')[0],
+  wordCount: 0,
+  content: '',
+  externalUrl: '',
+  visibility: 'private'
+};
+
+// Writing status options
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+  { value: 'scheduled', label: 'Scheduled' }
+];
+
+// Writing category options
+const categoryOptions = [
+  { value: 'blog', label: 'Blog Post' },
+  { value: 'newsletter', label: 'Newsletter' },
+  { value: 'documentation', label: 'Documentation' },
+  { value: 'other', label: 'Other' }
+];
+
+// Common tags for writing
+const commonTags = [
+  'tutorial',
+  'guide',
+  'review',
+  'opinion',
+  'case-study',
+  'technical',
+  'programming',
+  'design',
+  'writing',
+  'astro',
+  'javascript',
+  'typescript',
+  'react',
+  'productivity'
+];
+
+// Convert tags array to string for form input
+const tagsString = initialWriting.tags.join(', ');
+
+// Visibility options
+const visibilityOptions = [
+  { value: 'public', label: 'Public' },
+  { value: 'private', label: 'Private' }
+];
+---
+
+<form method="post" action={`/api/writing${mode === 'edit' ? `/${initialWriting.id}` : ''}`} class="writing-form space-y-6">
+  
+  <!-- Basic Info Section -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-medium mb-4 text-gray-800">Basic Info</h2>
+    
+    <div class="space-y-4">
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          value={initialWriting.title} 
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Your writing title"
+        />
+      </div>
+
+      <!-- Summary -->
+      <div>
+        <label for="summary" class="block text-sm font-medium text-gray-700 mb-1">Summary *</label>
+        <textarea 
+          id="summary" 
+          name="summary" 
+          required
+          rows="2"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Brief summary of your writing piece..."
+        >{initialWriting.summary}</textarea>
+      </div>
+
+      <!-- Status & Category -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Status -->
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select 
+            id="status" 
+            name="status" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            {statusOptions.map(option => (
+              <option value={option.value} selected={option.value === initialWriting.status}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select 
+            id="category" 
+            name="category" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            {categoryOptions.map(option => (
+              <option value={option.value} selected={option.value === initialWriting.category}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-medium mb-4 text-gray-800">Content</h2>
+    
+    <div class="space-y-4">
+      <!-- Content -->
+      <div>
+        <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+        <textarea 
+          id="content" 
+          name="content" 
+          rows="10"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+          placeholder="Write your content here..."
+        >{initialWriting.content}</textarea>
+      </div>
+
+      <!-- Word Count -->
+      <div>
+        <label for="wordCount" class="block text-sm font-medium text-gray-700 mb-1">Word Count</label>
+        <input 
+          type="number" 
+          id="wordCount" 
+          name="wordCount" 
+          value={initialWriting.wordCount} 
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <p class="text-xs text-gray-500 mt-1">Manually enter or use the "Calculate" button below to count words from content.</p>
+        <button 
+          type="button" 
+          id="calculate-word-count" 
+          class="mt-2 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded border border-gray-300 hover:bg-gray-200 transition"
+        >
+          Calculate Word Count
+        </button>
+      </div>
+
+      <!-- External URL -->
+      <div>
+        <label for="externalUrl" class="block text-sm font-medium text-gray-700 mb-1">External URL</label>
+        <input 
+          type="url" 
+          id="externalUrl" 
+          name="externalUrl" 
+          value={initialWriting.externalUrl} 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="https://example.com/my-article (optional)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Tags and Settings Section -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-medium mb-4 text-gray-800">Tags & Settings</h2>
+    
+    <div class="space-y-4">
+      <!-- Tags -->
+      <div>
+        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+        <div class="flex items-center gap-2 mb-2">
+          <input 
+            type="text" 
+            id="tags" 
+            name="tags" 
+            value={tagsString}
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="tutorial, guide, technical"
+          />
+          <button
+            type="button"
+            id="show-common-tags"
+            class="px-3 py-2 bg-gray-100 text-gray-700 rounded border border-gray-300 hover:bg-gray-200 transition"
+          >
+            Common Tags
+          </button>
+        </div>
+        <div id="common-tags-container" class="hidden bg-gray-50 p-3 rounded-md border border-gray-200 mt-2">
+          <div class="text-sm font-medium text-gray-700 mb-2">Click to add:</div>
+          <div class="flex flex-wrap gap-1">
+            {commonTags.map(tag => (
+              <button
+                type="button"
+                class="common-tag bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded transition"
+                data-tag={tag}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div id="tag-pills" class="flex flex-wrap gap-1 mt-2">
+          <!-- Tag pills will be added here by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Dates Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Created Date -->
+        <div>
+          <label for="createdDate" class="block text-sm font-medium text-gray-700 mb-1">Created Date</label>
+          <input 
+            type="date" 
+            id="createdDate" 
+            name="createdDate" 
+            value={initialWriting.createdDate}
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <!-- Published Date (shown only if status is published or scheduled) -->
+        <div id="published-date-container">
+          <label for="publishedDate" class="block text-sm font-medium text-gray-700 mb-1">Published Date</label>
+          <input 
+            type="date" 
+            id="publishedDate" 
+            name="publishedDate" 
+            value={initialWriting.publishedDate}
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+      </div>
+
+      <!-- Visibility -->
+      <div>
+        <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+        <select 
+          id="visibility" 
+          name="visibility" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          {visibilityOptions.map(option => (
+            <option value={option.value} selected={option.value === initialWriting.visibility}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex justify-between items-center">
+    <button
+      type="submit"
+      class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+    >
+      {mode === 'create' ? 'Create Writing' : 'Update Writing'}
+    </button>
+
+    {mode === 'edit' && (
+      <button
+        type="button"
+        id="delete-writing-btn"
+        class="px-6 py-2 bg-white border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+      >
+        Delete
+      </button>
+    )}
+  </div>
+
+  <!-- Hidden delete method field -->
+  <input type="hidden" name="_method" id="method-field" value="POST" />
+  <!-- Hidden last updated field -->
+  <input type="hidden" name="lastUpdated" value={new Date().toISOString().split('T')[0]} />
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Calculate word count
+    const calculateWordCountBtn = document.getElementById('calculate-word-count');
+    const contentField = document.getElementById('content') as HTMLTextAreaElement;
+    const wordCountField = document.getElementById('wordCount') as HTMLInputElement;
+    
+    calculateWordCountBtn?.addEventListener('click', () => {
+      if (contentField && wordCountField) {
+        const content = contentField.value.trim();
+        const wordCount = content ? content.split(/\s+/).length : 0;
+        wordCountField.value = wordCount.toString();
+      }
+    });
+    
+    // Handle common tags
+    const showCommonTagsBtn = document.getElementById('show-common-tags');
+    const commonTagsContainer = document.getElementById('common-tags-container');
+    const tagsInput = document.getElementById('tags');
+    const tagPillsContainer = document.getElementById('tag-pills');
+    
+    // Show/hide common tags
+    showCommonTagsBtn?.addEventListener('click', () => {
+      commonTagsContainer?.classList.toggle('hidden');
+    });
+    
+    // Add common tag to input when clicked
+    const commonTagButtons = document.querySelectorAll('.common-tag');
+    commonTagButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tag = button.getAttribute('data-tag');
+        if (tag && tagsInput) {
+          const currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+          if (!currentTags.includes(tag)) {
+            const newTags = currentTags.length > 0 ? `${tagsInput.value}, ${tag}` : tag;
+            tagsInput.value = newTags;
+            renderTagPills(newTags);
+          }
+        }
+      });
+    });
+    
+    // Render tag pills on page load
+    if (tagsInput && tagPillsContainer) {
+      renderTagPills(tagsInput.value);
+      
+      // Update tag pills when input changes
+      tagsInput.addEventListener('input', () => {
+        renderTagPills(tagsInput.value);
+      });
+    }
+    
+    // Function to render tag pills
+    function renderTagPills(tagsString) {
+      if (!tagPillsContainer) return;
+      
+      // Clear existing pills
+      tagPillsContainer.innerHTML = '';
+      
+      // Split tags and create pills
+      const tags = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+      tags.forEach(tag => {
+        const pill = document.createElement('div');
+        pill.className = 'bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded';
+        pill.textContent = tag;
+        tagPillsContainer.appendChild(pill);
+      });
+    }
+    
+    // Show/hide published date based on status
+    const statusSelect = document.getElementById('status') as HTMLSelectElement;
+    const publishedDateContainer = document.getElementById('published-date-container');
+    
+    // Show/hide published date on load
+    if (statusSelect && publishedDateContainer) {
+      const status = statusSelect.value;
+      if (status === 'draft') {
+        publishedDateContainer.classList.add('hidden');
+      } else {
+        publishedDateContainer.classList.remove('hidden');
+      }
+      
+      // Show/hide published date on status change
+      statusSelect.addEventListener('change', () => {
+        const status = statusSelect.value;
+        if (status === 'draft') {
+          publishedDateContainer.classList.add('hidden');
+        } else {
+          publishedDateContainer.classList.remove('hidden');
+        }
+      });
+    }
+    
+    // Handle delete button
+    const deleteBtn = document.getElementById('delete-writing-btn');
+    const methodField = document.getElementById('method-field');
+    const form = document.querySelector('.writing-form');
+    
+    deleteBtn?.addEventListener('click', () => {
+      if (confirm('Are you sure you want to delete this writing? This action cannot be undone.')) {
+        if (methodField) methodField.value = 'DELETE';
+        form?.submit();
+      }
+    });
+  });
+</script> 

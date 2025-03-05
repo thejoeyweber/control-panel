@@ -1,245 +1,164 @@
 /*
   File: src/data/revenue.ts
-  Purpose: Provides revenue data for the control panel
-  Dependencies: RevenueEntry, RevenueGoal types from types/index.ts
+  Purpose: Data service for revenue entries, providing CRUD operations
+  Dependencies: Requires fs for file operations, uuid for ID generation
 */
 
-import type { RevenueEntry, RevenueGoal } from '../types';
-import { isAuthenticated } from '../utils/auth';
-import * as dataUtils from '../utils/data';
+import type { Revenue } from '../types';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
-// Sample revenue entries
-export const revenueEntries: RevenueEntry[] = [
-  {
-    id: 'rev-1',
-    amount: 1200.00,
-    source: 'Consulting',
-    category: 'Services',
-    date: '2023-11-15',
-    description: 'Web development consultation for Client A',
-    recurring: false,
-    visibility: 'private'
-  },
-  {
-    id: 'rev-2',
-    amount: 499.99,
-    source: 'Digital Product',
-    category: 'Products',
-    date: '2023-11-20',
-    description: 'Course sales for November',
-    recurring: false,
-    visibility: 'private'
-  },
-  {
-    id: 'rev-3',
-    amount: 32.50,
-    source: 'Affiliate',
-    category: 'Passive',
-    date: '2023-11-30',
-    description: 'Affiliate commission from Amazon',
-    recurring: true,
-    visibility: 'private'
-  },
-  {
-    id: 'rev-4',
-    amount: 950.00,
-    source: 'Consulting',
-    category: 'Services',
-    date: '2023-12-05',
-    description: 'Technical writing for Client B',
-    recurring: false,
-    visibility: 'private'
-  },
-  {
-    id: 'rev-5',
-    amount: 150.00,
-    source: 'Membership',
-    category: 'Passive',
-    date: '2023-12-01',
-    description: 'Monthly membership subscriptions',
-    recurring: true,
-    visibility: 'private'
-  },
-  {
-    id: 'rev-6',
-    amount: 75.00,
-    source: 'Royalties',
-    category: 'Passive',
-    date: '2023-12-10',
-    description: 'Book royalties for November',
-    recurring: true,
-    visibility: 'public'
+// File path for revenue data
+const dataFilePath = path.join(process.cwd(), 'src', 'data', 'revenue.json');
+
+// Ensure data file exists
+async function ensureDataFile() {
+  try {
+    await fs.access(dataFilePath);
+  } catch (error) {
+    // File doesn't exist, create it with empty array
+    await fs.writeFile(dataFilePath, JSON.stringify([]));
   }
-];
+}
 
-// Sample revenue goals
-export const revenueGoals: RevenueGoal[] = [
-  {
-    id: 'goal-1',
-    name: 'Monthly Income',
-    target: 3000.00,
-    period: 'monthly',
-    startDate: '2023-01-01',
-    visibility: 'private'
-  },
-  {
-    id: 'goal-2',
-    name: 'Passive Income',
-    target: 500.00,
-    period: 'monthly',
-    startDate: '2023-01-01',
-    visibility: 'private'
-  },
-  {
-    id: 'goal-3',
-    name: 'Annual Revenue',
-    target: 36000.00,
-    period: 'yearly',
-    startDate: '2023-01-01',
-    endDate: '2023-12-31',
-    visibility: 'public'
-  },
-  {
-    id: 'goal-4',
-    name: 'Q4 Consulting',
-    target: 5000.00,
-    period: 'quarterly',
-    startDate: '2023-10-01',
-    endDate: '2023-12-31',
-    visibility: 'private'
+// Get all revenue entries
+export async function getAllRevenue(): Promise<Revenue[]> {
+  await ensureDataFile();
+  const data = await fs.readFile(dataFilePath, 'utf-8');
+  return JSON.parse(data);
+}
+
+// Get revenue by project ID
+export async function getRevenueByProject(projectId: string): Promise<Revenue[]> {
+  const revenue = await getAllRevenue();
+  return revenue.filter(entry => entry.projectId === projectId);
+}
+
+// Get revenue by ID
+export async function getRevenueById(id: string): Promise<Revenue | null> {
+  const revenue = await getAllRevenue();
+  return revenue.find(entry => entry.id === id) || null;
+}
+
+// Create a new revenue entry
+export async function createRevenue(revenueData: Partial<Revenue>): Promise<Revenue> {
+  const revenue = await getAllRevenue();
+  
+  const newRevenue: Revenue = {
+    id: uuidv4(),
+    projectId: revenueData.projectId || '',
+    amount: revenueData.amount || 0,
+    date: revenueData.date || new Date().toISOString().split('T')[0],
+    description: revenueData.description || '',
+    type: revenueData.type || 'invoice',
+    status: revenueData.status || 'paid',
+    visibility: revenueData.visibility || 'private',
+  };
+  
+  revenue.push(newRevenue);
+  await fs.writeFile(dataFilePath, JSON.stringify(revenue, null, 2));
+  
+  return newRevenue;
+}
+
+// Update a revenue entry
+export async function updateRevenue(id: string, revenueData: Partial<Revenue>): Promise<Revenue | null> {
+  const revenue = await getAllRevenue();
+  const index = revenue.findIndex(entry => entry.id === id);
+  
+  if (index === -1) {
+    return null;
   }
-];
-
-/**
- * Get revenue entries filtered by visibility
- * @returns Array of revenue entries visible to the user
- */
-export function getVisibleRevenueEntries(): RevenueEntry[] {
-  return dataUtils.getVisibleContent(revenueEntries, isAuthenticated());
+  
+  // Update the revenue entry
+  revenue[index] = {
+    ...revenue[index],
+    ...revenueData,
+    id, // Ensure ID remains the same
+  };
+  
+  await fs.writeFile(dataFilePath, JSON.stringify(revenue, null, 2));
+  return revenue[index];
 }
 
-/**
- * Get revenue goals filtered by visibility
- * @returns Array of revenue goals visible to the user
- */
-export function getVisibleRevenueGoals(): RevenueGoal[] {
-  return dataUtils.getVisibleContent(revenueGoals, isAuthenticated());
+// Delete a revenue entry
+export async function deleteRevenue(id: string): Promise<boolean> {
+  const revenue = await getAllRevenue();
+  const filteredRevenue = revenue.filter(entry => entry.id !== id);
+  
+  if (filteredRevenue.length === revenue.length) {
+    return false; // No entry was removed
+  }
+  
+  await fs.writeFile(dataFilePath, JSON.stringify(filteredRevenue, null, 2));
+  return true;
 }
 
-/**
- * Get a revenue entry by its ID
- * @param id The revenue entry ID to find
- * @returns The revenue entry or undefined if not found
- */
-export function getRevenueEntryById(id: string): RevenueEntry | undefined {
-  return dataUtils.getItemById(revenueEntries, id);
-}
-
-/**
- * Get a revenue goal by its ID
- * @param id The revenue goal ID to find
- * @returns The revenue goal or undefined if not found
- */
-export function getRevenueGoalById(id: string): RevenueGoal | undefined {
-  return dataUtils.getItemById(revenueGoals, id);
-}
-
-/**
- * Get revenue statistics
- * @param year Year to get statistics for (default: current year)
- * @param month Month to get statistics for (optional, 1-12)
- * @returns Object containing revenue statistics
- */
-export function getRevenueStats(year: number = new Date().getFullYear(), month?: number) {
-  // Filter by year, and optionally by month
-  const filtered = revenueEntries.filter(entry => {
+// Get revenue statistics
+export async function getRevenueStats() {
+  const revenue = await getAllRevenue();
+  
+  // Calculate total revenue
+  const totalRevenue = revenue.reduce((sum, entry) => sum + entry.amount, 0);
+  
+  // Get revenue by type
+  const revenueByType = revenue.reduce((acc, entry) => {
+    acc[entry.type] = (acc[entry.type] || 0) + entry.amount;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Get revenue by status
+  const revenueByStatus = revenue.reduce((acc, entry) => {
+    acc[entry.status] = (acc[entry.status] || 0) + entry.amount;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Get recent revenue (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentRevenue = revenue.filter(
+    entry => new Date(entry.date) >= thirtyDaysAgo
+  );
+  
+  // Calculate monthly breakdown (last 12 months)
+  const monthlyRevenue: Record<string, number> = {};
+  const now = new Date();
+  
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(now);
+    date.setMonth(now.getMonth() - i);
+    const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    monthlyRevenue[yearMonth] = 0;
+  }
+  
+  revenue.forEach(entry => {
     const entryDate = new Date(entry.date);
-    const entryYear = entryDate.getFullYear();
-    
-    if (entryYear !== year) return false;
-    if (month && entryDate.getMonth() + 1 !== month) return false;
-    
-    return true;
+    const yearMonth = `${entryDate.getFullYear()}-${(entryDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    if (monthlyRevenue[yearMonth] !== undefined) {
+      monthlyRevenue[yearMonth] += entry.amount;
+    }
   });
-  
-  // Total revenue for the period
-  const total = filtered.reduce((sum, entry) => sum + entry.amount, 0);
-  
-  // Revenue by category
-  const categoryTotals: Record<string, number> = {};
-  filtered.forEach(entry => {
-    categoryTotals[entry.category] = (categoryTotals[entry.category] || 0) + entry.amount;
-  });
-  
-  // Revenue by source
-  const sourceTotals: Record<string, number> = {};
-  filtered.forEach(entry => {
-    sourceTotals[entry.source] = (sourceTotals[entry.source] || 0) + entry.amount;
-  });
-  
-  // Recurring vs non-recurring
-  const recurring = filtered
-    .filter(entry => entry.recurring)
-    .reduce((sum, entry) => sum + entry.amount, 0);
-  
-  const nonRecurring = total - recurring;
   
   return {
-    total,
-    categoryTotals,
-    sourceTotals,
-    recurring,
-    nonRecurring,
-    entries: filtered.length
+    total: totalRevenue,
+    byType: revenueByType,
+    byStatus: revenueByStatus,
+    recent: recentRevenue,
+    monthly: monthlyRevenue,
   };
 }
 
-/**
- * Get goal progress information
- * @param goalId ID of the goal to check progress for
- * @returns Object containing goal progress information
- */
-export function getGoalProgress(goalId: string) {
-  const goal = getRevenueGoalById(goalId);
-  if (!goal) return null;
-  
-  let relevant: RevenueEntry[] = [];
-  const now = new Date();
-  
-  // Determine the date range based on the goal period
-  if (goal.period === 'monthly') {
-    // Current month's entries
-    relevant = revenueEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate.getMonth() === now.getMonth() && 
-             entryDate.getFullYear() === now.getFullYear();
-    });
-  } else if (goal.period === 'quarterly') {
-    // Current quarter's entries
-    const currentQuarter = Math.floor(now.getMonth() / 3);
-    relevant = revenueEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      const entryQuarter = Math.floor(entryDate.getMonth() / 3);
-      return entryQuarter === currentQuarter && 
-             entryDate.getFullYear() === now.getFullYear();
-    });
-  } else if (goal.period === 'yearly') {
-    // Current year's entries
-    relevant = revenueEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate.getFullYear() === now.getFullYear();
-    });
-  }
-  
-  // Calculate the current amount and percentage
-  const current = relevant.reduce((sum, entry) => sum + entry.amount, 0);
-  const percentage = Math.min(Math.round((current / goal.target) * 100), 100);
-  
+// Create an empty revenue entry (for form initialization)
+export function createEmptyRevenue(): Revenue {
   return {
-    name: goal.name,
-    target: goal.target,
-    current,
-    percentage,
-    remaining: Math.max(goal.target - current, 0)
+    id: '',
+    projectId: '',
+    amount: 0,
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+    type: 'invoice',
+    status: 'paid',
+    visibility: 'private',
   };
 } 

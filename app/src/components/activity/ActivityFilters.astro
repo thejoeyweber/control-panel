@@ -30,7 +30,9 @@ const activityTypeLabels = {
       <select id="project-filter" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
         <option value="all">All Projects</option>
         {projects.map(project => (
-          <option value={project}>{project.replace(/-/g, ' ')}</option>
+          <option value={typeof project === 'object' ? project.id : project}>
+            {typeof project === 'object' ? project.name : project.replace(/-/g, ' ')}
+          </option>
         ))}
       </select>
     </div>

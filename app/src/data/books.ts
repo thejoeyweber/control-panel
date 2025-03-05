@@ -1,176 +1,267 @@
 /*
   File: src/data/books.ts
-  Purpose: Provides book data for the control panel
-  Dependencies: Book type from types/index.ts
+  Purpose: Data service for books with CRUD operations
+  Dependencies: fs for file operations, uuid for ID generation
 */
 
+import { promises as fs } from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import type { Book } from '../types';
-import { isAuthenticated } from '../utils/auth';
-import * as dataUtils from '../utils/data';
 
-// Sample books data
-export const books: Book[] = [
-  {
-    id: 'atomic-habits',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    category: 'Self-Improvement',
-    status: 'completed',
-    startedDate: '2023-09-10',
-    completedDate: '2023-10-05',
-    format: 'physical',
-    notes: 'Excellent book on habit formation. Key takeaway: focus on systems, not goals.',
-    rating: 5,
-    tags: ['productivity', 'habits', 'psychology'],
-    coverUrl: 'https://covers.openlibrary.org/b/id/10706949-L.jpg',
-    purchaseUrl: 'https://www.amazon.com/Atomic-Habits-Proven-Build-Break/dp/0735211299',
-    visibility: 'public'
-  },
-  {
-    id: 'accelerate',
-    title: 'Accelerate: Building and Scaling High Performing Technology Organizations',
-    author: 'Nicole Forsgren, Jez Humble, Gene Kim',
-    category: 'Technology',
-    status: 'reading',
-    startedDate: '2023-11-20',
-    format: 'ebook',
-    tags: ['devops', 'leadership', 'technology'],
-    coverUrl: 'https://covers.openlibrary.org/b/id/8765809-L.jpg',
-    visibility: 'public'
-  },
-  {
-    id: 'design-everyday-things',
-    title: 'The Design of Everyday Things',
-    author: 'Don Norman',
-    category: 'Design',
-    status: 'completed',
-    startedDate: '2023-07-05',
-    completedDate: '2023-08-10',
-    format: 'physical',
-    notes: 'Changed how I think about user experience and product design.',
-    rating: 4,
-    tags: ['design', 'user-experience', 'psychology'],
-    coverUrl: 'https://covers.openlibrary.org/b/id/8232890-L.jpg',
-    visibility: 'public'
-  },
-  {
-    id: 'deep-work',
-    title: 'Deep Work: Rules for Focused Success in a Distracted World',
-    author: 'Cal Newport',
-    category: 'Productivity',
-    status: 'to-read',
-    format: 'audiobook',
-    tags: ['productivity', 'focus', 'work'],
-    visibility: 'private'
-  },
-  {
-    id: 'thinking-fast-slow',
-    title: 'Thinking, Fast and Slow',
-    author: 'Daniel Kahneman',
-    category: 'Psychology',
-    status: 'reading',
-    startedDate: '2023-12-01',
-    format: 'physical',
-    tags: ['psychology', 'decision-making', 'behavioral-economics'],
-    coverUrl: 'https://covers.openlibrary.org/b/id/7089298-L.jpg',
-    visibility: 'private'
-  },
-  {
-    id: 'pragmatic-programmer',
-    title: 'The Pragmatic Programmer',
-    author: 'Andrew Hunt, David Thomas',
-    category: 'Programming',
-    status: 'completed',
-    startedDate: '2023-06-15',
-    completedDate: '2023-07-20',
-    format: 'ebook',
-    notes: 'A classic that still holds up today. Great practical advice for software developers.',
-    rating: 5,
-    tags: ['programming', 'software-development', 'career'],
-    coverUrl: 'https://covers.openlibrary.org/b/id/8410975-L.jpg',
-    visibility: 'public'
-  }
-];
+// Define the path to the books data file
+const dataFilePath = path.join(process.cwd(), 'src', 'data', 'books.json');
 
 /**
- * Get books filtered by visibility
- * @returns Array of books visible to the user
+ * Ensures the data file exists, creates it with empty array if it doesn't
  */
-export function getVisibleBooks(): Book[] {
-  return dataUtils.getVisibleContent(books, isAuthenticated());
+async function ensureDataFileExists(): Promise<void> {
+  try {
+    await fs.access(dataFilePath);
+  } catch (error) {
+    // File doesn't exist, create it with an empty array
+    await fs.writeFile(dataFilePath, JSON.stringify([], null, 2));
+  }
 }
 
 /**
- * Get a book by its ID
- * @param id The book ID to find
- * @returns The book or undefined if not found
+ * Get all books
+ * @returns {Promise<Book[]>} Array of all books
  */
-export function getBookById(id: string): Book | undefined {
-  return dataUtils.getItemById(books, id);
+export async function getAllBooks(): Promise<Book[]> {
+  await ensureDataFileExists();
+  const data = await fs.readFile(dataFilePath, 'utf-8');
+  return JSON.parse(data);
+}
+
+/**
+ * Get books by category
+ * @param {string} category - The category to filter by
+ * @returns {Promise<Book[]>} Array of books in the specified category
+ */
+export async function getBooksByCategory(category: string): Promise<Book[]> {
+  const books = await getAllBooks();
+  return books.filter(book => book.category === category);
+}
+
+/**
+ * Get books by status
+ * @param {string} status - The status to filter by
+ * @returns {Promise<Book[]>} Array of books with the specified status
+ */
+export async function getBooksByStatus(status: string): Promise<Book[]> {
+  const books = await getAllBooks();
+  return books.filter(book => book.status === status);
+}
+
+/**
+ * Get a book by ID
+ * @param {string} id - The ID of the book to retrieve
+ * @returns {Promise<Book|null>} The book or null if not found
+ */
+export async function getBookById(id: string): Promise<Book | null> {
+  const books = await getAllBooks();
+  return books.find(book => book.id === id) || null;
+}
+
+/**
+ * Create a new book
+ * @param {Partial<Book>} bookData - The book data
+ * @returns {Promise<Book>} The created book
+ */
+export async function createBook(bookData: Partial<Book>): Promise<Book> {
+  await ensureDataFileExists();
+  
+  const books = await getAllBooks();
+  
+  // Create a new book with default values and provided data
+  const newBook: Book = {
+    id: uuidv4(),
+    title: '',
+    author: '',
+    category: '',
+    status: 'to-read',
+    format: 'physical',
+    tags: [],
+    rating: 0,
+    visibility: 'private',
+    ...bookData
+  };
+  
+  // Add the new book to the array
+  books.push(newBook);
+  
+  // Save the updated books array
+  await fs.writeFile(dataFilePath, JSON.stringify(books, null, 2));
+  
+  return newBook;
+}
+
+/**
+ * Update an existing book
+ * @param {string} id - The ID of the book to update
+ * @param {Partial<Book>} bookData - The updated book data
+ * @returns {Promise<Book|null>} The updated book or null if not found
+ */
+export async function updateBook(id: string, bookData: Partial<Book>): Promise<Book | null> {
+  await ensureDataFileExists();
+  
+  const books = await getAllBooks();
+  
+  // Find the index of the book to update
+  const index = books.findIndex(book => book.id === id);
+  
+  // If the book doesn't exist, return null
+  if (index === -1) {
+    return null;
+  }
+  
+  // Update the book with the provided data
+  books[index] = {
+    ...books[index],
+    ...bookData,
+    id // Ensure ID doesn't change
+  };
+  
+  // Save the updated books array
+  await fs.writeFile(dataFilePath, JSON.stringify(books, null, 2));
+  
+  return books[index];
+}
+
+/**
+ * Delete a book
+ * @param {string} id - The ID of the book to delete
+ * @returns {Promise<boolean>} True if the book was deleted, false if not found
+ */
+export async function deleteBook(id: string): Promise<boolean> {
+  await ensureDataFileExists();
+  
+  const books = await getAllBooks();
+  
+  // Find the index of the book to delete
+  const index = books.findIndex(book => book.id === id);
+  
+  // If the book doesn't exist, return false
+  if (index === -1) {
+    return false;
+  }
+  
+  // Remove the book from the array
+  books.splice(index, 1);
+  
+  // Save the updated books array
+  await fs.writeFile(dataFilePath, JSON.stringify(books, null, 2));
+  
+  return true;
+}
+
+/**
+ * Search books by query
+ * @param {string} query - The search query
+ * @returns {Promise<Book[]>} Array of books matching the query
+ */
+export async function searchBooks(query: string): Promise<Book[]> {
+  const books = await getAllBooks();
+  const lowerQuery = query.toLowerCase();
+  
+  return books.filter(book => 
+    book.title.toLowerCase().includes(lowerQuery) ||
+    book.author.toLowerCase().includes(lowerQuery) ||
+    book.category.toLowerCase().includes(lowerQuery) ||
+    book.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+    (book.notes && book.notes.toLowerCase().includes(lowerQuery))
+  );
 }
 
 /**
  * Get book statistics
- * @returns Object containing book statistics
+ * @returns {Promise<Object>} Object containing book statistics
  */
-export function getBookStats() {
-  const total = books.length;
+export async function getBookStats(): Promise<{
+  total: number;
+  byStatus: Record<string, number>;
+  byCategory: Record<string, number>;
+  byFormat: Record<string, number>;
+  completedThisYear: number;
+  averageRating: number;
+  topTags: { tag: string; count: number }[];
+}> {
+  const books = await getAllBooks();
   
-  // Count by status
-  const statusCounts = dataUtils.countByProperty(books, 'status');
+  // Count books by status
+  const byStatus: Record<string, number> = {};
+  books.forEach(book => {
+    byStatus[book.status] = (byStatus[book.status] || 0) + 1;
+  });
   
-  // Count by category
-  const categoryCounts = dataUtils.countByProperty(books, 'category');
+  // Count books by category
+  const byCategory: Record<string, number> = {};
+  books.forEach(book => {
+    if (book.category) {
+      byCategory[book.category] = (byCategory[book.category] || 0) + 1;
+    }
+  });
   
-  // Count by format
-  const formatCounts = dataUtils.countByProperty(books, 'format');
+  // Count books by format
+  const byFormat: Record<string, number> = {};
+  books.forEach(book => {
+    byFormat[book.format] = (byFormat[book.format] || 0) + 1;
+  });
   
-  // Calculate average rating for read books
-  const completedBooks = books.filter(book => book.status === 'completed' && book.rating);
-  const totalRating = completedBooks.reduce((sum, book) => sum + (book.rating || 0), 0);
-  const averageRating = completedBooks.length > 0 ? 
-    (totalRating / completedBooks.length).toFixed(1) : 
-    'N/A';
+  // Count completed books this year
+  const currentYear = new Date().getFullYear();
+  const completedThisYear = books.filter(book => {
+    if (book.status === 'completed' && book.completedDate) {
+      const completedYear = new Date(book.completedDate).getFullYear();
+      return completedYear === currentYear;
+    }
+    return false;
+  }).length;
+  
+  // Calculate average rating for completed books
+  const completedBooks = books.filter(book => book.status === 'completed' && book.rating > 0);
+  const totalRating = completedBooks.reduce((sum, book) => sum + book.rating, 0);
+  const averageRating = completedBooks.length > 0 ? totalRating / completedBooks.length : 0;
+  
+  // Count tag occurrences
+  const tagCounts: Record<string, number> = {};
+  books.forEach(book => {
+    book.tags.forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  });
+  
+  // Convert tag counts to array and sort by count
+  const topTags = Object.entries(tagCounts)
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
   
   return {
-    total,
-    reading: statusCounts['reading'] || 0,
-    completed: statusCounts['completed'] || 0,
-    toRead: statusCounts['to-read'] || 0,
-    abandoned: statusCounts['abandoned'] || 0,
-    categoryCounts,
-    formatCounts,
-    averageRating
+    total: books.length,
+    byStatus,
+    byCategory,
+    byFormat,
+    completedThisYear,
+    averageRating,
+    topTags
   };
 }
 
 /**
- * Get recently updated books
- * @param limit Number of items to return (default: 5)
- * @returns Array of books sorted by status (reading first) and then by start or completion date
+ * Create an empty book for form initialization
+ * @returns {Book} An empty book with default values
  */
-export function getRecentBooks(limit: number = 5): Book[] {
-  const visibleBooks = getVisibleBooks();
-  
-  // Sort with custom sorting logic: reading books first, then by start/completion date
-  const sortedBooks = [...visibleBooks].sort((a, b) => {
-    // Reading books go first
-    if (a.status === 'reading' && b.status !== 'reading') return -1;
-    if (a.status !== 'reading' && b.status === 'reading') return 1;
-    
-    // Then completed books, sorted by completion date
-    if (a.status === 'completed' && b.status === 'completed') {
-      return new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime();
-    }
-    
-    // Then sort by started date if available
-    if (a.startedDate && b.startedDate) {
-      return new Date(b.startedDate).getTime() - new Date(a.startedDate).getTime();
-    }
-    
-    // Fall back to alphabetical by title
-    return a.title.localeCompare(b.title);
-  });
-  
-  return sortedBooks.slice(0, limit);
+export function createEmptyBook(): Book {
+  return {
+    id: '',
+    title: '',
+    author: '',
+    category: '',
+    status: 'to-read',
+    format: 'physical',
+    tags: [],
+    rating: 0,
+    visibility: 'private'
+  };
 } 

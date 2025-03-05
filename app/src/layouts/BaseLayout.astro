@@ -6,6 +6,7 @@
 */
 
 import '../styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
 
 export interface Props {
   title: string;
@@ -56,6 +57,8 @@ const navGroups = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - Control Panel</title>
+    <!-- Add ViewTransitions for smooth page navigation -->
+    <ViewTransitions />
     <!-- Preload fonts to prevent FOUT (Flash of Unstyled Text) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" as="style">
@@ -84,7 +87,7 @@ const navGroups = [
       }
       
       .nav-dropdown-content {
-        display: none;
+        display: block;
         position: absolute;
         background-color: white;
         min-width: 180px;
@@ -93,10 +96,29 @@ const navGroups = [
         border-radius: 0.5rem;
         padding: 0.5rem 0;
         margin-top: 0.25rem;
+        transition: opacity 0.3s, visibility 0.3s;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition-delay: 0.3s;
       }
       
       .nav-dropdown:hover .nav-dropdown-content {
         display: block;
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+        pointer-events: auto;
+      }
+      
+      /* Create a larger hover area that includes the dropdown content */
+      .nav-dropdown::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: 20px; /* This creates an invisible extension to keep hover active */
       }
       
       /* Prevent line breaks in specific text */

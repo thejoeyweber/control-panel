@@ -2,350 +2,426 @@
 /*
   File: src/pages/books.astro
   Purpose: Displays user's book collection, reading progress, and wishlists
-  Dependencies: BaseLayout, books data
+  Dependencies: Layout, BookForm for creating/editing books
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleBooks, getBookStats } from '../data/books';
+import Modal from '../components/Modal.astro';
+import BookForm from '../components/books/BookForm.astro';
+import Toast from '../components/Toast.astro';
+import { isAuthenticated } from '../utils/auth';
+import { getAllBooks, getBookStats, createEmptyBook, getBookById } from '../data/books';
 
-// Get visible books and stats
-const books = getVisibleBooks();
-const stats = getBookStats();
+// Get the authenticated status
+const authenticated = isAuthenticated();
 
-// Filter books by status
-const reading = books.filter(book => book.status === 'reading');
-const toRead = books.filter(book => book.status === 'to-read');
-const completed = books.filter(book => book.status === 'completed');
+// Get books and stats
+const books = await getAllBooks();
+const stats = await getBookStats();
+
+// Check for success/error messages from form submission
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get('success');
+const error = url.searchParams.get('error');
+const editId = url.searchParams.get('edit');
+
+// If editing, get the book
+let editingBook = null;
+if (editId) {
+  editingBook = await getBookById(editId);
+}
+
+// Group books by status
+const readingBooks = books.filter(book => book.status === 'reading');
+const completedBooks = books.filter(book => book.status === 'completed');
+const toReadBooks = books.filter(book => book.status === 'to-read');
+const abandonedBooks = books.filter(book => book.status === 'abandoned');
+
+// Function to render star rating
+function renderStarRating(rating) {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+// Function to get status badge color
+function getStatusColor(status) {
+  switch (status) {
+    case 'reading': return 'bg-blue-500';
+    case 'completed': return 'bg-green-500';
+    case 'to-read': return 'bg-yellow-500';
+    case 'abandoned': return 'bg-gray-500';
+    default: return 'bg-gray-500';
+  }
+}
+
+// Function to get status display name
+function getStatusLabel(status) {
+  switch (status) {
+    case 'reading': return 'Reading';
+    case 'completed': return 'Completed';
+    case 'to-read': return 'To Read';
+    case 'abandoned': return 'Abandoned';
+    default: return status;
+  }
+}
 ---
 
-<BaseLayout title="Books" activePage="books">
-  <div class="container mx-auto px-4">
+<BaseLayout title="Books | Control Panel" activePage="books">
+  <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-      <h1 class="text-3xl font-bold mb-4 md:mb-0">Books</h1>
-      <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Books</h1>
+      <button 
+        id="add-book-btn" 
+        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors flex items-center"
+      >
         <i class="ri-add-line mr-1"></i> Add Book
       </button>
     </div>
     
+    <!-- Success/Error Messages -->
+    {success && <Toast type="success" message={success} />}
+    {error && <Toast type="error" message={error} />}
+    
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Currently Reading</h3>
-        <p class="text-2xl font-bold">{stats.reading}</p>
+      <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="text-lg font-medium text-gray-700">Reading</h3>
+        <p class="text-3xl font-bold text-blue-600">{stats.byStatus.reading || 0}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Books Read</h3>
-        <p class="text-2xl font-bold">{stats.completed}</p>
+      <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="text-lg font-medium text-gray-700">Completed</h3>
+        <p class="text-3xl font-bold text-green-600">{stats.byStatus.completed || 0}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Total Collection</h3>
-        <p class="text-2xl font-bold">{stats.total}</p>
+      <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="text-lg font-medium text-gray-700">To Read</h3>
+        <p class="text-3xl font-bold text-yellow-600">{stats.byStatus['to-read'] || 0}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">On Wishlist</h3>
-        <p class="text-2xl font-bold">{stats.toRead}</p>
-      </div>
-    </div>
-    
-    <!-- Reading Progress -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Current Reading Progress</h3>
-        <button class="text-highlight hover:underline text-sm">Update Progress</button>
-      </div>
-      
-      <div class="divide-y">
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex items-start gap-4">
-            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
-              <img src="https://placehold.co/120x160/e0f2fe/1e40af?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
-            </div>
-            <div class="flex-grow">
-              <h4 class="font-semibold">Atomic Habits</h4>
-              <p class="text-xs text-light-ink">James Clear • 320 pages</p>
-              <div class="flex justify-between text-xs mt-2 mb-1">
-                <span>Progress</span>
-                <span>245/320 pages (76%)</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-highlight h-2 rounded-full" style="width: 76%"></div>
-              </div>
-              <p class="text-xs text-light-ink mt-2">Last read: Yesterday</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex items-start gap-4">
-            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
-              <img src="https://placehold.co/120x160/f0fdf4/166534?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
-            </div>
-            <div class="flex-grow">
-              <h4 class="font-semibold">The Pragmatic Programmer</h4>
-              <p class="text-xs text-light-ink">Andrew Hunt, David Thomas • 352 pages</p>
-              <div class="flex justify-between text-xs mt-2 mb-1">
-                <span>Progress</span>
-                <span>140/352 pages (40%)</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-highlight h-2 rounded-full" style="width: 40%"></div>
-              </div>
-              <p class="text-xs text-light-ink mt-2">Last read: 3 days ago</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex items-start gap-4">
-            <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0">
-              <img src="https://placehold.co/120x160/fef2f2/991b1b?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover rounded" />
-            </div>
-            <div class="flex-grow">
-              <h4 class="font-semibold">The Psychology of Money</h4>
-              <p class="text-xs text-light-ink">Morgan Housel • 256 pages</p>
-              <div class="flex justify-between text-xs mt-2 mb-1">
-                <span>Progress</span>
-                <span>52/256 pages (20%)</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-highlight h-2 rounded-full" style="width: 20%"></div>
-              </div>
-              <p class="text-xs text-light-ink mt-2">Last read: Today</p>
-            </div>
-          </div>
-        </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="text-lg font-medium text-gray-700">Total Collection</h3>
+        <p class="text-3xl font-bold text-primary">{stats.total}</p>
       </div>
     </div>
     
-    <!-- Filter Controls -->
-    <div class="bg-paper border border-gray-200 rounded-lg p-4 mb-8">
+    <!-- Reading Progress (Currently Reading Books) -->
+    {readingBooks.length > 0 && (
+      <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+          <h3 class="text-lg font-bold text-gray-800">Currently Reading</h3>
+        </div>
+        
+        <div class="divide-y">
+          {readingBooks.map(book => (
+            <div class="p-4 hover:bg-gray-50 book-item" data-id={book.id} data-status={book.status} data-category={book.category}>
+              <div class="flex items-start gap-4">
+                <div class="w-16 h-20 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+                  {book.coverUrl ? (
+                    <img src={book.coverUrl} alt={`Cover of ${book.title}`} class="w-full h-full object-cover" />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-500 text-xs text-center p-1">
+                      No Cover
+                    </div>
+                  )}
+                </div>
+                <div class="flex-grow">
+                  <div class="flex justify-between">
+                    <h4 class="font-semibold">{book.title}</h4>
+                    <button 
+                      class="text-primary hover:text-primary-dark text-sm edit-book-btn"
+                      data-id={book.id}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <p class="text-xs text-gray-500">{book.author}</p>
+                  <div class="mt-2 text-xs text-yellow-500">
+                    {book.rating ? renderStarRating(book.rating) : 'Not rated'}
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">Started: {book.startedDate ? new Date(book.startedDate).toLocaleDateString() : 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+    
+    <!-- Books Filter -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-4 mb-8">
       <div class="flex flex-wrap gap-4">
         <div>
-          <label class="block text-sm text-light-ink mb-1">Category</label>
-          <select class="border rounded px-3 py-2 w-full">
-            <option>All Categories</option>
-            <option>Fiction</option>
-            <option>Non-Fiction</option>
-            <option>Technical</option>
-            <option>Business</option>
-            <option>Self-Improvement</option>
-            <option>Philosophy</option>
+          <label class="block text-sm text-gray-600 mb-1">Category</label>
+          <select id="category-filter" class="category-filter border rounded px-3 py-2 w-full">
+            <option value="">All Categories</option>
+            {
+              [...new Set(books.map(book => book.category).filter(Boolean))]
+                .sort()
+                .map(category => (
+                  <option value={category}>{category}</option>
+                ))
+            }
           </select>
         </div>
         <div>
-          <label class="block text-sm text-light-ink mb-1">Status</label>
-          <select class="border rounded px-3 py-2 w-full">
-            <option>All</option>
-            <option>Reading</option>
-            <option>Completed</option>
-            <option>To Read</option>
-            <option>Wish List</option>
+          <label class="block text-sm text-gray-600 mb-1">Status</label>
+          <select id="status-filter" class="status-filter border rounded px-3 py-2 w-full">
+            <option value="">All Status</option>
+            <option value="reading">Reading</option>
+            <option value="completed">Completed</option>
+            <option value="to-read">To Read</option>
+            <option value="abandoned">Abandoned</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm text-light-ink mb-1">Rating</label>
-          <select class="border rounded px-3 py-2 w-full">
-            <option>Any Rating</option>
-            <option>⭐⭐⭐⭐⭐</option>
-            <option>⭐⭐⭐⭐ & up</option>
-            <option>⭐⭐⭐ & up</option>
+          <label class="block text-sm text-gray-600 mb-1">Format</label>
+          <select id="format-filter" class="format-filter border rounded px-3 py-2 w-full">
+            <option value="">All Formats</option>
+            <option value="physical">Physical</option>
+            <option value="ebook">E-Book</option>
+            <option value="audiobook">Audiobook</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm text-light-ink mb-1">Search</label>
-          <input type="text" placeholder="Search books..." class="border rounded px-3 py-2 w-full" />
+        <div class="flex-1">
+          <label class="block text-sm text-gray-600 mb-1">Search</label>
+          <input type="text" id="search-input" placeholder="Search books..." class="border rounded px-3 py-2 w-full" />
         </div>
-        <div class="flex-1"></div>
         <div class="flex items-end">
-          <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-            Apply Filters
+          <button id="reset-filters" class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors">
+            Reset
           </button>
         </div>
       </div>
     </div>
     
-    <!-- Book Collection -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
-      <!-- Book 1 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/e0f2fe/1e40af?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              ⭐⭐⭐⭐⭐
+    <!-- Book Collection Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8" id="books-grid">
+      {books.length === 0 ? (
+        <div class="col-span-6 text-center py-8 text-gray-500">
+          <p>No books found. Click "Add Book" to create your first book entry.</p>
+        </div>
+      ) : (
+        books.map(book => (
+          <div 
+            class="group book-item" 
+            data-id={book.id}
+            data-status={book.status}
+            data-category={book.category}
+            data-format={book.format}
+          >
+            <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow hover:shadow-md transition-shadow">
+              {book.coverUrl ? (
+                <img src={book.coverUrl} alt={`Cover of ${book.title}`} class="w-full h-full object-cover" />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 p-4 text-center">
+                  {book.title}
+                </div>
+              )}
+              
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                <div class="text-yellow-400 text-xs">
+                  {book.rating ? renderStarRating(book.rating) : '☆☆☆☆☆'}
+                </div>
+              </div>
+              
+              <div class="absolute top-2 right-2">
+                <span class={`${getStatusColor(book.status)} text-white text-xs px-2 py-0.5 rounded-full`}>
+                  {getStatusLabel(book.status)}
+                </span>
+              </div>
+              
+              <div class="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  class="bg-white text-primary p-1 rounded-full shadow hover:bg-gray-100 edit-book-btn"
+                  data-id={book.id}
+                >
+                  ✏️
+                </button>
+              </div>
             </div>
+            
+            <h4 class="font-medium text-sm truncate">{book.title}</h4>
+            <p class="text-xs text-gray-500 truncate">{book.author}</p>
           </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">Atomic Habits</h4>
-        <p class="text-xs text-light-ink truncate">James Clear</p>
-      </div>
-      
-      <!-- Book 2 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/f0fdf4/166534?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              ⭐⭐⭐⭐
-            </div>
-          </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">Reading</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">The Pragmatic Programmer</h4>
-        <p class="text-xs text-light-ink truncate">Andrew Hunt, David Thomas</p>
-      </div>
-      
-      <!-- Book 3 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/fef2f2/991b1b?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              ⭐⭐⭐⭐⭐
-            </div>
-          </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">Reading</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">The Psychology of Money</h4>
-        <p class="text-xs text-light-ink truncate">Morgan Housel</p>
-      </div>
-      
-      <!-- Book 4 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/eff6ff/1e3a8a?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              ⭐⭐⭐⭐
-            </div>
-          </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">Deep Work</h4>
-        <p class="text-xs text-light-ink truncate">Cal Newport</p>
-      </div>
-      
-      <!-- Book 5 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/f0fdfa/134e4a?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              ⭐⭐⭐⭐⭐
-            </div>
-          </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Completed</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">Designing Data-Intensive Applications</h4>
-        <p class="text-xs text-light-ink truncate">Martin Kleppmann</p>
-      </div>
-      
-      <!-- Book 6 -->
-      <div class="group">
-        <div class="relative aspect-[2/3] bg-gray-200 rounded-lg overflow-hidden mb-2 shadow-card group-hover:shadow-lg transition-shadow">
-          <img src="https://placehold.co/240x360/faf5ff/5b21b6?text=Book+Cover" alt="Book cover" class="w-full h-full object-cover" />
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-            <div class="text-amber-400 text-xs">
-              Not rated
-            </div>
-          </div>
-          <div class="absolute top-2 right-2">
-            <span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">To Read</span>
-          </div>
-        </div>
-        <h4 class="font-medium text-sm truncate">Four Thousand Weeks</h4>
-        <p class="text-xs text-light-ink truncate">Oliver Burkeman</p>
-      </div>
-      
-    </div>
-    
-    <!-- Reading Challenges -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Reading Challenges</h3>
-        <button class="text-highlight hover:underline text-sm">View All</button>
-      </div>
-      
-      <div class="divide-y">
-        <div class="p-4">
-          <h4 class="font-semibold">2025 Reading Goal</h4>
-          <p class="text-sm text-light-ink mb-2">Read 24 books in 2025</p>
-          <div class="flex justify-between text-xs mb-1">
-            <span>Progress</span>
-            <span>7/24 books (29%)</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-highlight h-2 rounded-full" style="width: 29%"></div>
-          </div>
-          <p class="text-xs text-light-ink mt-2">On track: 2 books ahead of schedule</p>
-        </div>
-        <div class="p-4">
-          <h4 class="font-semibold">Technical Reading</h4>
-          <p class="text-sm text-light-ink mb-2">Read 10 technical books this year</p>
-          <div class="flex justify-between text-xs mb-1">
-            <span>Progress</span>
-            <span>3/10 books (30%)</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-highlight h-2 rounded-full" style="width: 30%"></div>
-          </div>
-        </div>
-        <div class="p-4">
-          <h4 class="font-semibold">Author Diversity</h4>
-          <p class="text-sm text-light-ink mb-2">Read books from 12 different countries</p>
-          <div class="flex justify-between text-xs mb-1">
-            <span>Progress</span>
-            <span>4/12 countries (33%)</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-highlight h-2 rounded-full" style="width: 33%"></div>
-          </div>
-        </div>
-      </div>
+        ))
+      )}
     </div>
     
     <!-- Reading Lists -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden">
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Reading Lists</h3>
-        <button class="text-highlight hover:underline text-sm">Manage Lists</button>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- To Read List -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-yellow-500 text-white p-3">
+          <h3 class="font-bold">To Read List ({toReadBooks.length})</h3>
+        </div>
+        <div class="divide-y max-h-80 overflow-y-auto">
+          {toReadBooks.length === 0 ? (
+            <div class="p-4 text-center text-gray-500">
+              <p>Your reading list is empty.</p>
+            </div>
+          ) : (
+            toReadBooks.map(book => (
+              <div class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                <div>
+                  <h4 class="font-medium text-sm">{book.title}</h4>
+                  <p class="text-xs text-gray-500">{book.author}</p>
+                </div>
+                <button 
+                  class="text-primary hover:text-primary-dark text-sm edit-book-btn"
+                  data-id={book.id}
+                >
+                  Edit
+                </button>
+              </div>
+            ))
+          )}
+        </div>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-          <h4 class="font-semibold mb-1">Technical Growth</h4>
-          <p class="text-xs text-light-ink mb-2">12 books • Last updated Mar 1, 2025</p>
-          <div class="flex justify-between text-xs">
-            <span>3 currently reading</span>
-            <span>5 completed</span>
-          </div>
+      <!-- Recently Completed -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-green-500 text-white p-3">
+          <h3 class="font-bold">Recently Completed ({completedBooks.length})</h3>
         </div>
-        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-          <h4 class="font-semibold mb-1">Productivity & Focus</h4>
-          <p class="text-xs text-light-ink mb-2">8 books • Last updated Feb 15, 2025</p>
-          <div class="flex justify-between text-xs">
-            <span>0 currently reading</span>
-            <span>6 completed</span>
-          </div>
-        </div>
-        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-          <h4 class="font-semibold mb-1">Spring 2025 Reading</h4>
-          <p class="text-xs text-light-ink mb-2">6 books • Last updated Mar 10, 2025</p>
-          <div class="flex justify-between text-xs">
-            <span>2 currently reading</span>
-            <span>1 completed</span>
-          </div>
+        <div class="divide-y max-h-80 overflow-y-auto">
+          {completedBooks.length === 0 ? (
+            <div class="p-4 text-center text-gray-500">
+              <p>You haven't completed any books yet.</p>
+            </div>
+          ) : (
+            completedBooks.slice(0, 5).map(book => (
+              <div class="p-3 hover:bg-gray-50">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-sm">{book.title}</h4>
+                  <div class="text-yellow-500 text-xs">
+                    {book.rating ? renderStarRating(book.rating) : 'Not rated'}
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500">{book.author}</p>
+                <p class="text-xs text-gray-500 mt-1">
+                  Completed: {book.completedDate ? new Date(book.completedDate).toLocaleDateString() : 'N/A'}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
   </div>
-</BaseLayout> 
+
+  <!-- Modal for Adding/Editing Books -->
+  <Modal id="book-modal" title={editingBook ? `Edit: ${editingBook.title}` : 'Add New Book'}>
+    <BookForm 
+      book={editingBook || createEmptyBook()} 
+      mode={editingBook ? 'edit' : 'create'} 
+    />
+  </Modal>
+</BaseLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.getElementById('add-book-btn');
+    const modal = document.getElementById('book-modal');
+    const closeButtons = modal?.querySelectorAll('.close-modal');
+    
+    // Open modal when Add Book button is clicked
+    addButton?.addEventListener('click', () => {
+      modal?.classList.remove('hidden');
+      // Clear edit parameter from URL if present
+      const url = new URL(window.location.href);
+      url.searchParams.delete('edit');
+      window.history.replaceState({}, '', url);
+    });
+    
+    // Close modal when close button is clicked
+    closeButtons?.forEach(button => {
+      button.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+      });
+    });
+    
+    // Handle edit buttons
+    const editButtons = document.querySelectorAll('.edit-book-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        if (id) {
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', id);
+          window.history.replaceState({}, '', url);
+          // Open modal
+          modal?.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Show modal if edit parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      modal?.classList.remove('hidden');
+    }
+    
+    // Filtering functionality
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const formatFilter = document.getElementById('format-filter');
+    const searchInput = document.getElementById('search-input');
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const bookItems = document.querySelectorAll('.book-item');
+    
+    function applyFilters() {
+      const categoryValue = categoryFilter?.value.toLowerCase();
+      const statusValue = statusFilter?.value.toLowerCase();
+      const formatValue = formatFilter?.value.toLowerCase();
+      const searchValue = searchInput?.value.toLowerCase();
+      
+      bookItems.forEach(item => {
+        const category = item.getAttribute('data-category')?.toLowerCase();
+        const status = item.getAttribute('data-status')?.toLowerCase();
+        const format = item.getAttribute('data-format')?.toLowerCase();
+        const itemContent = item.textContent?.toLowerCase();
+        
+        let showItem = true;
+        
+        // Apply category filter
+        if (categoryValue && category !== categoryValue) {
+          showItem = false;
+        }
+        
+        // Apply status filter
+        if (statusValue && status !== statusValue) {
+          showItem = false;
+        }
+        
+        // Apply format filter
+        if (formatValue && format !== formatValue) {
+          showItem = false;
+        }
+        
+        // Apply search filter
+        if (searchValue && itemContent && !itemContent.includes(searchValue)) {
+          showItem = false;
+        }
+        
+        // Show or hide item
+        item.style.display = showItem ? '' : 'none';
+      });
+    }
+    
+    // Add event listeners to filters
+    categoryFilter?.addEventListener('change', applyFilters);
+    statusFilter?.addEventListener('change', applyFilters);
+    formatFilter?.addEventListener('change', applyFilters);
+    searchInput?.addEventListener('input', applyFilters);
+    
+    // Reset filters
+    resetFiltersBtn?.addEventListener('click', () => {
+      if (categoryFilter) categoryFilter.value = '';
+      if (statusFilter) statusFilter.value = '';
+      if (formatFilter) formatFilter.value = '';
+      if (searchInput) searchInput.value = '';
+      
+      bookItems.forEach(item => {
+        item.style.display = '';
+      });
+    });
+  });
+</script> 

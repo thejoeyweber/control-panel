@@ -39,13 +39,13 @@ const formatDate = (dateString: string) => {
             <i class="ri-more-2-fill"></i>
           </button>
           <div class="dropdown-menu absolute right-0 mt-1 bg-white shadow-lg rounded-md py-1 w-40 z-10 hidden">
-            <a 
-              href={`/projects?edit=${project.id}`}
-              class="edit-project-btn flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            <button
+              type="button"
+              class="edit-project-btn flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
               data-id={project.id}
             >
               <i class="ri-edit-line mr-2"></i> Edit
-            </a>
+            </button>
             <form 
               method="post" 
               action={`/api/projects/${project.id}`} 
@@ -120,8 +120,8 @@ const formatDate = (dateString: string) => {
 </div>
 
 <script is:inline>
-  // Set up dropdowns for project cards
-  document.addEventListener('DOMContentLoaded', () => {
+  // Set up dropdowns for project cards - use astro:page-load for View Transitions compatibility
+  document.addEventListener('astro:page-load', () => {
     setupDropdowns();
   });
 
@@ -149,6 +149,33 @@ const formatDate = (dateString: string) => {
       menu.addEventListener('click', (e) => {
         e.stopPropagation();
       });
+      
+      // Better hover behavior with delay before hiding
+      let hideTimeout;
+      
+      // Show on hover
+      dropdown.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        menu.classList.remove('hidden');
+      });
+      
+      // Hide after delay when mouse leaves
+      dropdown.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 300); // 300ms delay before hiding
+      });
+      
+      // Keep menu open when hovering the menu itself
+      menu.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+      });
+      
+      menu.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 300);
+      });
     });
   }
 </script>
@@ -166,7 +193,27 @@ const formatDate = (dateString: string) => {
   /* Dropdown styles */
   .dropdown-menu {
     transform-origin: top right;
-    transition: opacity 0.1s ease, transform 0.1s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Add hover functionality as a fallback */
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  
+  /* Create a small delay before hiding */
+  .dropdown-menu.hidden {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition-delay: 0.05s;
+  }
+  
+  .dropdown-menu:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 </style> 

@@ -10,6 +10,8 @@ module.exports = {
         'ink': 'var(--color-ink)',
         'light-ink': 'var(--color-light-ink)',
         'highlight': 'var(--color-highlight)',
+        'primary': '#3b82f6', // Blue-500
+        'primary-dark': '#2563eb', // Blue-600
         'success': 'var(--color-success)',
         'warning': 'var(--color-warning)',
         'danger': 'var(--color-danger)',
