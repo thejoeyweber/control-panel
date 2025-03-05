@@ -50,26 +50,103 @@ Object.entries(projectCounts).forEach(([project, count]) => {
 const formattedProjectName = mostActiveProject.replace(/-/g, ' ');
 ---
 
-<div class="bg-white rounded-lg shadow-card p-6 mb-6">
+<div class="bg-white rounded-lg shadow-card p-6 mb-6" id="activity-stats">
   <h3 class="text-lg font-medium mb-4">Activity Summary</h3>
   
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="bg-blue-50 p-4 rounded-lg">
       <div class="text-sm text-blue-600 mb-1">Today</div>
-      <div class="text-3xl font-bold text-blue-800">{todayActivities.length}</div>
+      <div class="text-3xl font-bold text-blue-800" id="today-count">{todayActivities.length}</div>
       <div class="text-xs text-blue-600">Activity entries</div>
     </div>
     
     <div class="bg-green-50 p-4 rounded-lg">
       <div class="text-sm text-green-600 mb-1">This Week</div>
-      <div class="text-3xl font-bold text-green-800">{thisWeekActivities.length}</div>
+      <div class="text-3xl font-bold text-green-800" id="week-count">{thisWeekActivities.length}</div>
       <div class="text-xs text-green-600">Activity entries</div>
     </div>
     
     <div class="bg-purple-50 p-4 rounded-lg">
       <div class="text-sm text-purple-600 mb-1">Most Active Project</div>
-      <div class="text-2xl font-bold text-purple-800 truncate">{formattedProjectName || 'None'}</div>
-      <div class="text-xs text-purple-600">{maxCount} entries total</div>
+      <div class="text-2xl font-bold text-purple-800 truncate" id="active-project">{formattedProjectName || 'None'}</div>
+      <div class="text-xs text-purple-600"><span id="project-count">{maxCount}</span> entries total</div>
     </div>
   </div>
-</div> 
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Function to calculate activity stats from activities
+    function updateActivityStats(activities) {
+      // Skip if no stats elements
+      if (!document.getElementById('today-count') || 
+          !document.getElementById('week-count') || 
+          !document.getElementById('active-project') || 
+          !document.getElementById('project-count')) {
+        return;
+      }
+      
+      // Get today and this week dates
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+      
+      // Counters
+      let todayCount = 0;
+      let weekCount = 0;
+      const projectCounts = {};
+      
+      // Count activities
+      activities.forEach(activity => {
+        const dateStr = activity.date;
+        const projectId = activity.projectId;
+        
+        if (dateStr && projectId) {
+          const activityDate = new Date(dateStr);
+          activityDate.setHours(0, 0, 0, 0);
+          
+          // Count today's activities
+          if (activityDate.getTime() === today.getTime()) {
+            todayCount++;
+          }
+          
+          // Count this week's activities
+          if (activityDate >= weekStart) {
+            weekCount++;
+          }
+          
+          // Count by project
+          projectCounts[projectId] = (projectCounts[projectId] || 0) + 1;
+        }
+      });
+      
+      // Find most active project
+      let mostActiveProject = '';
+      let maxCount = 0;
+      
+      Object.entries(projectCounts).forEach(([project, count]) => {
+        if (count > maxCount) {
+          mostActiveProject = project;
+          maxCount = count;
+        }
+      });
+      
+      // Format project name
+      const formattedProjectName = mostActiveProject ? mostActiveProject.replace(/-/g, ' ') : 'None';
+      
+      // Update the stats in the DOM
+      document.getElementById('today-count').textContent = todayCount.toString();
+      document.getElementById('week-count').textContent = weekCount.toString();
+      document.getElementById('active-project').textContent = formattedProjectName;
+      document.getElementById('project-count').textContent = maxCount.toString();
+    }
+    
+    // Listen for the activity-stats-update event
+    document.addEventListener('activity-stats-update', (event) => {
+      const { activities } = event.detail;
+      updateActivityStats(activities);
+    });
+  });
+</script> 

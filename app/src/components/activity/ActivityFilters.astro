@@ -20,7 +20,7 @@ const activityTypeLabels = {
 };
 ---
 
-<div class="mb-6">
+<div class="mb-6" id="activity-filters">
   <h3 class="text-lg font-medium mb-4">Filters</h3>
   
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -60,4 +60,115 @@ const activityTypeLabels = {
       </select>
     </div>
   </div>
-</div> 
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get filter elements
+    const projectFilter = document.getElementById('project-filter');
+    const typeFilter = document.getElementById('type-filter');
+    const dateRangeFilter = document.getElementById('date-range-filter');
+    
+    if (!projectFilter || !typeFilter || !dateRangeFilter) {
+      console.error('Could not find filter elements');
+      return;
+    }
+    
+    // Initialize filters from URL params if present
+    function initializeFilters() {
+      const params = new URLSearchParams(window.location.search);
+      
+      if (params.has('project')) {
+        projectFilter.value = params.get('project') || 'all';
+      }
+      
+      if (params.has('type')) {
+        typeFilter.value = params.get('type') || 'all';
+      }
+      
+      if (params.has('dateRange')) {
+        dateRangeFilter.value = params.get('dateRange') || 'all';
+      }
+      
+      // Trigger initial filter
+      triggerFilterEvent();
+    }
+    
+    // Update URL with current filter values
+    function updateURLParams() {
+      const params = new URLSearchParams(window.location.search);
+      
+      // Update or remove project parameter
+      if (projectFilter.value === 'all') {
+        params.delete('project');
+      } else {
+        params.set('project', projectFilter.value);
+      }
+      
+      // Update or remove type parameter
+      if (typeFilter.value === 'all') {
+        params.delete('type');
+      } else {
+        params.set('type', typeFilter.value);
+      }
+      
+      // Update or remove dateRange parameter
+      if (dateRangeFilter.value === 'all') {
+        params.delete('dateRange');
+      } else {
+        params.set('dateRange', dateRangeFilter.value);
+      }
+      
+      // Update URL without reloading the page
+      const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+      window.history.pushState({}, '', newURL);
+    }
+    
+    // Create and dispatch a custom event with filter data
+    function triggerFilterEvent() {
+      console.log('Triggering filter event with:', {
+        project: projectFilter.value,
+        type: typeFilter.value,
+        dateRange: dateRangeFilter.value
+      });
+      
+      const filterEvent = new CustomEvent('activity-filter', {
+        detail: {
+          project: projectFilter.value,
+          type: typeFilter.value,
+          dateRange: dateRangeFilter.value
+        },
+        bubbles: true
+      });
+      
+      document.dispatchEvent(filterEvent);
+    }
+    
+    // Handle filter changes
+    function handleFilterChange(e) {
+      console.log(`Filter changed: ${e.target.id} to ${e.target.value}`);
+      updateURLParams();
+      triggerFilterEvent();
+    }
+    
+    // Add event listeners to filters
+    if (projectFilter) {
+      projectFilter.addEventListener('change', handleFilterChange);
+      console.log('Added event listener to project filter');
+    }
+    
+    if (typeFilter) {
+      typeFilter.addEventListener('change', handleFilterChange);
+      console.log('Added event listener to type filter');
+    }
+    
+    if (dateRangeFilter) {
+      dateRangeFilter.addEventListener('change', handleFilterChange);
+      console.log('Added event listener to date range filter');
+    }
+    
+    // Initialize filters on page load
+    console.log('Initializing filters');
+    initializeFilters();
+  });
+</script> 

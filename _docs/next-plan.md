@@ -1,22 +1,23 @@
-Here are three recommended “medium-sized” tasks (each suitable for its own branch or PR) that align with the original project structure and use cases:
 
-1. **Centralize and Expand Data Files**
+1. **Implement Real Filtering & Date Range on the Activity Dashboard**  
+   - **What**: Make the UI filters on `activity-dashboard.astro` truly functional (project, type, date range).  
+   - **Why**: Currently, filter dropdowns log to the console or do nothing. Real filtering will let you isolate relevant activities (commits vs. manual logs, by project, by “This Week,” etc.).  
+   - **How**:  
+     - Add some client-side state or a small library (or just custom JS) to filter `activities` in place.  
+     - Optionally, store the user’s filter selections in query params or localStorage so they persist on refresh.  
 
-   - **What**: Move beyond `projects.ts` by creating similar data files for *writing*, *books*, *resources*, *revenue*, etc.  
-   - **Why**: Right now, only `projects.ts` fully demonstrates how data is stored. To display real stats for writing, books, or revenue, each section should have its own `*.ts` (or `*.json`) file with a consistent structure (including `visibility` for private content).  
-   - **Outcome**: All pages can pull data from a uniform pattern, making future CRUD expansions simpler.
+2. **Create “Add / Edit” Forms for One Data Type (e.g., Projects)**  
+   - **What**: Make the “New Project” button actually create a new entry (or let you edit an existing project).  
+   - **Why**: Right now, the button is a placeholder. Giving it real functionality moves your dashboard from “view only” to “create & manage.”  
+   - **How**:  
+     - Create a form (modal or separate route) to input `title`, `description`, `status`, etc.  
+     - Decide on a simple store approach (e.g., writing to localStorage or a small JSON file if you have a lightweight back-end process).  
+     - On submit, push the new project data into your `projects` array at runtime, and re-render.  
 
-2. **Create a Full "Activity" (or “Activity Dashboard”) Page**
-
-   - **What**: Build a dedicated `/activity` or `/activity-dashboard` page to aggregate *all* activities from every project (and possibly writing or revenue events). Add filtering (by date range, project, type, etc.) and pagination if needed.  
-   - **Why**: Right now, you have “Recent Activity” components on the dashboard and in projects, but no single central place to see everything. A consolidated activity page fulfills the “Activity Dashboard” use case from your project plan.  
-   - **Outcome**: You’ll have a one-stop page to review manual logs, GitHub commits, or any new activity record, supporting the “Log Activity” and “View Dashboard” use cases thoroughly.
-
-3. **Enhance Private/Public Handling & Auth Checks**
-
-   - **What**: Refine the logic that hides private content. For example:
-     - When not logged in, ensure “private” projects and sections are fully hidden or replaced with a prompt to log in.  
-     - Possibly show a “locked” badge or partial preview for private items.  
-     - Centralize the check (`isAuthenticated()`) so your entire site can consistently respect visibility.  
-   - **Why**: Right now, `.private-content` toggles by a CSS class, but deeper checks might be needed if you add more dynamic content or partial hydration. You might also unify the approach across pages so any private item is consistently handled.  
-   - **Outcome**: A more seamless user experience where public users see only the allowed items, and you (once logged in) see everything.
+3. **Add “Add Activity” or “Add Revenue” (Any Single-Item Logger) with Persistence**  
+   - **What**: Extend a second part of your data model—e.g., let the “Log Activity” form or “Add Income” button truly save the data.  
+   - **Why**: This ensures your second major entity (activities or revenue) is also end-to-end functional. Users can add a new log, see it show up in the main listing, and confirm that it remains after reload (persistence).  
+   - **How**:  
+     - Reuse patterns from the “Add Project” form in step #2.  
+     - If you want to keep it ultra-simple, store everything in localStorage JSON. If you prefer a tiny serverless approach, you could do that as well.  
+     - Show user feedback (e.g., “Activity saved!”) and refresh the relevant list automatically.  

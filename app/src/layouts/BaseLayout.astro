@@ -9,10 +9,23 @@ import '../styles/global.css';
 
 export interface Props {
   title: string;
-  activePage?: 'dashboard' | 'projects' | 'revenue' | 'writing' | 'ai-library' | 'resources' | 'books' | 'activity-dashboard';
+  description?: string;
+  activePage?: 'dashboard' | 'projects' | 'revenue' | 'writing' | 'ai-library' | 'resources' | 'books' | 'activity';
 }
 
-const { title, activePage = 'dashboard' } = Astro.props;
+const { title, description, activePage = 'dashboard' } = Astro.props;
+
+// Navigation items
+const navItems = [
+  { href: '/', icon: 'ri-dashboard-line', label: 'Dashboard', id: 'dashboard' },
+  { href: '/projects', icon: 'ri-stack-line', label: 'Projects', id: 'projects' },
+  { href: '/revenue', icon: 'ri-money-dollar-circle-line', label: 'Revenue', id: 'revenue' },
+  { href: '/writing', icon: 'ri-draft-line', label: 'Writing', id: 'writing' },
+  { href: '/ai-library', icon: 'ri-robot-line', label: 'AI Library', id: 'ai-library' },
+  { href: '/resources', icon: 'ri-bookmark-line', label: 'Resources', id: 'resources' },
+  { href: '/books', icon: 'ri-book-open-line', label: 'Books', id: 'books' },
+  { href: '/activity', icon: 'ri-history-line', label: 'Activity', id: 'activity' },
+];
 
 // Group navigation items for dropdown menus
 const navGroups = [
@@ -21,7 +34,7 @@ const navGroups = [
     items: [
       { href: '/', icon: 'ri-dashboard-line', label: 'Dashboard', id: 'dashboard' },
       { href: '/projects', icon: 'ri-folder-line', label: 'Projects', id: 'projects' },
-      { href: '/activity-dashboard', icon: 'ri-history-line', label: 'Activity', id: 'activity-dashboard' },
+      { href: '/activity', icon: 'ri-history-line', label: 'Activity', id: 'activity' },
       { href: '/writing', icon: 'ri-edit-line', label: 'Writing', id: 'writing' },
       { href: '/ai-library', icon: 'ri-robot-line', label: 'AI Library', id: 'ai-library', noBreak: true },
     ]

@@ -101,51 +101,427 @@ const activityStyles = {
 };
 ---
 
-<div class="activity-timeline space-y-6 mt-6">
-  {Object.entries(activityGroups).map(([groupKey, groupActivities]) => (
-    <div>
-      <!-- Timeline Day Header -->
-      <div class="timeline-day-header flex items-center mb-4">
-        <div class="flex-grow border-t border-gray-200 mr-3"></div>
-        <div class="bg-gray-100 px-3 py-1 rounded-full text-light-ink text-sm">{groupKey}</div>
-        <div class="flex-grow border-t border-gray-200 ml-3"></div>
-      </div>
-      
-      <!-- Activities for this day/period -->
-      <div class="space-y-4">
-        {groupActivities.map(activity => {
-          const style = activityStyles[activity.type];
-          return (
-            <div class="activity-item flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
-              <div class={`activity-icon ${style.bgColor} p-2 rounded-full`}>
-                <i class={`${style.icon} ${style.textColor}`}></i>
-              </div>
-              <div class="flex-grow">
-                <div class="flex justify-between">
-                  <span class="font-medium">{style.label} <span class="text-light-ink text-sm">on {activity.projectId.replace(/-/g, ' ')}</span></span>
-                  <span class="text-light-ink text-sm">{getRelativeTimeString(activity.date)}</span>
+<div class="activity-timeline space-y-6 mt-6" id="activity-list">
+  <div id="activity-list-content">
+    {Object.entries(activityGroups).map(([groupKey, groupActivities]) => (
+      <div>
+        <!-- Timeline Day Header -->
+        <div class="timeline-day-header flex items-center mb-4">
+          <div class="flex-grow border-t border-gray-200 mr-3"></div>
+          <div class="bg-gray-100 px-3 py-1 rounded-full text-light-ink text-sm">{groupKey}</div>
+          <div class="flex-grow border-t border-gray-200 ml-3"></div>
+        </div>
+        
+        <!-- Activities for this day/period -->
+        <div class="space-y-4">
+          {groupActivities.map(activity => {
+            const style = activityStyles[activity.type];
+            return (
+              <div class="activity-item flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0" 
+                   data-project={activity.projectId} 
+                   data-type={activity.type} 
+                   data-date={activity.date}>
+                <div class={`activity-icon ${style.bgColor} p-2 rounded-full`}>
+                  <i class={`${style.icon} ${style.textColor}`}></i>
                 </div>
-                <div class="text-light-ink">
-                  {activity.type === 'manual' ? (
-                    <div class="markdown-content">
-                      <p>{activity.description}</p>
-                    </div>
-                  ) : (
-                    <code class="bg-gray-50 px-1 rounded text-sm">{activity.description}</code>
-                  )}
+                <div class="flex-grow">
+                  <div class="flex justify-between">
+                    <span class="font-medium">{style.label} <span class="text-light-ink text-sm">on {activity.projectId.replace(/-/g, ' ')}</span></span>
+                    <span class="text-light-ink text-sm">{getRelativeTimeString(activity.date)}</span>
+                  </div>
+                  <div class="text-light-ink">
+                    {activity.type === 'manual' ? (
+                      <div class="markdown-content">
+                        <p>{activity.description}</p>
+                      </div>
+                    ) : (
+                      <code class="bg-gray-50 px-1 rounded text-sm">{activity.description}</code>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
-  ))}
+    ))}
+    
+    {activities.length === 0 && (
+      <div class="text-center py-10 text-light-ink">
+        <i class="ri-calendar-line text-4xl mb-2"></i>
+        <p>No activities found. Try adjusting your filters or log a new activity.</p>
+      </div>
+    )}
+  </div>
   
-  {activities.length === 0 && (
-    <div class="text-center py-10 text-light-ink">
-      <i class="ri-calendar-line text-4xl mb-2"></i>
-      <p>No activities found. Try adjusting your filters or log a new activity.</p>
-    </div>
-  )}
-</div> 
+  <!-- Empty state for filtered results -->
+  <div id="no-filtered-results" class="text-center py-10 text-light-ink hidden">
+    <i class="ri-filter-line text-4xl mb-2"></i>
+    <p>No activities match the selected filters. Try changing your filter criteria.</p>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('ActivityList: Script loaded');
+    
+    // Store the original activities on page load
+    let originalActivities = [];
+    
+    // Function to format a date relative to now (e.g., "2 days ago")
+    function getRelativeTimeString(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInMs = now.getTime() - date.getTime();
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      
+      if (diffInHours < 24) {
+        return diffInHours === 0 ? 'Just now' : 
+               diffInHours === 1 ? '1 hour ago' : 
+               `${diffInHours} hours ago`;
+      }
+      
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) {
+        return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
+      }
+      
+      if (diffInDays < 30) {
+        const diffInWeeks = Math.floor(diffInDays / 7);
+        return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
+      }
+      
+      const diffInMonths = Math.floor(diffInDays / 30);
+      return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+    }
+    
+    // Extract activities data from the DOM
+    function extractActivitiesFromDOM() {
+      const activityElements = document.querySelectorAll('.activity-item');
+      const activities = [];
+      
+      console.log(`Found ${activityElements.length} activity elements in the DOM`);
+      
+      if (activityElements.length === 0) {
+        console.warn('No activity elements found in the DOM. Check selector or DOM structure.');
+      }
+      
+      activityElements.forEach((el, index) => {
+        const projectId = el.getAttribute('data-project') || '';
+        const type = el.getAttribute('data-type') || '';
+        const date = el.getAttribute('data-date') || '';
+        const description = el.querySelector('.text-light-ink')?.textContent?.trim() || '';
+        
+        if (!projectId || !type || !date) {
+          console.warn(`Activity ${index} has missing attributes: `, { projectId, type, date });
+        }
+        
+        activities.push({
+          projectId,
+          type,
+          date,
+          description
+        });
+        
+        if (index < 3) {
+          console.log(`Activity ${index}: Project=${projectId}, Type=${type}, Date=${date}`);
+        }
+      });
+      
+      return activities;
+    }
+    
+    // Store original activities when the page loads
+    originalActivities = extractActivitiesFromDOM();
+    console.log(`Stored ${originalActivities.length} original activities`);
+    
+    // Function to filter activities
+    function filterByProject(activities, projectId) {
+      if (!projectId || projectId === 'all') {
+        console.log('No project filter applied');
+        return activities;
+      }
+      
+      console.log(`Applying project filter: ${projectId}`);
+      const filtered = activities.filter(activity => activity.projectId === projectId);
+      console.log(`Project filter: ${projectId} - Filtered from ${activities.length} to ${filtered.length} activities`);
+      return filtered;
+    }
+    
+    function filterByType(activities, type) {
+      if (!type || type === 'all') {
+        console.log('No type filter applied');
+        return activities;
+      }
+      
+      console.log(`Applying type filter: ${type}`);
+      const filtered = activities.filter(activity => activity.type === type);
+      console.log(`Type filter: ${type} - Filtered from ${activities.length} to ${filtered.length} activities`);
+      return filtered;
+    }
+    
+    function filterByDateRange(activities, dateRange) {
+      if (!dateRange || dateRange === 'all') {
+        return activities;
+      }
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      let startDate;
+      
+      switch (dateRange) {
+        case 'today':
+          startDate = today;
+          break;
+        case 'yesterday':
+          startDate = yesterday;
+          break;
+        case 'this-week': {
+          // Start of this week (Sunday)
+          const day = today.getDay(); // 0 for Sunday, 1 for Monday, etc.
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - day);
+          break;
+        }
+        case 'last-week': {
+          // Start of last week
+          const day = today.getDay();
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - day - 7);
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 6);
+          
+          return activities.filter(activity => {
+            const activityDate = new Date(activity.date);
+            return activityDate >= startDate && activityDate <= endDate;
+          });
+        }
+        case 'this-month': {
+          // Start of this month
+          startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          break;
+        }
+        case 'last-month': {
+          // Start of last month
+          startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          const endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+          
+          return activities.filter(activity => {
+            const activityDate = new Date(activity.date);
+            return activityDate >= startDate && activityDate <= endDate;
+          });
+        }
+        default:
+          return activities;
+      }
+      
+      return activities.filter(activity => {
+        const activityDate = new Date(activity.date);
+        return activityDate >= startDate;
+      });
+    }
+    
+    function applyAllFilters(activities, projectId, type, dateRange) {
+      console.log(`Applying filters - Project: ${projectId}, Type: ${type}, DateRange: ${dateRange}`);
+      console.log(`Starting with ${activities.length} activities`);
+      
+      if (!activities || activities.length === 0) {
+        console.warn('No activities to filter!');
+        return [];
+      }
+      
+      let filtered = activities;
+      
+      // Only apply filters if they're not set to "all"
+      if (projectId && projectId !== 'all') {
+        filtered = filterByProject(filtered, projectId);
+      }
+      
+      if (type && type !== 'all') {
+        filtered = filterByType(filtered, type);
+      }
+      
+      if (dateRange && dateRange !== 'all') {
+        filtered = filterByDateRange(filtered, dateRange);
+      }
+      
+      console.log(`After all filters: ${filtered.length} activities remain`);
+      
+      // Debug the first few filtered activities
+      if (filtered.length > 0) {
+        console.log('Sample filtered activities:');
+        filtered.slice(0, Math.min(3, filtered.length)).forEach((activity, idx) => {
+          console.log(`  ${idx}: Project=${activity.projectId}, Type=${activity.type}, Date=${activity.date}`);
+        });
+      } else {
+        console.log('No activities match the filters');
+      }
+      
+      return filtered;
+    }
+  
+    // Function to group activities by date period
+    function groupActivitiesByDate(activities) {
+      const groups = {};
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      activities.forEach(activity => {
+        const date = new Date(activity.date);
+        
+        let groupKey;
+        
+        if (date.toDateString() === today.toDateString()) {
+          groupKey = 'Today';
+        } else if (date.toDateString() === yesterday.toDateString()) {
+          groupKey = 'Yesterday';
+        } else if (today.getTime() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
+          groupKey = 'This Week';
+        } else if (today.getTime() - date.getTime() < 14 * 24 * 60 * 60 * 1000) {
+          groupKey = 'Last Week';
+        } else if (today.getTime() - date.getTime() < 30 * 24 * 60 * 60 * 1000) {
+          groupKey = 'This Month';
+        } else {
+          // Format as 'Month Year'
+          groupKey = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+        
+        if (!groups[groupKey]) {
+          groups[groupKey] = [];
+        }
+        
+        groups[groupKey].push(activity);
+      });
+      
+      return groups;
+    }
+    
+    // Function to render the activity HTML
+    function getActivityHTML(activity) {
+      const activityStyles = {
+        'commit': {
+          icon: 'ri-github-fill',
+          bgColor: 'bg-blue-50',
+          textColor: 'text-blue-600',
+          label: 'GitHub Commit'
+        },
+        'pr': {
+          icon: 'ri-git-pull-request-line',
+          bgColor: 'bg-green-50',
+          textColor: 'text-green-600',
+          label: 'Pull Request Merged'
+        },
+        'manual': {
+          icon: 'ri-edit-line',
+          bgColor: 'bg-purple-50',
+          textColor: 'text-purple-600',
+          label: 'Manual Log'
+        }
+      };
+      
+      const style = activityStyles[activity.type] || activityStyles.manual;
+      const relativeTime = getRelativeTimeString(activity.date);
+      
+      return `
+        <div class="activity-item flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0"
+             data-project="${activity.projectId}" 
+             data-type="${activity.type}" 
+             data-date="${activity.date}">
+          <div class="activity-icon ${style.bgColor} p-2 rounded-full">
+            <i class="${style.icon} ${style.textColor}"></i>
+          </div>
+          <div class="flex-grow">
+            <div class="flex justify-between">
+              <span class="font-medium">${style.label} <span class="text-light-ink text-sm">on ${activity.projectId.replace(/-/g, ' ')}</span></span>
+              <span class="text-light-ink text-sm">${relativeTime}</span>
+            </div>
+            <div class="text-light-ink">
+              ${activity.type === 'manual' 
+                ? `<div class="markdown-content"><p>${activity.description}</p></div>` 
+                : `<code class="bg-gray-50 px-1 rounded text-sm">${activity.description}</code>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Function to render activity list with filtered data
+    function renderFilteredActivities(activities) {
+      const activityListContent = document.getElementById('activity-list-content');
+      const noFilteredResults = document.getElementById('no-filtered-results');
+      
+      if (!activityListContent || !noFilteredResults) return;
+      
+      if (activities.length === 0) {
+        activityListContent.classList.add('hidden');
+        noFilteredResults.classList.remove('hidden');
+        return;
+      }
+      
+      activityListContent.classList.remove('hidden');
+      noFilteredResults.classList.add('hidden');
+      
+      // Sort activities by date (most recent first)
+      const sortedActivities = [...activities].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      // Group activities by date
+      const groups = groupActivitiesByDate(sortedActivities);
+      
+      // Build HTML
+      let html = '';
+      
+      Object.entries(groups).forEach(([groupKey, groupActivities]) => {
+        html += `
+          <div>
+            <!-- Timeline Day Header -->
+            <div class="timeline-day-header flex items-center mb-4">
+              <div class="flex-grow border-t border-gray-200 mr-3"></div>
+              <div class="bg-gray-100 px-3 py-1 rounded-full text-light-ink text-sm">${groupKey}</div>
+              <div class="flex-grow border-t border-gray-200 ml-3"></div>
+            </div>
+            
+            <!-- Activities for this day/period -->
+            <div class="space-y-4">
+              ${groupActivities.map(activity => getActivityHTML(activity)).join('')}
+            </div>
+          </div>
+        `;
+      });
+      
+      activityListContent.innerHTML = html;
+    }
+    
+    // Handle filter events
+    document.addEventListener('activity-filter', (event) => {
+      const { project, type, dateRange } = event.detail;
+      
+      console.log('ActivityList: Filter event received:', { project, type, dateRange });
+      
+      // Apply filters to the original activities
+      const filteredActivities = applyAllFilters(originalActivities, project, type, dateRange);
+      
+      console.log(`ActivityList: Filtered to ${filteredActivities.length} activities`);
+      
+      // Debug the first few filtered activities
+      filteredActivities.slice(0, 3).forEach((activity, i) => {
+        console.log(`Filtered activity ${i}: Project=${activity.projectId}, Type=${activity.type}, Date=${activity.date}`);
+      });
+      
+      // Render filtered activities
+      renderFilteredActivities(filteredActivities);
+      
+      // Dispatch an event to update stats
+      const statsUpdateEvent = new CustomEvent('activity-stats-update', {
+        detail: { activities: filteredActivities }
+      });
+      document.dispatchEvent(statsUpdateEvent);
+    });
+  });
+</script> 

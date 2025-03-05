@@ -32,6 +32,20 @@ export const projects: Project[] = [
     visibility: 'private',
     activities: [
       {
+        id: 'act-recent-1',
+        projectId: 'control-panel',
+        type: 'commit',
+        date: '2025-03-04',
+        description: 'Implemented activity filtering functionality'
+      },
+      {
+        id: 'act-recent-2',
+        projectId: 'control-panel',
+        type: 'manual',
+        date: '2025-03-04',
+        description: 'Added test data for today to verify date filtering'
+      },
+      {
         id: 'act1',
         projectId: 'control-panel',
         type: 'commit',
@@ -147,6 +161,13 @@ export const projects: Project[] = [
     ],
     visibility: 'private',
     activities: [
+      {
+        id: 'act-recent-3',
+        projectId: 'book-notes',
+        type: 'manual',
+        date: '2025-03-04',
+        description: 'Added notes for "Deep Work" by Cal Newport'
+      },
       {
         id: 'act7',
         projectId: 'book-notes',

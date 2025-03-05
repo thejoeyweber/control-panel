@@ -24,6 +24,11 @@ Directory structure:
     │   │   ├── assets/
     │   │   ├── components/
     │   │   │   ├── Welcome.astro
+    │   │   │   ├── activity/
+    │   │   │   │   ├── ActivityFilters.astro
+    │   │   │   │   ├── ActivityList.astro
+    │   │   │   │   ├── ActivityPagination.astro
+    │   │   │   │   └── ActivityStats.astro
     │   │   │   └── projects/
     │   │   │       ├── ProjectCard.astro
     │   │   │       ├── ProjectFilters.astro
@@ -42,6 +47,7 @@ Directory structure:
     │   │   │   ├── BaseLayout.astro
     │   │   │   └── Layout.astro
     │   │   ├── pages/
+    │   │   │   ├── activity-dashboard.astro
     │   │   │   ├── ai-library.astro
     │   │   │   ├── books.astro
     │   │   │   ├── index.astro
