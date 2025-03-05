@@ -1,0 +1,42 @@
+---
+/*
+  File: src/components/projects/TechStack.astro
+  Purpose: Displays an overview of tech stack usage across projects
+  Dependencies: projects data from data/projects.ts
+*/
+
+import { projects } from '../../data/projects';
+
+// Extract tech stack data and count occurrences
+const techStackData = projects.reduce((acc, project) => {
+  if (project.techStack && project.techStack.length > 0) {
+    project.techStack.forEach(tech => {
+      if (!acc[tech]) {
+        acc[tech] = 0;
+      }
+      acc[tech]++;
+    });
+  }
+  return acc;
+}, {} as Record<string, number>);
+
+// Convert to array and sort by count (descending)
+const techStackArray = Object.entries(techStackData)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+---
+
+{techStackArray.length > 0 && (
+  <div class="bg-white rounded-lg shadow-card p-6 mb-6">
+    <h2 class="text-lg font-bold mb-4">Tech Stack Overview</h2>
+    
+    <div class="flex flex-wrap gap-2">
+      {techStackArray.map(tech => (
+        <div class="tech-tag px-3 py-2 rounded-full bg-gray-100 flex items-center">
+          <span class="font-medium">{tech.name}</span>
+          <span class="text-xs text-light-ink ml-1">{tech.count} {tech.count === 1 ? 'project' : 'projects'}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)} 

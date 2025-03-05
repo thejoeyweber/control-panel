@@ -1,0 +1,100 @@
+---
+/*
+  File: src/components/projects/RecentActivity.astro
+  Purpose: Displays recent project activities across all projects
+  Dependencies: getAllActivities from data/projects.ts
+*/
+
+import { getAllActivities } from '../../data/projects';
+
+// Get all activities and sort them by date (newest first)
+const activities = getAllActivities().sort((a, b) => 
+  new Date(b.date).getTime() - new Date(a.date).getTime()
+).slice(0, 3); // Take only the 3 most recent activities
+
+// Format a date relative to now (e.g., "2 days ago")
+function getRelativeTimeString(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  
+  if (diffInHours < 24) {
+    return diffInHours === 0 ? 'Just now' : 
+           diffInHours === 1 ? '1 hour ago' : 
+           `${diffInHours} hours ago`;
+  }
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
+  }
+  
+  if (diffInDays < 30) {
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
+  }
+  
+  const diffInMonths = Math.floor(diffInDays / 30);
+  return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+}
+
+// Activity type styling
+const activityStyles = {
+  'commit': {
+    icon: 'ri-github-fill',
+    bgColor: 'bg-blue-50',
+    textColor: 'text-blue-600',
+    label: 'GitHub Commit'
+  },
+  'pr': {
+    icon: 'ri-git-pull-request-line',
+    bgColor: 'bg-green-50',
+    textColor: 'text-green-600',
+    label: 'Pull Request Merged'
+  },
+  'manual': {
+    icon: 'ri-edit-line',
+    bgColor: 'bg-purple-50',
+    textColor: 'text-purple-600',
+    label: 'Manual Log'
+  }
+};
+---
+
+{activities.length > 0 && (
+  <div class="bg-white rounded-lg shadow-card p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-bold">Recent Activity</h2>
+      <a href="/activity" class="text-highlight text-sm hover:underline">View All Activity</a>
+    </div>
+    
+    <div class="space-y-4">
+      {activities.map(activity => {
+        const style = activityStyles[activity.type];
+        return (
+          <div class="activity-item flex items-start gap-3">
+            <div class={`activity-icon ${style.bgColor} p-2 rounded-full`}>
+              <i class={`${style.icon} ${style.textColor}`}></i>
+            </div>
+            <div class="flex-grow">
+              <div class="flex justify-between">
+                <span class="font-medium">{style.label} <span class="text-light-ink text-sm">on {activity.projectId.replace(/-/g, ' ')}</span></span>
+                <span class="text-light-ink text-sm">{getRelativeTimeString(activity.date)}</span>
+              </div>
+              <div class="text-light-ink">
+                {activity.type === 'manual' ? (
+                  <div class="markdown-content">
+                    <p>{activity.description}</p>
+                  </div>
+                ) : (
+                  <code class="bg-gray-50 px-1 rounded text-sm">{activity.description}</code>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  </div>
+)} 

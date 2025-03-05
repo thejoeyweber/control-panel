@@ -1,0 +1,129 @@
+---
+/*
+  File: src/pages/index.astro
+  Purpose: Dashboard page displaying overview of projects, revenue, and other metrics
+  Dependencies: BaseLayout
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Dashboard" activePage="dashboard">
+  <div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Quick Stats Cards -->
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-2">Projects</h2>
+        <p class="text-4xl font-bold text-highlight">8</p>
+        <p class="text-light-ink mt-2">3 active, 5 complete</p>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-2">Revenue</h2>
+        <p class="text-4xl font-bold text-success">$1,250</p>
+        <p class="text-light-ink mt-2">This month</p>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-2">Writing</h2>
+        <p class="text-4xl font-bold text-highlight">12</p>
+        <p class="text-light-ink mt-2">3 drafts, 9 published</p>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-2">Books</h2>
+        <p class="text-4xl font-bold text-highlight">5</p>
+        <p class="text-light-ink mt-2">Currently reading</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+        <ul class="divide-y divide-gray-200">
+          <li class="py-3">
+            <div class="flex items-start">
+              <span class="text-highlight mr-2"><i class="ri-git-commit-line"></i></span>
+              <div>
+                <p class="font-medium">Updated Control Panel UI</p>
+                <p class="text-sm text-light-ink">2 hours ago</p>
+              </div>
+            </div>
+          </li>
+          <li class="py-3">
+            <div class="flex items-start">
+              <span class="text-highlight mr-2"><i class="ri-edit-line"></i></span>
+              <div>
+                <p class="font-medium">Published new blog post</p>
+                <p class="text-sm text-light-ink">Yesterday</p>
+              </div>
+            </div>
+          </li>
+          <li class="py-3">
+            <div class="flex items-start">
+              <span class="text-highlight mr-2"><i class="ri-folder-add-line"></i></span>
+              <div>
+                <p class="font-medium">Created new project: AI Assistant</p>
+                <p class="text-sm text-light-ink">3 days ago</p>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <a href="/activity-dashboard" class="block text-center text-highlight mt-4 hover:underline">View all activity</a>
+      </div>
+      
+      <!-- Project Status -->
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h2 class="text-xl font-bold mb-4">Project Status</h2>
+        <ul class="divide-y divide-gray-200">
+          <li class="py-3">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">Control Panel Rebuild</p>
+                <p class="text-sm text-light-ink">Building with Astro + Tailwind</p>
+              </div>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-highlight text-white">
+                In Progress
+              </span>
+            </div>
+          </li>
+          <li class="py-3">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">AI Content Assistant</p>
+                <p class="text-sm text-light-ink">Generating content with AI</p>
+              </div>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning text-white">
+                Planning
+              </span>
+            </div>
+          </li>
+          <li class="py-3">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">Personal Website Redesign</p>
+                <p class="text-sm text-light-ink">New portfolio site</p>
+              </div>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success text-white">
+                Completed
+              </span>
+            </div>
+          </li>
+        </ul>
+        <a href="/projects" class="block text-center text-highlight mt-4 hover:underline">View all projects</a>
+      </div>
+    </div>
+    
+    <!-- Private Content Example -->
+    <div class="mt-8 p-6 bg-white rounded-lg shadow-card border-l-4 border-warning private-content">
+      <h2 class="text-xl font-bold mb-2">Revenue Goal Progress</h2>
+      <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+        <div class="bg-success h-4 rounded-full" style="width: 75%"></div>
+      </div>
+      <p class="text-light-ink">You are at 75% of your monthly goal ($3,000 / $4,000)</p>
+    </div>
+  </div>
+</BaseLayout>

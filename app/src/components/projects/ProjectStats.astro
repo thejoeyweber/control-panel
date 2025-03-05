@@ -1,0 +1,56 @@
+---
+/*
+  File: src/components/projects/ProjectStats.astro
+  Purpose: Displays statistics about projects (counts, percentages, etc.)
+  Dependencies: getProjectStats from data/projects.ts
+*/
+
+import { getProjectStats } from '../../data/projects';
+
+// Get project statistics
+const stats = getProjectStats();
+---
+
+<div class="bg-white rounded-lg shadow-card p-6 mb-6">
+  <h2 class="text-lg font-bold mb-4">Project Statistics</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="stat-card p-4 bg-gray-50 rounded-lg">
+      <div class="stat-title text-sm text-light-ink">Total Projects</div>
+      <div class="stat-value text-2xl font-bold">{stats.total}</div>
+      <div class="stat-desc text-xs flex items-center text-light-ink mt-1">
+        <i class="ri-list-check-2 mr-1"></i> All projects
+      </div>
+    </div>
+    
+    <div class="stat-card p-4 bg-gray-50 rounded-lg">
+      <div class="stat-title text-sm text-light-ink">Active</div>
+      <div class="stat-value text-2xl font-bold">{stats.active}</div>
+      <div class="stat-desc mt-2">
+        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div class="bg-highlight h-full rounded-full" style={`width: ${stats.activePercentage}%`}></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card p-4 bg-gray-50 rounded-lg">
+      <div class="stat-title text-sm text-light-ink">Completed</div>
+      <div class="stat-value text-2xl font-bold">{stats.completed}</div>
+      <div class="stat-desc mt-2">
+        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div class="bg-success h-full rounded-full" style={`width: ${stats.completedPercentage}%`}></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stat-card p-4 bg-gray-50 rounded-lg">
+      <div class="stat-title text-sm text-light-ink">Planning</div>
+      <div class="stat-value text-2xl font-bold">{stats.planning}</div>
+      <div class="stat-desc mt-2">
+        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div class="bg-warning h-full rounded-full" style={`width: ${stats.planningPercentage}%`}></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

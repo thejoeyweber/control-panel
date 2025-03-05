@@ -1,0 +1,177 @@
+---
+/*
+  File: src/components/projects/ProjectFilters.astro
+  Purpose: Component for filtering projects by various criteria
+  Dependencies: None
+*/
+
+// Define accepted categories and statuses for filtering
+const categories = [
+  { value: '', label: 'All Categories' },
+  { value: 'Development', label: 'Development' },
+  { value: 'Writing', label: 'Writing' },
+  { value: 'Health', label: 'Health' }
+];
+
+const statuses = [
+  { value: '', label: 'All Statuses' },
+  { value: 'active', label: 'Active' },
+  { value: 'planning', label: 'Planning' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'paused', label: 'Paused' }
+];
+---
+
+<div class="bg-white p-4 rounded-lg shadow-card mb-6">
+  <div class="flex flex-col md:flex-row gap-4 mb-4">
+    <div class="relative flex-grow">
+      <input 
+        type="text" 
+        id="project-search" 
+        placeholder="Search projects..." 
+        class="w-full pl-10 border border-gray-200 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-highlight focus:border-transparent"
+      >
+      <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-light-ink"></i>
+    </div>
+    
+    <div class="flex gap-2 flex-wrap md:flex-nowrap">
+      <select 
+        id="status-filter" 
+        class="border border-gray-200 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-highlight focus:border-transparent"
+      >
+        {statuses.map(status => (
+          <option value={status.value}>{status.label}</option>
+        ))}
+      </select>
+      
+      <select 
+        id="category-filter" 
+        class="border border-gray-200 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-highlight focus:border-transparent"
+      >
+        {categories.map(category => (
+          <option value={category.value}>{category.label}</option>
+        ))}
+      </select>
+      
+      <button 
+        id="clear-filters"
+        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded transition-colors flex items-center"
+      >
+        <i class="ri-refresh-line mr-1"></i> Reset
+      </button>
+    </div>
+  </div>
+  
+  <div class="flex flex-col md:flex-row justify-between items-center gap-3">
+    <div class="text-sm text-light-ink">
+      <span id="filtered-count">Showing all projects</span>
+    </div>
+    
+    <div class="flex gap-2">
+      <button 
+        id="view-grid" 
+        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded transition-colors flex items-center"
+        aria-pressed="true"
+      >
+        <i class="ri-grid-line mr-1"></i> Grid
+      </button>
+      <button 
+        id="view-list" 
+        class="hover:bg-gray-100 text-gray-600 px-3 py-1 rounded transition-colors flex items-center"
+        aria-pressed="false"
+      >
+        <i class="ri-list-check mr-1"></i> List
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Add client-side filtering logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('project-search') as HTMLInputElement;
+    const statusFilter = document.getElementById('status-filter') as HTMLSelectElement;
+    const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const filteredCountElement = document.getElementById('filtered-count');
+    const viewGridBtn = document.getElementById('view-grid');
+    const viewListBtn = document.getElementById('view-list');
+    const projectsContainer = document.getElementById('projects-container');
+    
+    // Toggle view between grid and list
+    viewGridBtn?.addEventListener('click', () => {
+      projectsContainer?.classList.remove('list-view');
+      projectsContainer?.classList.add('grid-view');
+      viewGridBtn.setAttribute('aria-pressed', 'true');
+      viewListBtn?.setAttribute('aria-pressed', 'false');
+      viewGridBtn.classList.add('bg-gray-100');
+      viewListBtn?.classList.remove('bg-gray-100');
+    });
+    
+    viewListBtn?.addEventListener('click', () => {
+      projectsContainer?.classList.remove('grid-view');
+      projectsContainer?.classList.add('list-view');
+      viewListBtn.setAttribute('aria-pressed', 'true');
+      viewGridBtn?.setAttribute('aria-pressed', 'false');
+      viewListBtn.classList.add('bg-gray-100');
+      viewGridBtn?.classList.remove('bg-gray-100');
+    });
+    
+    // Clear all filters
+    clearFiltersBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (statusFilter) statusFilter.value = '';
+      if (categoryFilter) categoryFilter.value = '';
+      
+      // Trigger filter update
+      updateFilters();
+    });
+    
+    // Update filters when inputs change
+    searchInput?.addEventListener('input', updateFilters);
+    statusFilter?.addEventListener('change', updateFilters);
+    categoryFilter?.addEventListener('change', updateFilters);
+    
+    function updateFilters() {
+      const searchQuery = searchInput?.value.toLowerCase() || '';
+      const statusValue = statusFilter?.value || '';
+      const categoryValue = categoryFilter?.value || '';
+      
+      // Get all project elements
+      const projectElements = document.querySelectorAll('[data-project]');
+      let visibleCount = 0;
+      
+      projectElements.forEach(el => {
+        const projectEl = el as HTMLElement;
+        const status = projectEl.dataset.status || '';
+        const category = projectEl.dataset.category || '';
+        const title = projectEl.dataset.title?.toLowerCase() || '';
+        const description = projectEl.dataset.description?.toLowerCase() || '';
+        
+        // Check if the project matches all selected filters
+        const matchesStatus = !statusValue || status === statusValue;
+        const matchesCategory = !categoryValue || category === categoryValue;
+        const matchesSearch = !searchQuery || 
+          title.includes(searchQuery) || 
+          description.includes(searchQuery);
+        
+        // Show or hide based on filter matches
+        if (matchesStatus && matchesCategory && matchesSearch) {
+          projectEl.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          projectEl.classList.add('hidden');
+        }
+      });
+      
+      // Update the count text
+      if (filteredCountElement) {
+        if (visibleCount === projectElements.length) {
+          filteredCountElement.textContent = `Showing all projects`;
+        } else {
+          filteredCountElement.textContent = `Showing ${visibleCount} of ${projectElements.length} projects`;
+        }
+      }
+    }
+  });
+</script> 

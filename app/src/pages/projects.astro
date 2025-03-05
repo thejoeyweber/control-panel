@@ -1,0 +1,107 @@
+---
+/*
+  File: src/pages/projects.astro
+  Purpose: Displays user projects with status, filters, and links to project details
+  Dependencies: BaseLayout, project components, and project data
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getVisibleContent, projects } from '../data/projects';
+import ProjectCard from '../components/projects/ProjectCard.astro';
+import ProjectFilters from '../components/projects/ProjectFilters.astro';
+import ProjectStats from '../components/projects/ProjectStats.astro';
+import ProjectsAttention from '../components/projects/ProjectsAttention.astro';
+import RecentActivity from '../components/projects/RecentActivity.astro';
+import TechStack from '../components/projects/TechStack.astro';
+
+// Filter projects based on authentication status
+// For now, assume the user is authenticated
+const visibleProjects = getVisibleContent(true);
+
+// Status color mapping for consistency
+const statusColors = {
+  'active': 'bg-highlight text-white',
+  'completed': 'bg-success text-white',
+  'planning': 'bg-warning text-white',
+  'paused': 'bg-yellow-500 text-white',
+};
+---
+
+<BaseLayout title="Projects" activePage="projects">
+  <div class="container mx-auto px-4">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold mb-4 md:mb-0">Projects</h1>
+      <div class="flex items-center space-x-3">
+        <a href="/activity" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded border border-gray-200 transition-colors flex items-center">
+          <i class="ri-history-line mr-1"></i> Activity
+        </a>
+        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center">
+          <i class="ri-add-line mr-1"></i> New Project
+        </button>
+      </div>
+    </div>
+    
+    <!-- Project Stats Overview -->
+    <ProjectStats />
+    
+    <!-- Dashboard Overview Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Left Column - Projects Overview -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Projects Needing Attention -->
+        <ProjectsAttention />
+        
+        <!-- Recent Activity -->
+        <RecentActivity />
+      </div>
+      
+      <!-- Right Sidebar -->
+      <div class="space-y-6">
+        <!-- Tech Stack Distribution -->
+        <TechStack />
+      </div>
+    </div>
+    
+    <!-- Project List Section -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Projects List</h2>
+      </div>
+    </div>
+    
+    <!-- Project filtering and controls -->
+    <ProjectFilters />
+    
+    <!-- Projects Grid -->
+    <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-view">
+      {visibleProjects.map(project => (
+        <div 
+          data-project 
+          data-status={project.status} 
+          data-category={project.category}
+          data-title={project.title}
+          data-description={project.description}
+        >
+          <ProjectCard project={project} />
+        </div>
+      ))}
+    </div>
+    
+    {/* Show message when no projects are visible */}
+    {visibleProjects.length === 0 && (
+      <div class="text-center py-12 bg-white rounded-lg shadow-card">
+        <p class="text-light-ink text-lg mb-4">No projects found.</p>
+        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+          <i class="ri-add-line mr-1"></i> Create a new project
+        </button>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  // Filter functionality would be implemented here in a real app
+  // This would be client-side JavaScript to filter the projects based on
+  // the status, category, and search inputs
+</script> 

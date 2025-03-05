@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base color variables */
+  --color-paper: #f0f4f8;
+  --color-ink: #333333;
+  --color-light-ink: #777777;
+  --color-highlight: #4361ee;
+  --color-success: #38b000;
+  --color-warning: #ffaa00;
+  --color-danger: #d62828;
+}
+
+body {
+  font-family: 'Special Elite', cursive;
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+}
+
+/* Utility classes for content visibility */
+.private-content {
+  display: none;
+}
+
+body.authenticated .private-content {
+  display: block;
+}
