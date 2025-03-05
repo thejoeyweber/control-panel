@@ -1,0 +1,22 @@
+# Node.js dependencies
+node_modules/
+
+# Package files
+package-lock.json
+package.json
+
+# Application files
+start.js
+
+# Environment variables
+.env
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db 
