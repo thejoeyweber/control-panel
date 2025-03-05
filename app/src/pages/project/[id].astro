@@ -2,60 +2,80 @@
 /*
   File: src/pages/project/[id].astro
   Purpose: Displays detailed information for a specific project
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, getProjectById from data/projects.ts
 */
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjectById, projects } from '../../data/projects';
 
-// In a real implementation, this would fetch from a database or JSON file
-// based on the project ID
+// Generate static paths for all projects
+export function getStaticPaths() {
+  return projects.map(project => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
 
-// Get the project ID from the URL
+// Get project from props or by ID (fallback)
 const { id } = Astro.params;
+const { project: propProject } = Astro.props;
+const project = propProject || getProjectById(id);
 
-// Mock project data - in a real app, this would come from a data store
-const project = {
-  id: id,
-  title: 'Control Panel Rebuild',
-  description: 'Rebuilding the personal dashboard with Astro and Tailwind CSS to improve performance and maintainability.',
-  status: 'in-progress',
-  category: 'development',
-  progress: 35,
-  startDate: '2025-02-15',
-  dueDate: '2025-04-30',
-  tags: ['web development', 'astro', 'tailwind css'],
-  visibility: 'public',
-  notes: 'This project involves rebuilding the existing prototype with a modern stack for better performance and maintainability.',
-  nextSteps: [
-    'Complete the base layout',
-    'Implement all page templates',
-    'Add data loading from JSON/Markdown',
-    'Implement authentication'
-  ],
-  activities: [
-    {
-      date: '2025-03-04',
-      description: 'Initialized Astro project with Tailwind CSS'
-    },
-    {
-      date: '2025-03-01',
-      description: 'Created project plan and technical specifications'
-    },
-    {
-      date: '2025-02-15',
-      description: 'Project started'
-    }
-  ]
-};
+// Redirect to projects page if project not found
+if (!project) {
+  return Astro.redirect('/projects');
+}
 
-// Format dates for display
-const formatDate = (dateString) => {
+// Format date for display
+function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+}
+
+// Format relative time for last activity
+function getRelativeTimeString(dateString) {
+  if (!dateString) return 'No activity';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  
+  if (diffInHours < 24) {
+    return diffInHours === 0 ? 'Just now' : 
+           diffInHours === 1 ? '1 hour ago' : 
+           `${diffInHours} hours ago`;
+  }
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
+  }
+  
+  if (diffInDays < 30) {
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
+  }
+  
+  const diffInMonths = Math.floor(diffInDays / 30);
+  return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+}
+
+// Status color mapping
+const statusColors = {
+  active: 'bg-green-100 text-green-800',
+  completed: 'bg-blue-100 text-blue-800',
+  planning: 'bg-purple-100 text-purple-800',
+  paused: 'bg-amber-100 text-amber-800'
 };
+
+// Get the most recent activity date
+const lastActivityDate = project.activities && project.activities.length > 0
+  ? project.activities[0].date
+  : null;
 ---
 
 <BaseLayout title={project.title} activePage="projects">
@@ -72,17 +92,54 @@ const formatDate = (dateString) => {
         <div class="flex flex-wrap justify-between items-start gap-4">
           <div>
             <h1 class="text-3xl font-bold mb-2">{project.title}</h1>
+            <div class="flex items-center gap-2 mb-3">
+              <span class={`text-xs px-2 py-1 rounded-full ${statusColors[project.status]}`}>
+                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+              </span>
+              <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                {project.category}
+              </span>
+            </div>
             <p class="text-light-ink">{project.description}</p>
           </div>
           
           <div class="flex gap-2">
-            <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            {project.githubUrl && (
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors flex items-center">
+                <i class="ri-github-fill mr-1"></i> GitHub
+              </a>
+            )}
+            {project.liveUrl && (
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors flex items-center">
+                <i class="ri-external-link-line mr-1"></i> Live Demo
+              </a>
+            )}
+            <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center">
               <i class="ri-edit-line mr-1"></i> Edit
             </button>
-            <button class="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
-              <i class="ri-delete-bin-line mr-1"></i> Delete
-            </button>
           </div>
+        </div>
+      </div>
+      
+      <!-- Key Metrics Section -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b border-gray-200 bg-gray-50">
+        <div class="flex items-center text-light-ink">
+          <i class="ri-time-line mr-2"></i>
+          <span>Last updated: {getRelativeTimeString(project.lastUpdated)}</span>
+        </div>
+        <div class="flex items-center text-light-ink">
+          <i class="ri-git-commit-line mr-2"></i>
+          <span>{project.activities?.filter(a => a.type === 'commit').length || 0} commits</span>
+        </div>
+        <div class="flex items-center text-light-ink">
+          <i class="ri-calendar-line mr-2"></i>
+          <span>Started: {formatDate(project.startDate)}</span>
+        </div>
+        <div class="flex items-center">
+          <span class="inline-flex items-center text-light-ink">
+            <i class="ri-progress-4-line mr-2"></i>
+            <span>{project.progress}% Complete</span>
+          </span>
         </div>
       </div>
       
@@ -90,111 +147,118 @@ const formatDate = (dateString) => {
       <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column - Main Details -->
         <div class="lg:col-span-2">
-          <!-- Status and Progress -->
+          <!-- Next Steps -->
           <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4">Status & Progress</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-sm text-light-ink mb-1">Status</h3>
-                <p class="font-bold capitalize">{project.status.replace('-', ' ')}</p>
-              </div>
-              
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-sm text-light-ink mb-1">Category</h3>
-                <p class="font-bold capitalize">{project.category}</p>
-              </div>
-              
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-sm text-light-ink mb-1">Start Date</h3>
-                <p class="font-bold">{formatDate(project.startDate)}</p>
-              </div>
-              
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-sm text-light-ink mb-1">Due Date</h3>
-                <p class="font-bold">{formatDate(project.dueDate)}</p>
-              </div>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold">Next Steps</h2>
+              <button class="text-highlight hover:underline text-sm flex items-center">
+                <i class="ri-add-line mr-1"></i> Add Step
+              </button>
             </div>
             
-            <div class="mb-2">
-              <div class="flex justify-between items-center mb-2">
-                <span class="font-bold">Progress: {project.progress}%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-4">
-                <div 
-                  class="bg-highlight h-4 rounded-full" 
-                  style={`width: ${project.progress}%`}
-                ></div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Notes -->
-          <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4">Notes</h2>
             <div class="bg-gray-50 p-4 rounded-lg">
-              <p>{project.notes}</p>
+              {project.nextSteps && project.nextSteps.length > 0 ? (
+                <ul class="space-y-2">
+                  {project.nextSteps.map((step) => (
+                    <li class="flex items-start">
+                      <span class="text-highlight mr-2 mt-0.5"><i class="ri-checkbox-blank-circle-line"></i></span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="text-light-ink">No next steps defined yet. Add some to track your progress.</p>
+              )}
             </div>
           </div>
           
           <!-- Activities -->
           <div>
-            <h2 class="text-xl font-bold mb-4">Activity Log</h2>
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <ul class="divide-y divide-gray-200">
-                {project.activities.map((activity) => (
-                  <li class="py-3">
-                    <div class="flex items-start">
-                      <span class="text-highlight mr-2"><i class="ri-time-line"></i></span>
-                      <div>
-                        <p class="font-medium">{activity.description}</p>
-                        <p class="text-sm text-light-ink">{formatDate(activity.date)}</p>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              
-              <button class="mt-4 text-highlight hover:underline inline-flex items-center">
-                <i class="ri-add-line mr-1"></i> Add Activity
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold">Activity Log</h2>
+              <button class="text-highlight hover:underline text-sm flex items-center">
+                <i class="ri-add-line mr-1"></i> Log Activity
               </button>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              {project.activities && project.activities.length > 0 ? (
+                <ul class="divide-y divide-gray-200">
+                  {project.activities.map((activity) => (
+                    <li class="py-3">
+                      <div class="flex items-start">
+                        <span class={`text-${activity.type === 'commit' ? 'blue' : activity.type === 'pr' ? 'green' : 'purple'}-600 mr-2`}>
+                          <i class={`ri-${activity.type === 'commit' ? 'github-fill' : activity.type === 'pr' ? 'git-pull-request-line' : 'edit-line'}`}></i>
+                        </span>
+                        <div>
+                          <p class="font-medium">{activity.description}</p>
+                          <p class="text-sm text-light-ink">{formatDate(activity.date)}</p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="text-light-ink">No activities logged yet. Add some to track your progress.</p>
+              )}
             </div>
           </div>
         </div>
         
-        <!-- Right Column - Tags and Next Steps -->
+        <!-- Right Column - Tags and Tech Stack -->
         <div>
           <!-- Tags -->
           <div class="mb-8">
             <h2 class="text-xl font-bold mb-4">Tags</h2>
             <div class="flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
-                <span class="bg-gray-100 text-light-ink px-3 py-1 rounded-full text-sm">
-                  {tag}
-                </span>
-              ))}
+              {project.tags && project.tags.length > 0 ? (
+                project.tags.map((tag) => (
+                  <span class="bg-gray-100 text-light-ink px-3 py-1 rounded-full text-sm">
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <p class="text-light-ink">No tags added yet.</p>
+              )}
               
-              <button class="text-highlight hover:underline text-sm">
+              <button class="text-highlight hover:underline text-sm flex items-center">
                 <i class="ri-add-line"></i> Add Tag
               </button>
             </div>
           </div>
           
-          <!-- Next Steps -->
-          <div>
-            <h2 class="text-xl font-bold mb-4">Next Steps</h2>
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <ul class="space-y-2">
-                {project.nextSteps.map((step) => (
-                  <li class="flex items-start">
-                    <span class="text-highlight mr-2 mt-0.5"><i class="ri-checkbox-blank-circle-line"></i></span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ul>
+          <!-- Tech Stack -->
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Tech Stack</h2>
+            <div class="flex flex-wrap gap-2">
+              {project.techStack && project.techStack.length > 0 ? (
+                project.techStack.map((tech) => (
+                  <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+                    {tech}
+                  </span>
+                ))
+              ) : (
+                <p class="text-light-ink">No tech stack defined yet.</p>
+              )}
               
-              <button class="mt-4 text-highlight hover:underline inline-flex items-center">
-                <i class="ri-add-line mr-1"></i> Add Step
+              <button class="text-highlight hover:underline text-sm flex items-center">
+                <i class="ri-add-line"></i> Add Tech
+              </button>
+            </div>
+          </div>
+          
+          <!-- Notes -->
+          <div>
+            <h2 class="text-xl font-bold mb-4">Notes</h2>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              {project.notes ? (
+                <p class="text-light-ink">{project.notes}</p>
+              ) : (
+                <p class="text-light-ink">No notes added yet.</p>
+              )}
+              
+              <button class="text-highlight hover:underline text-sm flex items-center mt-2">
+                <i class="ri-edit-line"></i> Edit Notes
               </button>
             </div>
           </div>

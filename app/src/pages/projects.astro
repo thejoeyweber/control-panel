@@ -2,145 +2,99 @@
 /*
   File: src/pages/projects.astro
   Purpose: Displays user projects with status, filters, and links to project details
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, project components, and project data
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent } from '../utils/auth';
-
-// This would come from a JSON file or database in the real implementation
-const allProjects = [
-  {
-    id: 'project-1',
-    title: 'Control Panel Rebuild',
-    description: 'Rebuilding personal dashboard with Astro and Tailwind CSS',
-    status: 'in-progress',
-    category: 'development',
-    progress: 35,
-    startDate: '2025-02-15',
-    visibility: 'public',
-  },
-  {
-    id: 'project-2',
-    title: 'AI Content Assistant',
-    description: 'Tool for generating and editing content with AI',
-    status: 'planning',
-    category: 'ai',
-    progress: 10,
-    startDate: '2025-03-01',
-    visibility: 'public',
-  },
-  {
-    id: 'project-3',
-    title: 'Revenue Optimization Strategy',
-    description: 'Analysis and optimization of income streams',
-    status: 'planning',
-    category: 'finance',
-    progress: 5,
-    startDate: '2025-03-10',
-    visibility: 'private', // This will only be visible when logged in
-  }
-];
+import { getVisibleContent, projects } from '../data/projects';
+import ProjectCard from '../components/projects/ProjectCard.astro';
+import ProjectFilters from '../components/projects/ProjectFilters.astro';
+import ProjectStats from '../components/projects/ProjectStats.astro';
+import ProjectsAttention from '../components/projects/ProjectsAttention.astro';
+import RecentActivity from '../components/projects/RecentActivity.astro';
+import TechStack from '../components/projects/TechStack.astro';
 
 // Filter projects based on authentication status
-const projects = getVisibleContent(allProjects);
+// For now, assume the user is authenticated
+const visibleProjects = getVisibleContent(true);
 
+// Status color mapping for consistency
 const statusColors = {
+  'active': 'bg-highlight text-white',
   'completed': 'bg-success text-white',
-  'in-progress': 'bg-highlight text-white',
   'planning': 'bg-warning text-white',
-  'archived': 'bg-gray-400 text-white',
+  'paused': 'bg-yellow-500 text-white',
 };
 ---
 
 <BaseLayout title="Projects" activePage="projects">
   <div class="container mx-auto px-4">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Projects</h1>
-      <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-        <i class="ri-add-line mr-1"></i> New Project
-      </button>
-    </div>
-    
-    <!-- Filter Controls -->
-    <div class="bg-white p-4 rounded-lg shadow-card mb-6">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div>
-          <label for="status-filter" class="block text-sm font-medium text-light-ink mb-1">Status</label>
-          <select id="status-filter" class="border rounded px-3 py-1">
-            <option value="">All Statuses</option>
-            <option value="in-progress">In Progress</option>
-            <option value="planning">Planning</option>
-            <option value="completed">Completed</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="category-filter" class="block text-sm font-medium text-light-ink mb-1">Category</label>
-          <select id="category-filter" class="border rounded px-3 py-1">
-            <option value="">All Categories</option>
-            <option value="development">Development</option>
-            <option value="writing">Writing</option>
-            <option value="ai">AI</option>
-            <option value="finance">Finance</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="search" class="block text-sm font-medium text-light-ink mb-1">Search</label>
-          <input type="text" id="search" placeholder="Search projects..." class="border rounded px-3 py-1 w-full">
-        </div>
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold mb-4 md:mb-0">Projects</h1>
+      <div class="flex items-center space-x-3">
+        <a href="/activity" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded border border-gray-200 transition-colors flex items-center">
+          <i class="ri-history-line mr-1"></i> Activity
+        </a>
+        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center">
+          <i class="ri-add-line mr-1"></i> New Project
+        </button>
       </div>
     </div>
     
+    <!-- Project Stats Overview -->
+    <ProjectStats />
+    
+    <!-- Dashboard Overview Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Left Column - Projects Overview -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Projects Needing Attention -->
+        <ProjectsAttention />
+        
+        <!-- Recent Activity -->
+        <RecentActivity />
+      </div>
+      
+      <!-- Right Sidebar -->
+      <div class="space-y-6">
+        <!-- Tech Stack Distribution -->
+        <TechStack />
+      </div>
+    </div>
+    
+    <!-- Project List Section -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">Projects List</h2>
+      </div>
+    </div>
+    
+    <!-- Project filtering and controls -->
+    <ProjectFilters />
+    
     <!-- Projects Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {projects.map(project => (
-        <div class="bg-white rounded-lg shadow-card overflow-hidden hover:shadow-card-hover transition-shadow">
-          <div class="p-6">
-            <div class="flex justify-between items-start mb-4">
-              <h3 class="text-xl font-bold">{project.title}</h3>
-              <span class={`text-xs px-2 py-1 rounded-full ${statusColors[project.status] || 'bg-gray-200'}`}>
-                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-              </span>
-            </div>
-            
-            <p class="text-light-ink mb-4">{project.description}</p>
-            
-            <div class="mb-4">
-              <div class="flex justify-between text-xs text-light-ink mb-1">
-                <span>Progress</span>
-                <span>{project.progress}%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  class="bg-highlight h-2 rounded-full" 
-                  style={`width: ${project.progress}%`}
-                ></div>
-              </div>
-            </div>
-            
-            <p class="text-sm text-light-ink">
-              <i class="ri-calendar-line mr-1"></i> {new Date(project.startDate).toLocaleDateString()}
-            </p>
-          </div>
-          
-          <div class="border-t border-gray-100 p-4 bg-gray-50">
-            <a 
-              href={`/project/${project.id}`} 
-              class="text-highlight hover:text-blue-700 hover:underline transition-colors">
-              View details <i class="ri-arrow-right-line"></i>
-            </a>
-          </div>
+    <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-view">
+      {visibleProjects.map(project => (
+        <div 
+          data-project 
+          data-status={project.status} 
+          data-category={project.category}
+          data-title={project.title}
+          data-description={project.description}
+        >
+          <ProjectCard project={project} />
         </div>
       ))}
     </div>
     
     {/* Show message when no projects are visible */}
-    {projects.length === 0 && (
-      <div class="text-center py-12">
-        <p class="text-light-ink text-lg">No projects found. Create a new project to get started.</p>
+    {visibleProjects.length === 0 && (
+      <div class="text-center py-12 bg-white rounded-lg shadow-card">
+        <p class="text-light-ink text-lg mb-4">No projects found.</p>
+        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+          <i class="ri-add-line mr-1"></i> Create a new project
+        </button>
       </div>
     )}
   </div>
