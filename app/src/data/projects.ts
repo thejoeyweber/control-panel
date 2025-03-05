@@ -8,8 +8,8 @@ import type { Project, Activity } from '../types';
 import { isAuthenticated } from '../utils/auth';
 import * as dataUtils from '../utils/data';
 
-// Mock project data
-export const projects: Project[] = [
+// Default project data
+const defaultProjects: Project[] = [
   {
     id: 'control-panel',
     title: 'Personal Control Panel',
@@ -48,16 +48,16 @@ export const projects: Project[] = [
       {
         id: 'act1',
         projectId: 'control-panel',
-        type: 'commit',
-        date: '2023-11-20',
-        description: 'Added project filtering functionality'
+        type: 'manual',
+        date: '2023-11-18',
+        description: 'Sketched initial dashboard wireframes'
       },
       {
         id: 'act2',
         projectId: 'control-panel',
-        type: 'manual',
-        date: '2023-11-15',
-        description: 'Updated project requirements document'
+        type: 'commit',
+        date: '2023-11-20',
+        description: 'Initial project setup and configuration'
       }
     ]
   },
@@ -176,8 +176,188 @@ export const projects: Project[] = [
         description: 'Added notes for "Atomic Habits"'
       }
     ]
+  },
+  {
+    id: 'writing-portfolio',
+    title: 'Writing Portfolio',
+    description: 'A collection of my technical blog posts, articles, and tutorials.',
+    status: 'active',
+    category: 'Writing',
+    startDate: '2023-09-01',
+    lastUpdated: '2023-11-15',
+    progress: 80,
+    tags: ['writing', 'portfolio', 'blogging'],
+    techStack: ['Markdown', 'Gatsby', 'React'],
+    nextSteps: [
+      'Add categories and filtering',
+      'Implement newsletter signup',
+      'Design PDF download option'
+    ],
+    notes: 'Focus on technical articles and tutorials for developers.',
+    githubUrl: 'https://github.com/username/writing-portfolio',
+    liveUrl: 'https://yourname.com/writing',
+    visibility: 'public',
+    activities: [
+      {
+        id: 'wp-act1',
+        projectId: 'writing-portfolio',
+        type: 'manual',
+        date: '2023-11-15',
+        description: 'Published article on React hooks'
+      },
+      {
+        id: 'wp-act2',
+        projectId: 'writing-portfolio',
+        type: 'commit',
+        date: '2023-11-10',
+        description: 'Updated site styling and typography'
+      }
+    ]
+  },
+  {
+    id: 'task-tracker',
+    title: 'Task Tracker',
+    description: 'A simple task management application for personal use.',
+    status: 'planning',
+    category: 'Development',
+    startDate: '2023-12-01',
+    lastUpdated: '2023-11-25',
+    progress: 15,
+    tags: ['productivity', 'tasks', 'personal'],
+    techStack: ['React', 'Node.js', 'MongoDB'],
+    nextSteps: [
+      'Create data model',
+      'Design UI mockups',
+      'Set up database'
+    ],
+    notes: 'Should include time tracking and priority features.',
+    githubUrl: '',
+    liveUrl: '',
+    visibility: 'private',
+    activities: [
+      {
+        id: 'tt-act1',
+        projectId: 'task-tracker',
+        type: 'manual',
+        date: '2023-11-25',
+        description: 'Researched similar applications and features'
+      }
+    ]
+  },
+  {
+    id: 'newsletter',
+    title: 'Tech Insights Newsletter',
+    description: 'A weekly newsletter on tech trends and developer tips.',
+    status: 'paused',
+    category: 'Writing',
+    startDate: '2023-08-15',
+    lastUpdated: '2023-10-30',
+    progress: 40,
+    tags: ['newsletter', 'writing', 'audience-building'],
+    techStack: ['Substack', 'Markdown', 'ConvertKit'],
+    nextSteps: [
+      'Plan next 4 issues',
+      'Create subscriber onboarding sequence',
+      'Design new newsletter template'
+    ],
+    notes: 'Paused for reconsideration of format and audience targeting.',
+    githubUrl: '',
+    liveUrl: 'https://newsletter.example.com',
+    visibility: 'public',
+    activities: [
+      {
+        id: 'nl-act1',
+        projectId: 'newsletter',
+        type: 'manual',
+        date: '2023-10-30',
+        description: 'Sent issue #12 on debugging techniques'
+      },
+      {
+        id: 'nl-act2',
+        projectId: 'newsletter',
+        type: 'manual',
+        date: '2023-10-15',
+        description: 'Analyzed subscriber engagement metrics'
+      }
+    ]
+  },
+  {
+    id: 'personal-site',
+    title: 'Personal Website Redesign',
+    description: 'A refresh of my personal website and portfolio.',
+    status: 'completed',
+    category: 'Design',
+    startDate: '2023-07-10',
+    lastUpdated: '2023-09-20',
+    progress: 100,
+    tags: ['portfolio', 'design', 'personal-brand'],
+    techStack: ['Next.js', 'TailwindCSS', 'Framer Motion'],
+    nextSteps: [],
+    notes: 'Complete redesign with improved portfolio section and contact form.',
+    githubUrl: 'https://github.com/username/personal-site',
+    liveUrl: 'https://yourname.com',
+    visibility: 'public',
+    activities: [
+      {
+        id: 'ps-act1',
+        projectId: 'personal-site',
+        type: 'commit',
+        date: '2023-09-20',
+        description: 'Deployed final version to production'
+      },
+      {
+        id: 'ps-act2',
+        projectId: 'personal-site',
+        type: 'commit',
+        date: '2023-09-15',
+        description: 'Implemented animations and transitions'
+      }
+    ]
+  },
+  {
+    id: 'open-source-lib',
+    title: 'React Form Builder',
+    description: 'An open-source library for building dynamic forms in React.',
+    status: 'active',
+    category: 'Open Source',
+    startDate: '2023-06-01',
+    lastUpdated: '2023-11-22',
+    progress: 75,
+    tags: ['react', 'forms', 'open-source', 'library'],
+    techStack: ['React', 'TypeScript', 'Jest'],
+    nextSteps: [
+      'Add file upload component',
+      'Improve validation system',
+      'Write more documentation examples'
+    ],
+    notes: 'Currently at v0.9.0, aiming for 1.0 release by January.',
+    githubUrl: 'https://github.com/username/react-form-builder',
+    liveUrl: 'https://react-form-builder.example.com',
+    visibility: 'public',
+    activities: [
+      {
+        id: 'os-act1',
+        projectId: 'open-source-lib',
+        type: 'commit',
+        date: '2023-11-22',
+        description: 'Fixed validation bug reported in issue #42'
+      },
+      {
+        id: 'os-act2',
+        projectId: 'open-source-lib',
+        type: 'pr',
+        date: '2023-11-18',
+        description: 'Merged PR for accessibility improvements'
+      }
+    ]
   }
 ];
+
+// Initialize projects with localStorage integration
+// Only runs client-side (fails gracefully during SSR)
+export const projects = typeof window !== 'undefined' 
+  ? dataUtils.initializeData<Project>('projects', defaultProjects)
+  : defaultProjects;
 
 /**
  * Get projects filtered by visibility
@@ -201,22 +381,27 @@ export function getProjectById(id: string): Project | undefined {
  * @returns Object containing project statistics
  */
 export function getProjectStats() {
-  const total = projects.length;
-  const active = projects.filter(p => p.status === 'active').length;
-  const completed = projects.filter(p => p.status === 'completed').length;
-  const planning = projects.filter(p => p.status === 'planning').length;
-  const paused = projects.filter(p => p.status === 'paused').length;
+  const visibleProjects = getVisibleContent();
+  
+  // Count projects by status
+  const statusCounts = dataUtils.countByProperty(visibleProjects, 'status');
+  const statusPercentages = dataUtils.calculatePercentages(statusCounts);
+  
+  // Count projects by category
+  const categoryCounts = dataUtils.countByProperty(visibleProjects, 'category');
+  
+  // Calculate overall progress
+  const totalProgress = visibleProjects.reduce((sum, project) => sum + project.progress, 0);
+  const averageProgress = visibleProjects.length > 0 
+    ? Math.round(totalProgress / visibleProjects.length) 
+    : 0;
   
   return {
-    total,
-    active,
-    activePercent: Math.round((active / total) * 100),
-    completed,
-    completedPercent: Math.round((completed / total) * 100),
-    planning,
-    planningPercent: Math.round((planning / total) * 100),
-    paused,
-    pausedPercent: Math.round((paused / total) * 100)
+    totalProjects: visibleProjects.length,
+    statusCounts,
+    statusPercentages,
+    categoryCounts,
+    averageProgress
   };
 }
 
@@ -225,20 +410,16 @@ export function getProjectStats() {
  * @returns Array of projects needing attention
  */
 export function getProjectsNeedingAttention(): Project[] {
-  const twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  const visibleProjects = getVisibleContent();
   
-  return projects.filter(project => {
-    // Projects with no next steps
-    const missingNextSteps = project.status === 'active' && 
-                            (!project.nextSteps || project.nextSteps.length === 0);
-    
-    // Projects with no recent activity
-    const lastUpdatedDate = new Date(project.lastUpdated);
-    const noRecentActivity = project.status === 'active' && lastUpdatedDate < twoWeeksAgo;
-    
-    return missingNextSteps || noRecentActivity;
-  });
+  // Filter for active projects with progress < 50% or recently updated
+  return visibleProjects
+    .filter(project => 
+      (project.status === 'active' && project.progress < 50) ||
+      (project.status === 'active' && 
+       new Date(project.lastUpdated) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+    )
+    .slice(0, 3); // Get top 3
 }
 
 /**
@@ -246,11 +427,86 @@ export function getProjectsNeedingAttention(): Project[] {
  * @returns Array of all activities
  */
 export function getAllActivities(): Activity[] {
-  return projects
-    .flatMap(project => 
-      (project.activities || []).map(activity => ({
+  const visibleProjects = getVisibleContent();
+  
+  // Collect all activities from all projects
+  return visibleProjects
+    .flatMap(project => (project.activities || [])
+      .map(activity => ({
         ...activity,
-        projectId: project.id
+        projectTitle: project.title
       }))
-    );
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+/**
+ * Save a project (add new or update existing)
+ * @param project The project to save
+ * @returns Array of updated projects
+ */
+export function saveProject(project: Project): Project[] {
+  // Make a copy of the projects array to ensure reactivity
+  let updatedProjects: Project[];
+  
+  // Set 'lastUpdated' to current date if not provided
+  const now = new Date().toISOString().split('T')[0];
+  const projectWithDate = {
+    ...project,
+    lastUpdated: now
+  };
+  
+  // Generate ID if new project
+  if (!projectWithDate.id) {
+    projectWithDate.id = dataUtils.generateId();
+  }
+  
+  // Save to localStorage and update projects array
+  updatedProjects = dataUtils.saveItem('projects', projectWithDate, projects);
+  
+  // Update the projects reference
+  // This is a workaround since we can't directly modify the imported array
+  projects.length = 0;
+  projects.push(...updatedProjects);
+  
+  return updatedProjects;
+}
+
+/**
+ * Delete a project by ID
+ * @param id The ID of the project to delete
+ * @returns Array of remaining projects
+ */
+export function deleteProject(id: string): Project[] {
+  // Delete from localStorage and get updated list
+  const updatedProjects = dataUtils.deleteItem('projects', id, projects);
+  
+  // Update the projects reference
+  projects.length = 0;
+  projects.push(...updatedProjects);
+  
+  return updatedProjects;
+}
+
+/**
+ * Create a new, empty project template
+ * @returns A new project with default values
+ */
+export function createEmptyProject(): Project {
+  const now = new Date().toISOString().split('T')[0];
+  
+  return {
+    id: '', // Will be set when saved
+    title: '',
+    description: '',
+    status: 'planning',
+    category: '',
+    startDate: now,
+    lastUpdated: now,
+    progress: 0,
+    tags: [],
+    techStack: [],
+    visibility: 'private',
+    activities: []
+  };
 } 

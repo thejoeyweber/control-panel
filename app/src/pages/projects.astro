@@ -6,13 +6,16 @@
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent, projects } from '../data/projects';
+import { getVisibleContent, projects, saveProject, createEmptyProject, getProjectById, deleteProject } from '../data/projects';
 import ProjectCard from '../components/projects/ProjectCard.astro';
 import ProjectFilters from '../components/projects/ProjectFilters.astro';
 import ProjectStats from '../components/projects/ProjectStats.astro';
 import ProjectsAttention from '../components/projects/ProjectsAttention.astro';
 import RecentActivity from '../components/projects/RecentActivity.astro';
 import TechStack from '../components/projects/TechStack.astro';
+import Modal from '../components/Modal.astro';
+import ProjectForm from '../components/projects/ProjectForm.astro';
+import Toast from '../components/Toast.astro';
 
 // Filter projects based on authentication status
 const visibleProjects = getVisibleContent();
@@ -24,83 +27,141 @@ const statusColors = {
   'planning': 'bg-warning text-white',
   'paused': 'bg-yellow-500 text-white',
 };
+
+// Empty project for the edit form
+const emptyProject = createEmptyProject();
+
+// Check for success/error messages from form submissions
+const success = Astro.url.searchParams.get('success');
+const error = Astro.url.searchParams.get('error');
+const action = Astro.url.searchParams.get('action');
+
+// Get project ID from URL if in edit mode
+const projectId = Astro.url.searchParams.get('edit');
+const projectToEdit = projectId ? visibleProjects.find(p => p.id === projectId) : null;
+
+// If editing, get the project data
+let editProject = emptyProject;
+if (projectId) {
+  const project = getProjectById(projectId);
+  if (project) {
+    editProject = project;
+  }
+}
 ---
 
 <BaseLayout title="Projects" activePage="projects">
-  <div class="container mx-auto px-4">
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-      <h1 class="text-3xl font-bold mb-4 md:mb-0">Projects</h1>
-      <div class="flex items-center space-x-3">
-        <a href="/activity" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded border border-gray-200 transition-colors flex items-center">
-          <i class="ri-history-line mr-1"></i> Activity
-        </a>
-        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center">
-          <i class="ri-add-line mr-1"></i> New Project
-        </button>
-      </div>
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">My Projects</h1>
+      <button 
+        id="new-project-btn"
+        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md flex items-center"
+      >
+        <i class="ri-add-line mr-1"></i> New Project
+      </button>
     </div>
+
+    <!-- Success/Error Toast -->
+    {success && (
+      <Toast 
+        id="success-toast"
+        type="success" 
+        title={action === 'create' ? 'Project Created' : action === 'update' ? 'Project Updated' : 'Project Deleted'} 
+        message={success} 
+      />
+    )}
     
-    <!-- Project Stats Overview -->
-    <ProjectStats />
-    
-    <!-- Dashboard Overview Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-      <!-- Left Column - Projects Overview -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Projects Needing Attention -->
-        <ProjectsAttention />
-        
-        <!-- Recent Activity -->
-        <RecentActivity />
-      </div>
-      
-      <!-- Right Sidebar -->
-      <div class="space-y-6">
-        <!-- Tech Stack Distribution -->
-        <TechStack />
-      </div>
-    </div>
-    
-    <!-- Project List Section -->
-    <div class="mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">Projects List</h2>
-      </div>
-    </div>
-    
-    <!-- Project filtering and controls -->
+    {error && (
+      <Toast 
+        id="error-toast"
+        type="error" 
+        title="Error" 
+        message={error} 
+      />
+    )}
+
+    <!-- Project Filters -->
     <ProjectFilters />
     
-    <!-- Projects Grid -->
-    <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-view">
+    <!-- Project Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
       {visibleProjects.map(project => (
-        <div 
-          data-project 
-          data-status={project.status} 
-          data-category={project.category}
-          data-title={project.title}
-          data-description={project.description}
-        >
-          <ProjectCard project={project} />
-        </div>
+        <ProjectCard 
+          project={project}
+          statusColors={statusColors}
+        />
       ))}
+      
+      {visibleProjects.length === 0 && (
+        <div class="col-span-full text-center py-12 bg-gray-50 rounded-lg">
+          <p class="text-gray-500 mb-4">No projects found matching your filters</p>
+          <button id="clear-filters-btn" class="text-primary hover:text-primary-dark underline">
+            Clear filters
+          </button>
+        </div>
+      )}
     </div>
-    
-    {/* Show message when no projects are visible */}
-    {visibleProjects.length === 0 && (
-      <div class="text-center py-12 bg-white rounded-lg shadow-card">
-        <p class="text-light-ink text-lg mb-4">No projects found.</p>
-        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-          <i class="ri-add-line mr-1"></i> Create a new project
-        </button>
-      </div>
-    )}
   </div>
+  
+  <!-- Project Form Modal -->
+  <Modal id="project-modal" title={projectToEdit ? 'Edit Project' : 'Create New Project'}>
+    <ProjectForm 
+      project={projectToEdit} 
+      mode={projectToEdit ? 'edit' : 'create'} 
+    />
+  </Modal>
+  
+  <script>
+    // Show modal when New Project button is clicked
+    document.getElementById('new-project-btn')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('modal:open', { 
+        detail: { id: 'project-modal' } 
+      }));
+    });
+    
+    // Handle edit project buttons
+    document.querySelectorAll('.edit-project-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const projectId = button.getAttribute('data-id');
+        // Add the project ID to the URL without navigating
+        const url = new URL(window.location.href);
+        url.searchParams.set('edit', projectId);
+        window.history.pushState({}, '', url);
+        
+        // Open the modal
+        document.dispatchEvent(new CustomEvent('modal:open', { 
+          detail: { id: 'project-modal' } 
+        }));
+      });
+    });
+    
+    // Clear the edit parameter when modal is closed
+    document.addEventListener('modal:closed', (e) => {
+      if (e.detail?.id === 'project-modal') {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('edit')) {
+          url.searchParams.delete('edit');
+          window.history.pushState({}, '', url);
+        }
+      }
+    });
+    
+    // Handle project:cancel event
+    document.addEventListener('project:cancel', () => {
+      document.dispatchEvent(new CustomEvent('modal:close', { 
+        detail: { id: 'project-modal' } 
+      }));
+    });
+    
+    // Clear filters button
+    document.getElementById('clear-filters-btn')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('filters:clear'));
+    });
+  </script>
 </BaseLayout>
 
-<script>
-  // Filter functionality would be implemented here in a real app
-  // This would be client-side JavaScript to filter the projects based on
-  // the status, category, and search inputs
-</script> 
+<style>
+  /* Remove all existing notification animation styles since we're using Toast now */
+</style> 

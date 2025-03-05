@@ -1,0 +1,190 @@
+---
+/*
+  File: src/components/Modal.astro
+  Purpose: Reusable modal component for displaying forms and other content
+  Dependencies: None
+*/
+
+interface Props {
+  title: string;
+  id: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  fullHeight?: boolean;
+}
+
+const { title, id, size = 'md', fullHeight = false } = Astro.props;
+
+// Size classes for the modal
+const sizeClasses = {
+  sm: 'max-w-md',
+  md: 'max-w-2xl',
+  lg: 'max-w-4xl',
+  xl: 'max-w-6xl'
+};
+---
+
+<div id={id} class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden flex items-center justify-center" data-modal>
+  <div class={`modal-container bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full mx-4 ${fullHeight ? 'max-h-[90vh] flex flex-col' : ''} transition-transform transform scale-95 opacity-0 modal-content`}>
+    <div class="modal-header p-4 border-b flex justify-between items-center shrink-0">
+      <h3 class="text-xl font-semibold text-gray-800">{title}</h3>
+      <button type="button" class="modal-close text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class={`modal-body p-6 ${fullHeight ? 'overflow-y-auto' : 'overflow-y-visible'}`}>
+      <slot />
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  // Initialize modals when the DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    initModals();
+  });
+
+  // Initialize modal functionality
+  function initModals() {
+    // Get all elements with the data-modal attribute
+    const modals = document.querySelectorAll('[data-modal]');
+    
+    // Add click listeners to all modal trigger buttons
+    document.querySelectorAll('[data-modal-trigger]').forEach(trigger => {
+      const modalId = trigger.getAttribute('data-modal-target');
+      trigger.addEventListener('click', () => openModal(modalId));
+    });
+    
+    // Add close functionality to all modal close buttons
+    modals.forEach(modal => {
+      const closeBtn = modal.querySelector('.modal-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => closeModal(modal.id));
+      }
+      
+      // Close when clicking outside the modal content
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal(modal.id);
+        }
+      });
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const openModal = document.querySelector('.modal-backdrop:not(.hidden)');
+        if (openModal) {
+          closeModal(openModal.id);
+        }
+      }
+    });
+    
+    // Listen for custom events to open and close modals
+    document.addEventListener('modal:open', (e) => {
+      if (e.detail && e.detail.id) {
+        openModal(e.detail.id);
+      }
+    });
+    
+    document.addEventListener('modal:close', (e) => {
+      if (e.detail && e.detail.id) {
+        closeModal(e.detail.id);
+      } else {
+        // Close all modals if no ID specified
+        const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
+        openModals.forEach(modal => closeModal(modal.id));
+      }
+    });
+  }
+
+  // Open a modal by ID
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      // Show the backdrop
+      modal.classList.remove('hidden');
+      
+      // Animate in the modal content
+      setTimeout(() => {
+        const content = modal.querySelector('.modal-content');
+        if (content) {
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }
+      }, 10);
+      
+      // Prevent body scrolling
+      document.body.classList.add('overflow-hidden');
+    }
+  }
+
+  // Close a modal by ID
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      // Animate out the modal content
+      const content = modal.querySelector('.modal-content');
+      if (content) {
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+      }
+      
+      // Hide the backdrop after animation
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        
+        // Dispatch event when modal is fully closed
+        document.dispatchEvent(new CustomEvent('modal:closed', { 
+          detail: { id: modalId } 
+        }));
+      }, 200);
+    }
+  }
+  
+  // Make these functions available globally
+  if (window) {
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+  }
+</script>
+
+<style>
+  .modal-content {
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  }
+  
+  .modal-body {
+    max-height: calc(90vh - 100px); /* Subtract header height */
+  }
+</style>
+
+<noscript>
+  <style>
+    /* When JavaScript is disabled, make modals work with :target selector */
+    .modal-backdrop {
+      display: none;
+    }
+    
+    .modal-backdrop:target {
+      display: flex !important;
+    }
+    
+    .modal-backdrop:target .modal-content {
+      transform: scale(1) !important;
+      opacity: 1 !important;
+    }
+  </style>
+</noscript>
+
+<script>
+  // Define the types for the window object
+  declare global {
+    interface Window {
+      openModal: (modalId: string) => void;
+      closeModal: (modalId: string) => void;
+    }
+  }
+</script> 
