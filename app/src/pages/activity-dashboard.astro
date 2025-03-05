@@ -1,0 +1,170 @@
+---
+/*
+  File: src/pages/activity-dashboard.astro
+  Purpose: Aggregates all activities from projects and potentially other areas into a centralized dashboard
+  Dependencies: Uses BaseLayout, utility functions for authentication and data filtering
+*/
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ActivityFilters from '../components/activity/ActivityFilters.astro';
+import ActivityList from '../components/activity/ActivityList.astro';
+import ActivityStats from '../components/activity/ActivityStats.astro';
+import ActivityPagination from '../components/activity/ActivityPagination.astro';
+import { isAuthenticated } from '../utils/auth';
+import { getAllActivities } from '../data/projects';
+
+// Get the authenticated status
+const authenticated = isAuthenticated();
+
+// Get all activities, respecting the authenticated status
+const allActivities = getAllActivities();
+const activities = authenticated ? allActivities : allActivities.filter(activity => {
+  // This filter would check if the activity's project is public
+  // For now, we're returning all activities since the getAllActivities function
+  // should already handle visibility (this can be enhanced later)
+  return true;
+});
+
+// Extract unique projects from activities for filter options
+const projects = [...new Set(activities.map(activity => activity.projectId))];
+
+// Activity types for filter options
+const activityTypes = ['commit', 'pr', 'manual'];
+---
+
+<BaseLayout title="Activity Dashboard" activePage="activity-dashboard">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <h1 class="text-3xl font-bold mb-4 md:mb-0">Activity Dashboard</h1>
+    <div class="flex space-x-3">
+      <a href="/projects" class="bg-gray-100 hover:bg-gray-200 text-ink px-4 py-2 rounded-lg transition-colors flex items-center">
+        <i class="ri-list-check mr-1"></i> Projects List
+      </a>
+      <button 
+        id="log-activity-btn" 
+        class="bg-highlight hover:bg-highlight-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+      >
+        <i class="ri-add-line mr-1"></i> Log Activity
+      </button>
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column - Activity Feed -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Activity Stats -->
+      <ActivityStats activities={activities} />
+      
+      <!-- Activity Filters and List -->
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <ActivityFilters projects={projects} activityTypes={activityTypes} />
+        
+        <ActivityList activities={activities} />
+        
+        <!-- Pagination if needed -->
+        <ActivityPagination 
+          currentPage={1} 
+          totalPages={Math.ceil(activities.length / 10)} 
+        />
+      </div>
+    </div>
+    
+    <!-- Right Column - Quick Log Form -->
+    <div class="space-y-6">
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h3 class="text-lg font-bold mb-4">Quick Log</h3>
+        
+        <form id="quick-log-form">
+          <div class="mb-4">
+            <label for="project-select" class="block mb-2 font-medium">Project</label>
+            <select id="project-select" class="w-full border border-gray-300 rounded-lg p-2">
+              {projects.map(project => (
+                <option value={project}>{project.replace(/-/g, ' ')}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="log-type" class="block mb-2 font-medium">Log Type</label>
+            <select id="log-type" class="w-full border border-gray-300 rounded-lg p-2">
+              <option value="manual">Work Log</option>
+              <option value="research">Research</option>
+              <option value="meeting">Meeting Notes</option>
+              <option value="problem">Problem-Solution</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="quick-activity-content" class="block mb-2 font-medium">Content</label>
+            <textarea 
+              id="quick-activity-content" 
+              class="w-full border border-gray-300 rounded-lg p-2 min-h-[150px]"
+              placeholder="What did you accomplish?"
+            ></textarea>
+          </div>
+          
+          <button 
+            type="submit" 
+            class="w-full bg-highlight hover:bg-highlight-dark text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Log Activity
+          </button>
+        </form>
+      </div>
+      
+      <!-- Project Next Steps widget could go here -->
+      <div class="bg-white rounded-lg shadow-card p-6">
+        <h3 class="text-lg font-bold mb-4">Next Steps</h3>
+        <p class="text-light-ink mb-2">Your upcoming priorities:</p>
+        
+        <ul class="space-y-2">
+          <li class="flex items-start gap-2">
+            <i class="ri-checkbox-blank-circle-line text-highlight mt-1"></i>
+            <span>Implement authentication for private activities</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="ri-checkbox-blank-circle-line text-highlight mt-1"></i>
+            <span>Add GitHub integration for automatic activity tracking</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="ri-checkbox-blank-circle-line text-highlight mt-1"></i>
+            <span>Create activity filtering by date range</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Client-side interactivity for activity filtering
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get filter elements
+    const projectFilter = document.getElementById('project-filter');
+    const typeFilter = document.getElementById('type-filter');
+    const dateRangeFilter = document.getElementById('date-range-filter');
+    
+    // Handle filter changes
+    const handleFilterChange = () => {
+      // This would filter the activities based on the selected filters
+      // For now, we're just logging to the console
+      console.log('Filters changed');
+      // In a real implementation, you'd use fetch or other methods to get filtered data
+    };
+    
+    // Add event listeners to filters if they exist
+    if (projectFilter) projectFilter.addEventListener('change', handleFilterChange);
+    if (typeFilter) typeFilter.addEventListener('change', handleFilterChange);
+    if (dateRangeFilter) dateRangeFilter.addEventListener('change', handleFilterChange);
+    
+    // Handle activity log form submission
+    const quickLogForm = document.getElementById('quick-log-form');
+    if (quickLogForm) {
+      quickLogForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Form submission logic would go here
+        alert('Activity logged! (This is a placeholder - no actual data is saved yet)');
+        quickLogForm.reset();
+      });
+    }
+  });
+</script> 

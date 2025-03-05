@@ -1,0 +1,75 @@
+---
+/*
+  File: src/components/activity/ActivityStats.astro
+  Purpose: Displays statistics about activities such as daily/weekly counts and most active project
+  Dependencies: Activity type from types/index.ts
+*/
+
+import type { Activity } from '../../types';
+
+export interface Props {
+  activities: Activity[];
+}
+
+const { activities } = Astro.props;
+
+// Get today's activities
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const todayActivities = activities.filter(activity => {
+  const activityDate = new Date(activity.date);
+  activityDate.setHours(0, 0, 0, 0);
+  return activityDate.getTime() === today.getTime();
+});
+
+// Get this week's activities
+const weekStart = new Date(today);
+weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+const thisWeekActivities = activities.filter(activity => {
+  const activityDate = new Date(activity.date);
+  return activityDate >= weekStart;
+});
+
+// Determine most active project
+const projectCounts = activities.reduce((counts, activity) => {
+  counts[activity.projectId] = (counts[activity.projectId] || 0) + 1;
+  return counts;
+}, {} as Record<string, number>);
+
+let mostActiveProject = '';
+let maxCount = 0;
+
+Object.entries(projectCounts).forEach(([project, count]) => {
+  if (count > maxCount) {
+    mostActiveProject = project;
+    maxCount = count;
+  }
+});
+
+// Format project name
+const formattedProjectName = mostActiveProject.replace(/-/g, ' ');
+---
+
+<div class="bg-white rounded-lg shadow-card p-6 mb-6">
+  <h3 class="text-lg font-medium mb-4">Activity Summary</h3>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-blue-50 p-4 rounded-lg">
+      <div class="text-sm text-blue-600 mb-1">Today</div>
+      <div class="text-3xl font-bold text-blue-800">{todayActivities.length}</div>
+      <div class="text-xs text-blue-600">Activity entries</div>
+    </div>
+    
+    <div class="bg-green-50 p-4 rounded-lg">
+      <div class="text-sm text-green-600 mb-1">This Week</div>
+      <div class="text-3xl font-bold text-green-800">{thisWeekActivities.length}</div>
+      <div class="text-xs text-green-600">Activity entries</div>
+    </div>
+    
+    <div class="bg-purple-50 p-4 rounded-lg">
+      <div class="text-sm text-purple-600 mb-1">Most Active Project</div>
+      <div class="text-2xl font-bold text-purple-800 truncate">{formattedProjectName || 'None'}</div>
+      <div class="text-xs text-purple-600">{maxCount} entries total</div>
+    </div>
+  </div>
+</div> 

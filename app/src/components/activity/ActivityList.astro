@@ -1,0 +1,151 @@
+---
+/*
+  File: src/components/activity/ActivityList.astro
+  Purpose: Displays a list of activities organized by date with timeline headers
+  Dependencies: Activity type from types/index.ts
+*/
+
+import type { Activity } from '../../types';
+
+export interface Props {
+  activities: Activity[];
+}
+
+const { activities } = Astro.props;
+
+// Sort activities by date (most recent first)
+const sortedActivities = [...activities].sort((a, b) => 
+  new Date(b.date).getTime() - new Date(a.date).getTime()
+);
+
+// Group activities by day
+const activityGroups = sortedActivities.reduce((groups, activity) => {
+  const date = new Date(activity.date);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  let groupKey;
+  
+  // Determine the group this activity belongs to
+  if (date.toDateString() === today.toDateString()) {
+    groupKey = 'Today';
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    groupKey = 'Yesterday';
+  } else if (today.getTime() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
+    groupKey = 'This Week';
+  } else if (today.getTime() - date.getTime() < 14 * 24 * 60 * 60 * 1000) {
+    groupKey = 'Last Week';
+  } else if (today.getTime() - date.getTime() < 30 * 24 * 60 * 60 * 1000) {
+    groupKey = 'This Month';
+  } else {
+    // Format as 'Month Year'
+    groupKey = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  
+  if (!groups[groupKey]) {
+    groups[groupKey] = [];
+  }
+  
+  groups[groupKey].push(activity);
+  return groups;
+}, {} as Record<string, Activity[]>);
+
+// Format a date relative to now (e.g., "2 days ago")
+function getRelativeTimeString(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  
+  if (diffInHours < 24) {
+    return diffInHours === 0 ? 'Just now' : 
+           diffInHours === 1 ? '1 hour ago' : 
+           `${diffInHours} hours ago`;
+  }
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
+  }
+  
+  if (diffInDays < 30) {
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
+  }
+  
+  const diffInMonths = Math.floor(diffInDays / 30);
+  return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+}
+
+// Activity type styling
+const activityStyles = {
+  'commit': {
+    icon: 'ri-github-fill',
+    bgColor: 'bg-blue-50',
+    textColor: 'text-blue-600',
+    label: 'GitHub Commit'
+  },
+  'pr': {
+    icon: 'ri-git-pull-request-line',
+    bgColor: 'bg-green-50',
+    textColor: 'text-green-600',
+    label: 'Pull Request Merged'
+  },
+  'manual': {
+    icon: 'ri-edit-line',
+    bgColor: 'bg-purple-50',
+    textColor: 'text-purple-600',
+    label: 'Manual Log'
+  }
+};
+---
+
+<div class="activity-timeline space-y-6 mt-6">
+  {Object.entries(activityGroups).map(([groupKey, groupActivities]) => (
+    <div>
+      <!-- Timeline Day Header -->
+      <div class="timeline-day-header flex items-center mb-4">
+        <div class="flex-grow border-t border-gray-200 mr-3"></div>
+        <div class="bg-gray-100 px-3 py-1 rounded-full text-light-ink text-sm">{groupKey}</div>
+        <div class="flex-grow border-t border-gray-200 ml-3"></div>
+      </div>
+      
+      <!-- Activities for this day/period -->
+      <div class="space-y-4">
+        {groupActivities.map(activity => {
+          const style = activityStyles[activity.type];
+          return (
+            <div class="activity-item flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
+              <div class={`activity-icon ${style.bgColor} p-2 rounded-full`}>
+                <i class={`${style.icon} ${style.textColor}`}></i>
+              </div>
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <span class="font-medium">{style.label} <span class="text-light-ink text-sm">on {activity.projectId.replace(/-/g, ' ')}</span></span>
+                  <span class="text-light-ink text-sm">{getRelativeTimeString(activity.date)}</span>
+                </div>
+                <div class="text-light-ink">
+                  {activity.type === 'manual' ? (
+                    <div class="markdown-content">
+                      <p>{activity.description}</p>
+                    </div>
+                  ) : (
+                    <code class="bg-gray-50 px-1 rounded text-sm">{activity.description}</code>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ))}
+  
+  {activities.length === 0 && (
+    <div class="text-center py-10 text-light-ink">
+      <i class="ri-calendar-line text-4xl mb-2"></i>
+      <p>No activities found. Try adjusting your filters or log a new activity.</p>
+    </div>
+  )}
+</div> 

@@ -1,0 +1,63 @@
+---
+/*
+  File: src/components/activity/ActivityFilters.astro
+  Purpose: Provides filtering controls for activities based on project, type, and date range
+  Dependencies: None
+*/
+
+export interface Props {
+  projects: string[];
+  activityTypes: string[];
+}
+
+const { projects, activityTypes } = Astro.props;
+
+// Map activity types to display labels
+const activityTypeLabels = {
+  commit: 'GitHub Commits',
+  pr: 'Pull Requests',
+  manual: 'Manual Logs'
+};
+---
+
+<div class="mb-6">
+  <h3 class="text-lg font-medium mb-4">Filters</h3>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Project Filter -->
+    <div>
+      <label for="project-filter" class="block text-sm font-medium mb-2">Project</label>
+      <select id="project-filter" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+        <option value="all">All Projects</option>
+        {projects.map(project => (
+          <option value={project}>{project.replace(/-/g, ' ')}</option>
+        ))}
+      </select>
+    </div>
+    
+    <!-- Activity Type Filter -->
+    <div>
+      <label for="type-filter" class="block text-sm font-medium mb-2">Activity Type</label>
+      <select id="type-filter" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+        <option value="all">All Activities</option>
+        {activityTypes.map(type => (
+          <option value={type}>{activityTypeLabels[type] || type}</option>
+        ))}
+      </select>
+    </div>
+    
+    <!-- Date Range Filter -->
+    <div>
+      <label for="date-range-filter" class="block text-sm font-medium mb-2">Date Range</label>
+      <select id="date-range-filter" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="this-week">This Week</option>
+        <option value="last-week">Last Week</option>
+        <option value="this-month">This Month</option>
+        <option value="last-month">Last Month</option>
+      </select>
+    </div>
+  </div>
+</div> 
