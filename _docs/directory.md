@@ -9,7 +9,9 @@ Directory structure:
     │   ├── techstack.md
     │   └── prompts/
     │       ├── build-prompt.md
-    │       └── execution-prompt.md
+    │       ├── documentation-prompt.md
+    │       ├── execution-prompt.md
+    │       └── tech-recommendations-prompt.md
     ├── app/
     │   ├── README.md
     │   ├── astro.config.mjs
@@ -23,6 +25,8 @@ Directory structure:
     │   ├── src/
     │   │   ├── assets/
     │   │   ├── components/
+    │   │   │   ├── Modal.astro
+    │   │   │   ├── Toast.astro
     │   │   │   ├── Welcome.astro
     │   │   │   ├── activity/
     │   │   │   │   ├── ActivityFilters.astro
@@ -32,6 +36,7 @@ Directory structure:
     │   │   │   └── projects/
     │   │   │       ├── ProjectCard.astro
     │   │   │       ├── ProjectFilters.astro
+    │   │   │       ├── ProjectForm.astro
     │   │   │       ├── ProjectStats.astro
     │   │   │       ├── ProjectsAttention.astro
     │   │   │       ├── RecentActivity.astro
@@ -47,7 +52,7 @@ Directory structure:
     │   │   │   ├── BaseLayout.astro
     │   │   │   └── Layout.astro
     │   │   ├── pages/
-    │   │   │   ├── activity-dashboard.astro
+    │   │   │   ├── activity.astro
     │   │   │   ├── ai-library.astro
     │   │   │   ├── books.astro
     │   │   │   ├── index.astro
@@ -56,6 +61,10 @@ Directory structure:
     │   │   │   ├── resources.astro
     │   │   │   ├── revenue.astro
     │   │   │   ├── writing.astro
+    │   │   │   ├── api/
+    │   │   │   │   └── projects/
+    │   │   │   │       ├── [id].ts
+    │   │   │   │       └── index.ts
     │   │   │   └── project/
     │   │   │       └── [id].astro
     │   │   ├── styles/
@@ -64,7 +73,8 @@ Directory structure:
     │   │   │   └── index.ts
     │   │   └── utils/
     │   │       ├── auth.ts
-    │   │       └── data.ts
+    │   │       ├── data.ts
+    │   │       └── filters.ts
     │   └── .vscode/
     │       ├── extensions.json
     │       └── launch.json

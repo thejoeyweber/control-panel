@@ -105,6 +105,18 @@ export interface RevenueGoal {
   visibility: 'public' | 'private';
 }
 
+// New interface for Revenue (to replace RevenueEntry)
+export interface Revenue {
+  id: string;
+  projectId: string;
+  amount: number;
+  date: string;
+  description: string;
+  type: string;
+  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
+  visibility: 'public' | 'private';
+}
+
 // ------------------ AI Tool Types ------------------
 export interface AITool {
   id: string;

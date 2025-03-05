@@ -1,0 +1,58 @@
+[
+  {
+    "id": "a1",
+    "projectId": "p1",
+    "type": "commit",
+    "date": "2023-12-15",
+    "description": "Implemented new user authentication flow with JWT tokens"
+  },
+  {
+    "id": "a2",
+    "projectId": "p2",
+    "type": "manual",
+    "date": "2023-12-14",
+    "description": "Created initial wireframes for the dashboard UI"
+  },
+  {
+    "id": "a3",
+    "projectId": "p1",
+    "type": "pr",
+    "date": "2023-12-12",
+    "description": "Pull request #45: Fix responsive layout issues on mobile devices"
+  },
+  {
+    "id": "a4",
+    "projectId": "p3",
+    "type": "manual",
+    "date": "2023-12-10",
+    "description": "Brainstorming session for new features - documented key ideas"
+  },
+  {
+    "id": "a5",
+    "projectId": "p2",
+    "type": "commit",
+    "date": "2023-12-09",
+    "description": "Added dark mode support with system preference detection"
+  },
+  {
+    "id": "a6",
+    "projectId": "p1",
+    "type": "commit",
+    "date": "2023-12-08",
+    "description": "Fixed critical bug in payment processing module"
+  },
+  {
+    "id": "a7",
+    "projectId": "p3",
+    "type": "manual",
+    "date": "2023-12-05",
+    "description": "Client meeting - reviewed project requirements and timeline"
+  },
+  {
+    "id": "a8",
+    "projectId": "p2",
+    "type": "pr",
+    "date": "2023-12-03",
+    "description": "Pull request #12: Implement new analytics dashboard"
+  }
+] 

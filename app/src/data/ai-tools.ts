@@ -1,233 +1,174 @@
 /*
   File: src/data/ai-tools.ts
-  Purpose: Provides AI tools and prompts data for the control panel
-  Dependencies: AITool type from types/index.ts
+  Purpose: Data service for AI tools, providing CRUD operations
+  Dependencies: Requires fs for file operations, uuid for ID generation
 */
 
 import type { AITool } from '../types';
-import { isAuthenticated } from '../utils/auth';
-import * as dataUtils from '../utils/data';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
-// Sample AI tools data
-export const aiTools: AITool[] = [
-  {
-    id: 'weekly-report',
-    name: 'Weekly Status Report Generator',
-    description: 'Generates a structured weekly report based on accomplishments and plans.',
-    prompt: `Create a comprehensive weekly status report with the following sections:
-1. Accomplishments: [List your key accomplishments]
-2. Challenges: [Describe any challenges faced]
-3. Next Steps: [List your planned tasks for next week]
-4. Blockers: [Note any blockers requiring attention]
+// File path for AI tools data
+const dataFilePath = path.join(process.cwd(), 'src', 'data', 'ai-tools.json');
 
-Format this professionally with clear section headings, bullet points, and brief explanations.`,
-    category: 'Professional',
-    tags: ['reports', 'productivity', 'work'],
-    dateCreated: '2023-10-15',
-    lastUsed: '2023-12-01',
-    isFavorite: true,
-    visibility: 'public'
-  },
-  {
-    id: 'blog-outline',
-    name: 'Technical Blog Post Outline',
-    description: 'Creates a detailed outline for technical blog posts or tutorials.',
-    prompt: `Create a detailed outline for a technical blog post on the topic of [TOPIC]. Include:
-
-1. An engaging introduction section that explains why this topic matters
-2. 3-5 main sections with descriptive headings (not just "Section 1")
-3. For each main section, include 2-3 subsections or key points to cover
-4. A practical example or code sample section
-5. A conclusion that summarizes key takeaways
-
-The outline should be comprehensive enough that I can easily fill in the content.`,
-    category: 'Writing',
-    tags: ['blog', 'content-creation', 'outlines'],
-    dateCreated: '2023-09-20',
-    lastUsed: '2023-11-15',
-    isFavorite: true,
-    visibility: 'public'
-  },
-  {
-    id: 'code-review',
-    name: 'Code Review Assistant',
-    description: 'Helps conduct thorough code reviews by providing a comprehensive checklist.',
-    prompt: `Review the following [CODE SNIPPET/FILE] for:
-
-1. Bugs and logic errors
-2. Edge cases that aren't handled
-3. Performance concerns
-4. Security vulnerabilities
-5. Maintainability and code organization
-6. Adherence to best practices for the language/framework
-7. Suggestions for improvement with code examples
-
-For each issue found, provide:
-- The specific line number(s)
-- A clear explanation of the issue
-- A suggested fix with example code
-- The potential impact of not fixing it`,
-    category: 'Development',
-    tags: ['code-review', 'programming', 'quality'],
-    dateCreated: '2023-11-05',
-    lastUsed: '2023-12-05',
-    exampleResponse: 'Issue at lines 45-48: The function doesn\'t handle empty input arrays, which could lead to errors...',
-    isFavorite: false,
-    visibility: 'private'
-  },
-  {
-    id: 'meeting-notes',
-    name: 'Meeting Notes Transformer',
-    description: 'Converts rough meeting notes into structured, actionable summaries.',
-    prompt: `Transform the following rough meeting notes into a structured, professional summary:
-
-[INSERT ROUGH NOTES]
-
-Please organize the output with these sections:
-1. Meeting Details (date, participants, purpose)
-2. Key Discussion Points (bulleted list)
-3. Decisions Made (clearly stated)
-4. Action Items (with owner and deadline if specified)
-5. Next Steps
-
-Make it concise but comprehensive, focusing on the most important information.`,
-    category: 'Professional',
-    tags: ['meetings', 'productivity', 'notes'],
-    dateCreated: '2023-08-15',
-    lastUsed: '2023-11-28',
-    isFavorite: false,
-    visibility: 'private'
-  },
-  {
-    id: 'project-readme',
-    name: 'Project README Generator',
-    description: 'Creates comprehensive README files for GitHub projects.',
-    prompt: `Create a comprehensive README.md file for my project with the following details:
-
-Project Name: [NAME]
-Project Description: [BRIEF DESCRIPTION]
-Technologies Used: [LIST OF TECHNOLOGIES]
-Key Features: [LIST OF FEATURES]
-
-Please structure the README with these sections:
-- Title and description
-- Installation instructions
-- Usage examples with code snippets
-- Features with brief explanations
-- API documentation (if applicable)
-- Contributing guidelines
-- License information
-
-Use proper Markdown formatting with headings, code blocks, lists, and emphasis where appropriate.`,
-    category: 'Development',
-    tags: ['documentation', 'github', 'open-source'],
-    dateCreated: '2023-10-10',
-    lastUsed: '2023-11-05',
-    isFavorite: true,
-    visibility: 'public'
-  },
-  {
-    id: 'client-proposal',
-    name: 'Client Proposal Template',
-    description: 'Generates professional project proposals for client work.',
-    prompt: `Create a professional project proposal for the following client project:
-
-Client: [CLIENT NAME]
-Project: [PROJECT NAME]
-Budget Range: [BUDGET RANGE]
-Timeline: [TIMELINE]
-Requirements: [KEY REQUIREMENTS]
-
-The proposal should include:
-1. Executive Summary
-2. Problem Statement
-3. Proposed Solution
-4. Detailed Scope of Work
-5. Methodologies and Technologies
-6. Timeline with milestones
-7. Cost Breakdown
-8. Terms and Conditions
-9. Next Steps
-
-Use professional business language and format it in a way that builds confidence in my abilities to deliver this project.`,
-    category: 'Business',
-    tags: ['clients', 'proposals', 'business-development'],
-    dateCreated: '2023-11-15',
-    lastUsed: '2023-12-02',
-    isFavorite: false,
-    visibility: 'private'
+// Ensure data file exists
+async function ensureDataFile() {
+  try {
+    await fs.access(dataFilePath);
+  } catch (error) {
+    // File doesn't exist, create it with empty array
+    await fs.writeFile(dataFilePath, JSON.stringify([]));
   }
-];
-
-/**
- * Get AI tools filtered by visibility
- * @returns Array of AI tools visible to the user
- */
-export function getVisibleAITools(): AITool[] {
-  return dataUtils.getVisibleContent(aiTools, isAuthenticated());
 }
 
-/**
- * Get an AI tool by its ID
- * @param id The AI tool ID to find
- * @returns The AI tool or undefined if not found
- */
-export function getAIToolById(id: string): AITool | undefined {
-  return dataUtils.getItemById(aiTools, id);
+// Get all AI tools
+export async function getAllAITools(): Promise<AITool[]> {
+  await ensureDataFile();
+  const data = await fs.readFile(dataFilePath, 'utf-8');
+  return JSON.parse(data);
 }
 
-/**
- * Get AI tool statistics
- * @returns Object containing AI tool statistics
- */
-export function getAIToolStats() {
-  const total = aiTools.length;
+// Get AI tools by category
+export async function getAIToolsByCategory(category: string): Promise<AITool[]> {
+  const aiTools = await getAllAITools();
+  return aiTools.filter(tool => tool.category === category);
+}
+
+// Get AI tool by ID
+export async function getAIToolById(id: string): Promise<AITool | null> {
+  const aiTools = await getAllAITools();
+  return aiTools.find(tool => tool.id === id) || null;
+}
+
+// Get favorite AI tools
+export async function getFavoriteAITools(): Promise<AITool[]> {
+  const aiTools = await getAllAITools();
+  return aiTools.filter(tool => tool.isFavorite);
+}
+
+// Create a new AI tool
+export async function createAITool(aiToolData: Partial<AITool>): Promise<AITool> {
+  const aiTools = await getAllAITools();
+  
+  const newAITool: AITool = {
+    id: uuidv4(),
+    name: aiToolData.name || '',
+    description: aiToolData.description || '',
+    prompt: aiToolData.prompt || '',
+    category: aiToolData.category || '',
+    tags: aiToolData.tags || [],
+    dateCreated: aiToolData.dateCreated || new Date().toISOString().split('T')[0],
+    lastUsed: aiToolData.lastUsed,
+    exampleResponse: aiToolData.exampleResponse || '',
+    isFavorite: aiToolData.isFavorite || false,
+    visibility: aiToolData.visibility || 'private',
+  };
+  
+  aiTools.push(newAITool);
+  await fs.writeFile(dataFilePath, JSON.stringify(aiTools, null, 2));
+  
+  return newAITool;
+}
+
+// Update an AI tool
+export async function updateAITool(id: string, aiToolData: Partial<AITool>): Promise<AITool | null> {
+  const aiTools = await getAllAITools();
+  const index = aiTools.findIndex(tool => tool.id === id);
+  
+  if (index === -1) {
+    return null;
+  }
+  
+  // Update the AI tool
+  aiTools[index] = {
+    ...aiTools[index],
+    ...aiToolData,
+    id, // Ensure ID remains the same
+  };
+  
+  await fs.writeFile(dataFilePath, JSON.stringify(aiTools, null, 2));
+  return aiTools[index];
+}
+
+// Delete an AI tool
+export async function deleteAITool(id: string): Promise<boolean> {
+  const aiTools = await getAllAITools();
+  const filteredAITools = aiTools.filter(tool => tool.id !== id);
+  
+  if (filteredAITools.length === aiTools.length) {
+    return false; // No tool was removed
+  }
+  
+  await fs.writeFile(dataFilePath, JSON.stringify(filteredAITools, null, 2));
+  return true;
+}
+
+// Search AI tools by query (matches against name, description, prompt, and tags)
+export async function searchAITools(query: string): Promise<AITool[]> {
+  const aiTools = await getAllAITools();
+  const lowerQuery = query.toLowerCase();
+  
+  return aiTools.filter(tool => {
+    return (
+      tool.name.toLowerCase().includes(lowerQuery) ||
+      tool.description.toLowerCase().includes(lowerQuery) ||
+      tool.prompt.toLowerCase().includes(lowerQuery) ||
+      tool.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+    );
+  });
+}
+
+// Get AI tool statistics
+export async function getAIToolStats() {
+  const aiTools = await getAllAITools();
+  
+  // Total count of AI tools
+  const totalCount = aiTools.length;
   
   // Count by category
-  const categoryCounts = dataUtils.countByProperty(aiTools, 'category');
+  const countByCategory = aiTools.reduce((acc, tool) => {
+    acc[tool.category] = (acc[tool.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
   
-  // Count favorites
-  const favorites = aiTools.filter(tool => tool.isFavorite).length;
+  // Count of favorite tools
+  const favoriteCount = aiTools.filter(tool => tool.isFavorite).length;
   
-  // Get all unique tags
-  const tags = new Set<string>();
+  // Most common tags
+  const tagCounts: Record<string, number> = {};
   aiTools.forEach(tool => {
-    tool.tags.forEach(tag => tags.add(tag));
+    tool.tags.forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
   });
   
+  // Sort tags by count and get top 10
+  const topTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([tag, count]) => ({ tag, count }));
+  
   return {
-    total,
-    categoryCounts,
-    favorites,
-    uniqueTags: tags.size
+    total: totalCount,
+    byCategory: countByCategory,
+    favoriteCount,
+    topTags,
   };
 }
 
-/**
- * Get favorite AI tools
- * @returns Array of favorite AI tools
- */
-export function getFavoriteAITools(): AITool[] {
-  return getVisibleAITools().filter(tool => tool.isFavorite);
-}
-
-/**
- * Get AI tools by category
- * @param category The category to filter by
- * @returns Array of AI tools in the specified category
- */
-export function getAIToolsByCategory(category: string): AITool[] {
-  return getVisibleAITools().filter(
-    tool => tool.category.toLowerCase() === category.toLowerCase()
-  );
-}
-
-/**
- * Get recently used AI tools
- * @param limit Number of tools to return
- * @returns Array of recently used AI tools
- */
-export function getRecentlyUsedAITools(limit: number = 5): AITool[] {
-  const toolsWithLastUsed = getVisibleAITools().filter(tool => tool.lastUsed);
-  return dataUtils.sortByDate(toolsWithLastUsed, 'lastUsed').slice(0, limit);
+// Create an empty AI tool (for form initialization)
+export function createEmptyAITool(): AITool {
+  return {
+    id: '',
+    name: '',
+    description: '',
+    prompt: '',
+    category: '',
+    tags: [],
+    dateCreated: new Date().toISOString().split('T')[0],
+    exampleResponse: '',
+    isFavorite: false,
+    visibility: 'private',
+  };
 } 

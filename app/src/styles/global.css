@@ -27,3 +27,46 @@ body {
 body.authenticated .private-content {
   display: block;
 }
+
+/* Fix for modal visibility */
+.modal-backdrop.hidden {
+  display: none !important;
+}
+
+.modal-backdrop:not(.hidden) {
+  display: flex !important;
+  z-index: 50 !important;
+  position: fixed !important;
+  inset: 0 !important;
+}
+
+/* Ensure modals show properly with transitions API */
+html:has(dialog[open]), html:has(.modal-backdrop:not(.hidden)) {
+  overflow: hidden;
+}
+
+.modal-content {
+  position: relative;
+  z-index: 51;
+}
+
+/* Button styles */
+.bg-primary {
+  background-color: #3b82f6; /* Blue-500 */
+}
+
+.bg-primary-dark {
+  background-color: #2563eb; /* Blue-600 */
+}
+
+.hover\:bg-primary-dark:hover {
+  background-color: #2563eb; /* Blue-600 */
+}
+
+.text-primary {
+  color: #3b82f6; /* Blue-500 */
+}
+
+.hover\:text-primary-dark:hover {
+  color: #2563eb; /* Blue-600 */
+}

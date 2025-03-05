@@ -50,7 +50,7 @@ if (projectId) {
 }
 ---
 
-<BaseLayout title="Projects" activePage="projects">
+<BaseLayout title="Projects | Control Panel" activePage="projects">
   <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">My Projects</h1>
@@ -105,35 +105,128 @@ if (projectId) {
   </div>
   
   <!-- Project Form Modal -->
-  <Modal id="project-modal" title={projectToEdit ? 'Edit Project' : 'Create New Project'}>
+  <Modal id="project-modal" title="Project Form">
     <ProjectForm 
-      project={projectToEdit} 
-      mode={projectToEdit ? 'edit' : 'create'} 
+      project={emptyProject} 
+      mode="create" 
     />
   </Modal>
   
-  <script>
-    // Show modal when New Project button is clicked
-    document.getElementById('new-project-btn')?.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('modal:open', { 
-        detail: { id: 'project-modal' } 
-      }));
-    });
-    
-    // Handle edit project buttons
-    document.querySelectorAll('.edit-project-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
-        e.preventDefault();
-        const projectId = button.getAttribute('data-id');
-        // Add the project ID to the URL without navigating
-        const url = new URL(window.location.href);
-        url.searchParams.set('edit', projectId);
-        window.history.pushState({}, '', url);
+  <script is:inline>
+    // Use astro:page-load instead of DOMContentLoaded for View Transitions
+    document.addEventListener('astro:page-load', () => {
+      // Show modal when New Project button is clicked
+      document.getElementById('new-project-btn')?.addEventListener('click', () => {
+        // Reset the form title
+        const modal = document.getElementById('project-modal');
+        const titleElement = modal?.querySelector('.modal-header h3');
+        if (titleElement) {
+          titleElement.textContent = 'Create New Project';
+        }
         
-        // Open the modal
-        document.dispatchEvent(new CustomEvent('modal:open', { 
-          detail: { id: 'project-modal' } 
-        }));
+        // Reset form mode
+        const modeInput = document.querySelector('#project-form input[name="mode"]');
+        if (modeInput) {
+          modeInput.value = 'create';
+        }
+        
+        window.openModal('project-modal');
+        
+        // Clear edit parameter
+        const url = new URL(window.location.href);
+        url.searchParams.delete('edit');
+        window.history.replaceState({}, '', url);
+      });
+      
+      // Handle edit project buttons - we'll do this explicitly here
+      document.querySelectorAll('.edit-project-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          const projectId = button.getAttribute('data-id');
+          if (!projectId) return;
+          
+          console.log('Edit button clicked for project:', projectId);
+          
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', projectId);
+          window.history.replaceState({}, '', url);
+          
+          // Update modal title
+          const modal = document.getElementById('project-modal');
+          const titleElement = modal?.querySelector('.modal-header h3');
+          if (titleElement) {
+            titleElement.textContent = 'Edit Project';
+          }
+          
+          // Open the modal
+          window.openModal('project-modal');
+          
+          // Slight delay before dispatching the event to ensure form is ready
+          setTimeout(() => {
+            // Set form mode
+            const modeInput = document.querySelector('#project-form input[name="mode"]');
+            if (modeInput) {
+              modeInput.value = 'edit';
+            }
+            
+            // Set form ID
+            const idInput = document.querySelector('#project-form input[name="id"]');
+            if (idInput) {
+              idInput.value = projectId;
+            }
+            
+            // Dispatch event to load project data
+            document.dispatchEvent(new CustomEvent('project:edit', { 
+              detail: { id: projectId } 
+            }));
+          }, 50);
+        });
+      });
+      
+      // Check for edit parameter on page load
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('edit')) {
+        const projectId = urlParams.get('edit');
+        if (projectId) {
+          console.log('Found edit parameter on page load:', projectId);
+          
+          // Update modal title
+          const modal = document.getElementById('project-modal');
+          const titleElement = modal?.querySelector('.modal-header h3');
+          if (titleElement) {
+            titleElement.textContent = 'Edit Project';
+          }
+          
+          // Open the modal
+          window.openModal('project-modal');
+          
+          // Slight delay before dispatching the event to ensure form is ready
+          setTimeout(() => {
+            // Set form mode
+            const modeInput = document.querySelector('#project-form input[name="mode"]');
+            if (modeInput) {
+              modeInput.value = 'edit';
+            }
+            
+            // Set form ID
+            const idInput = document.querySelector('#project-form input[name="id"]');
+            if (idInput) {
+              idInput.value = projectId;
+            }
+            
+            // Dispatch event to load project data
+            document.dispatchEvent(new CustomEvent('project:edit', { 
+              detail: { id: projectId } 
+            }));
+          }, 50);
+        }
+      }
+      
+      // Clear filters button
+      document.getElementById('clear-filters-btn')?.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('filters:clear'));
       });
     });
     
@@ -150,14 +243,7 @@ if (projectId) {
     
     // Handle project:cancel event
     document.addEventListener('project:cancel', () => {
-      document.dispatchEvent(new CustomEvent('modal:close', { 
-        detail: { id: 'project-modal' } 
-      }));
-    });
-    
-    // Clear filters button
-    document.getElementById('clear-filters-btn')?.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('filters:clear'));
+      window.closeModal('project-modal');
     });
   </script>
 </BaseLayout>

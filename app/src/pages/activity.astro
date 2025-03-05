@@ -2,7 +2,7 @@
 /*
   File: src/pages/activity.astro
   Purpose: Aggregates all activities from projects and potentially other areas into a centralized dashboard
-  Dependencies: Uses BaseLayout, utility functions for authentication and data filtering
+  Dependencies: Uses Layout, ActivityForm for creating/editing activities
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -10,143 +10,335 @@ import ActivityFilters from '../components/activity/ActivityFilters.astro';
 import ActivityList from '../components/activity/ActivityList.astro';
 import ActivityStats from '../components/activity/ActivityStats.astro';
 import ActivityPagination from '../components/activity/ActivityPagination.astro';
+import Modal from '../components/Modal.astro';
+import ActivityForm from '../components/activity/ActivityForm.astro';
+import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllActivities } from '../data/projects';
+import { getRecentActivities, getActivityStats, createEmptyActivity, getActivityById } from '../data/activities';
+import { getVisibleContent as getAllProjects } from '../data/projects';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();
 
-// Get all activities, respecting the authenticated status
-const allActivities = getAllActivities();
-const activities = authenticated ? allActivities : allActivities.filter(activity => {
-  // This filter would check if the activity's project is public
-  // For now, we're returning all activities since the getAllActivities function
-  // should already handle visibility (this can be enhanced later)
-  return true;
-});
+// Get activities and stats
+const activities = await getRecentActivities(20);
+const stats = await getActivityStats();
 
-// Extract unique projects from activities for filter options
-const projects = [...new Set(activities.map(activity => activity.projectId))];
+// Get all projects for dropdown
+const projects = await getAllProjects();
+
+// Check for success/error messages from form submission
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get('success');
+const error = url.searchParams.get('error');
+const editId = url.searchParams.get('edit');
+
+// If editing, get the activity
+let editingActivity = null;
+if (editId) {
+  editingActivity = await getActivityById(editId);
+}
 
 // Activity types for filter options
-const activityTypes = ['commit', 'pr', 'manual'];
+const activityTypes = [
+  'commit', 
+  'pull-request', 
+  'issue', 
+  'note', 
+  'meeting', 
+  'research', 
+  'design', 
+  'documentation',
+  'other'
+];
+
+// Helper to get project name by ID
+function getProjectNameById(projectId: string): string {
+  const project = projects.find(p => p.id === projectId);
+  return project ? project.name : 'Unknown Project';
+}
+
+// Helper to format activity type for display
+function formatActivityType(type: string): string {
+  return type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ');
+}
+
+// Helper to get activity type color
+function getActivityTypeColor(type: string): string {
+  switch (type) {
+    case 'commit': return 'bg-blue-100 text-blue-800';
+    case 'pull-request': return 'bg-purple-100 text-purple-800';
+    case 'issue': return 'bg-red-100 text-red-800';
+    case 'note': return 'bg-gray-100 text-gray-800';
+    case 'meeting': return 'bg-yellow-100 text-yellow-800';
+    case 'research': return 'bg-indigo-100 text-indigo-800';
+    case 'design': return 'bg-pink-100 text-pink-800';
+    case 'documentation': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
 ---
 
-<BaseLayout title="Activity Dashboard" activePage="activity">
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-    <h1 class="text-3xl font-bold mb-4 md:mb-0">Activity Dashboard</h1>
-    <div class="flex space-x-3">
-      <a href="/projects" class="bg-gray-100 hover:bg-gray-200 text-ink px-4 py-2 rounded-lg transition-colors flex items-center">
-        <i class="ri-list-check mr-1"></i> Projects List
-      </a>
-      <button 
-        id="log-activity-btn" 
-        class="bg-highlight hover:bg-highlight-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-      >
-        <i class="ri-add-line mr-1"></i> Log Activity
-      </button>
-    </div>
-  </div>
-  
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Left Column - Activity Feed -->
-    <div class="lg:col-span-2 space-y-6">
-      <!-- Activity Stats -->
-      <ActivityStats activities={activities} />
-      
-      <!-- Activity Filters and List -->
-      <div class="bg-white rounded-lg shadow-card p-6">
-        <ActivityFilters projects={projects} activityTypes={activityTypes} />
-        
-        <ActivityList activities={activities} />
-        
-        <!-- Pagination if needed -->
-        <ActivityPagination 
-          currentPage={1} 
-          totalPages={Math.ceil(activities.length / 10)} 
-        />
+<BaseLayout title="Activity Dashboard | Control Panel" activePage="activity">
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Activity Dashboard</h1>
+      <div class="flex space-x-3">
+        <a href="/projects" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md transition-colors flex items-center">
+          <span class="mr-1">📋</span> Projects List
+        </a>
+        <button 
+          id="log-activity-btn" 
+          class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors flex items-center"
+        >
+          <i class="ri-add-line mr-1"></i> Log Activity
+        </button>
       </div>
     </div>
     
-    <!-- Right Column - Quick Log Form -->
-    <div class="space-y-6">
-      <div class="bg-white rounded-lg shadow-card p-6">
-        <h3 class="text-lg font-bold mb-4">Quick Log</h3>
+    <!-- Success/Error Messages -->
+    {success && <Toast type="success" message={success} />}
+    {error && <Toast type="error" message={error} />}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column - Activity Feed -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Activity Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-medium text-gray-700">Total Activities</h3>
+            <p class="text-3xl font-bold text-primary">{stats.total}</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-medium text-gray-700">This Month</h3>
+            <p class="text-3xl font-bold text-blue-600">
+              {Object.values(stats.recentDays).reduce((sum, count) => sum + count, 0)}
+            </p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-medium text-gray-700">Most Active Project</h3>
+            <p class="text-xl font-bold text-green-600">
+              {Object.entries(stats.byProject).length > 0 
+                ? getProjectNameById(Object.entries(stats.byProject)
+                    .sort((a, b) => b[1] - a[1])[0][0])
+                : 'None'
+              }
+            </p>
+          </div>
+        </div>
         
-        <form id="quick-log-form">
-          <div class="mb-4">
-            <label for="project-select" class="block mb-2 font-medium">Project</label>
-            <select id="project-select" class="w-full border border-gray-300 rounded-lg p-2">
-              {projects.map(project => (
-                <option value={project}>{project.replace(/-/g, ' ')}</option>
-              ))}
-            </select>
+        <!-- Activity Filters and List -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <ActivityFilters projects={projects} activityTypes={activityTypes} />
+          
+          <div class="mt-4">
+            {activities.length === 0 ? (
+              <div class="text-center py-8 text-gray-500">
+                <p>No activities found. Click "Log Activity" to add your first activity.</p>
+              </div>
+            ) : (
+              <div class="divide-y">
+                {activities.map(activity => (
+                  <div class="py-4 flex justify-between activity-item" data-type={activity.type} data-project={activity.projectId}>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActivityTypeColor(activity.type)}`}>
+                          {formatActivityType(activity.type)}
+                        </span>
+                        <span class="text-sm text-gray-500">{new Date(activity.date).toLocaleDateString()}</span>
+                      </div>
+                      <p class="mt-1 text-sm font-medium">{activity.description}</p>
+                      <p class="text-xs text-gray-500">Project: {getProjectNameById(activity.projectId)}</p>
+                      {activity.tags && activity.tags.length > 0 && (
+                        <div class="mt-1 flex flex-wrap gap-1">
+                          {activity.tags.map(tag => (
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <button 
+                        class="text-primary hover:text-primary-dark text-sm edit-activity-btn"
+                        data-id={activity.id}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
-          <div class="mb-4">
-            <label for="log-type" class="block mb-2 font-medium">Log Type</label>
-            <select id="log-type" class="w-full border border-gray-300 rounded-lg p-2">
-              <option value="manual">Work Log</option>
-              <option value="research">Research</option>
-              <option value="meeting">Meeting Notes</option>
-              <option value="problem">Problem-Solution</option>
-            </select>
+          <!-- Pagination -->
+          <div class="mt-6 flex justify-center">
+            <ActivityPagination 
+              currentPage={1} 
+              totalPages={Math.ceil(stats.total / 10)} 
+            />
           </div>
-          
-          <div class="mb-4">
-            <label for="quick-activity-content" class="block mb-2 font-medium">Content</label>
-            <textarea 
-              id="quick-activity-content" 
-              class="w-full border border-gray-300 rounded-lg p-2 min-h-[150px]"
-              placeholder="What did you accomplish?"
-            ></textarea>
-          </div>
-          
-          <button 
-            type="submit" 
-            class="w-full bg-highlight hover:bg-highlight-dark text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Log Activity
-          </button>
-        </form>
+        </div>
       </div>
       
-      <!-- Project Next Steps widget could go here -->
-      <div class="bg-white rounded-lg shadow-card p-6">
-        <h3 class="text-lg font-bold mb-4">Next Steps</h3>
-        <p class="text-light-ink mb-2">Your upcoming priorities:</p>
-        
-        <ul class="space-y-2">
-          <li class="flex items-start gap-2">
-            <i class="ri-checkbox-blank-circle-line text-highlight mt-1"></i>
-            <span>Implement authentication for private activities</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <i class="ri-checkbox-blank-circle-line text-highlight mt-1"></i>
-            <span>Add GitHub integration for automatic activity tracking</span>
-          </li>
-          <li class="flex items-start gap-2 line-through text-gray-400">
-            <i class="ri-checkbox-circle-line text-gray-400 mt-1"></i>
-            <span>Create activity filtering by date range</span>
-          </li>
-        </ul>
+      <!-- Right Column - Quick Log Form -->
+      <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-bold mb-4 text-gray-800">Quick Log</h3>
+          
+          <form id="quick-log-form" method="post" action="/api/activities">
+            <div class="mb-4">
+              <label for="projectId" class="block mb-2 text-sm font-medium text-gray-700">Project <span class="text-red-500">*</span></label>
+              <select id="projectId" name="projectId" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                <option value="" disabled selected>Select a project</option>
+                {projects.map(project => (
+                  <option value={project.id}>{project.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label for="type" class="block mb-2 text-sm font-medium text-gray-700">Activity Type <span class="text-red-500">*</span></label>
+              <select id="type" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                <option value="" disabled selected>Select activity type</option>
+                {activityTypes.map(type => (
+                  <option value={type}>{formatActivityType(type)}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label for="description" class="block mb-2 text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+              <textarea 
+                id="description" 
+                name="description" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md min-h-[120px]"
+                placeholder="What did you accomplish?"
+                required
+              ></textarea>
+            </div>
+            
+            <div class="mb-4">
+              <label for="tags" class="block mb-2 text-sm font-medium text-gray-700">Tags</label>
+              <input 
+                type="text" 
+                id="tags" 
+                name="tags" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="feature, bug-fix (comma-separated)"
+              />
+            </div>
+            
+            <div class="mb-4">
+              <label for="date" class="block mb-2 text-sm font-medium text-gray-700">Date <span class="text-red-500">*</span></label>
+              <input 
+                type="date" 
+                id="date" 
+                name="date" 
+                value={new Date().toISOString().split('T')[0]}
+                class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              class="w-full bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
+            >
+              Log Activity
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal for Adding/Editing Activities -->
+  <Modal id="activity-modal" title={editingActivity ? `Edit Activity` : 'Log New Activity'}>
+    <ActivityForm 
+      activity={editingActivity || createEmptyActivity()} 
+      mode={editingActivity ? 'edit' : 'create'} 
+    />
+  </Modal>
 </BaseLayout>
 
-<script>
-  // Client-side interactivity for quick activity logging
-  document.addEventListener('DOMContentLoaded', () => {
-    // Handle activity log form submission
-    const quickLogForm = document.getElementById('quick-log-form');
-    if (quickLogForm) {
-      quickLogForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // Form submission logic would go here
-        alert('Activity logged! (This is a placeholder - no actual data is saved yet)');
-        quickLogForm.reset();
+<script is:inline>
+  // Use astro:page-load instead of DOMContentLoaded to ensure it works with View Transitions
+  document.addEventListener('astro:page-load', () => {
+    const logButton = document.getElementById('log-activity-btn');
+    const modal = document.getElementById('activity-modal');
+    const closeButtons = modal?.querySelectorAll('.close-modal');
+    
+    // Open modal when Log Activity button is clicked
+    logButton?.addEventListener('click', () => {
+      window.openModal('activity-modal');
+      
+      // Clear edit parameter from URL if present
+      const url = new URL(window.location.href);
+      url.searchParams.delete('edit');
+      window.history.replaceState({}, '', url);
+    });
+    
+    // Close modal when close button is clicked
+    closeButtons?.forEach(button => {
+      button.addEventListener('click', () => {
+        window.closeModal('activity-modal');
+      });
+    });
+    
+    // Handle edit buttons
+    const editButtons = document.querySelectorAll('.edit-activity-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        if (id) {
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', id);
+          window.history.replaceState({}, '', url);
+          // Open modal
+          window.openModal('activity-modal');
+        }
+      });
+    });
+    
+    // Show modal if edit parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      window.openModal('activity-modal');
+    }
+    
+    // Activity filtering functionality
+    const projectFilter = document.querySelector('.project-filter');
+    const typeFilter = document.querySelector('.type-filter');
+    const activityItems = document.querySelectorAll('.activity-item');
+    
+    function applyFilters() {
+      const projectValue = projectFilter?.value;
+      const typeValue = typeFilter?.value;
+      
+      activityItems.forEach(item => {
+        const itemProject = item.getAttribute('data-project');
+        const itemType = item.getAttribute('data-type');
+        
+        let showItem = true;
+        
+        if (projectValue && itemProject !== projectValue && projectValue !== 'all') {
+          showItem = false;
+        }
+        
+        if (typeValue && itemType !== typeValue && typeValue !== 'all') {
+          showItem = false;
+        }
+        
+        item.style.display = showItem ? '' : 'none';
       });
     }
+    
+    // Add event listeners to filters
+    projectFilter?.addEventListener('change', applyFilters);
+    typeFilter?.addEventListener('change', applyFilters);
   });
 </script> 

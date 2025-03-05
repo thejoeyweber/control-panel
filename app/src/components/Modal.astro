@@ -40,10 +40,175 @@ const sizeClasses = {
 </div>
 
 <script is:inline>
-  // Initialize modals when the DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initialize modals when the DOM is loaded and after page transitions
+  document.addEventListener('astro:page-load', () => {
     initModals();
+    setupAddButtons();
   });
+
+  // Set up "Add" buttons found across the application
+  function setupAddButtons() {
+    // Common pattern: buttons with IDs like add-writing-btn, add-book-btn, etc.
+    const addButtons = [
+      { id: 'add-writing-btn', modalId: 'writing-modal' },
+      { id: 'add-resource-btn', modalId: 'resource-modal' },
+      { id: 'add-book-btn', modalId: 'book-modal' },
+      { id: 'add-ai-tool-btn', modalId: 'ai-tool-modal' },
+      { id: 'add-revenue-btn', modalId: 'revenue-modal' },
+      { id: 'new-project-btn', modalId: 'project-modal' },
+      { id: 'log-activity-btn', modalId: 'activity-modal' }
+    ];
+    
+    // For each button, add event listener to open its modal
+    addButtons.forEach(({id, modalId}) => {
+      const button = document.getElementById(id);
+      if (button) {
+        button.addEventListener('click', () => {
+          openModal(modalId);
+          
+          // Clear any edit parameters from URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('edit');
+          window.history.replaceState({}, '', url);
+        });
+      }
+    });
+    
+    // Set up edit buttons (commonly have class 'edit-*-btn' with data-id attribute)
+    const editButtonSelectors = [
+      '.edit-writing-btn',
+      '.edit-resource-btn',
+      '.edit-book-btn',
+      '.edit-ai-tool-btn',
+      '.edit-revenue-btn',
+      '.edit-activity-btn',
+      '.edit-project-btn'
+    ];
+    
+    editButtonSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(button => {
+        button.addEventListener('click', (e) => {
+          if (e) e.preventDefault();
+          
+          const id = button.getAttribute('data-id');
+          if (!id) return;
+          
+          // Figure out which modal to open based on the class
+          const className = button.className;
+          const modalType = className.match(/edit-([\w-]+)-btn/)?.[1];
+          const modalMap = {
+            'writing': 'writing-modal',
+            'resource': 'resource-modal',
+            'book': 'book-modal',
+            'ai-tool': 'ai-tool-modal',
+            'revenue': 'revenue-modal',
+            'activity': 'activity-modal',
+            'project': 'project-modal'
+          };
+          
+          const modalId = modalMap[modalType];
+          if (!modalId) return;
+          
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', id);
+          window.history.replaceState({}, '', url);
+          
+          // Open the modal
+          openModal(modalId);
+        });
+      });
+    });
+    
+    // Check for edit parameter in URL and open corresponding modal
+    checkEditParameter();
+  }
+
+  // Function to check for edit parameter and load entity data
+  function checkEditParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      const editId = urlParams.get('edit');
+      if (!editId) return;
+      
+      console.log('Edit parameter detected:', editId);
+      
+      // Determine which page we're on and which modal to open
+      const pathname = window.location.pathname;
+      console.log('Current pathname:', pathname);
+      
+      const pageToModalMap = {
+        '/writing': { modalId: 'writing-modal', formId: 'writing-form', dataType: 'writing', title: 'Edit Writing Piece' },
+        '/resources': { modalId: 'resource-modal', formId: 'resource-form', dataType: 'resource', title: 'Edit Resource' },
+        '/books': { modalId: 'book-modal', formId: 'book-form', dataType: 'book', title: 'Edit Book' },
+        '/ai-library': { modalId: 'ai-tool-modal', formId: 'ai-tool-form', dataType: 'ai-tool', title: 'Edit AI Tool' },
+        '/revenue': { modalId: 'revenue-modal', formId: 'revenue-form', dataType: 'revenue', title: 'Edit Revenue Entry' },
+        '/activity': { modalId: 'activity-modal', formId: 'activity-form', dataType: 'activity', title: 'Edit Activity' },
+        '/projects': { modalId: 'project-modal', formId: 'project-form', dataType: 'project', title: 'Edit Project' },
+        '/project': { modalId: 'project-modal', formId: 'project-form', dataType: 'project', title: 'Edit Project' }
+      };
+      
+      // Find the matching page pattern (handle paths with dynamic segments)
+      let modalInfo = null;
+      for (const [pattern, info] of Object.entries(pageToModalMap)) {
+        if (pathname === pattern || pathname.startsWith(`${pattern}/`)) {
+          modalInfo = info;
+          break;
+        }
+      }
+      
+      console.log('Modal info for current page:', modalInfo);
+      
+      if (modalInfo) {
+        // First, update the modal title
+        const modal = document.getElementById(modalInfo.modalId);
+        if (modal) {
+          const titleElement = modal.querySelector('.modal-header h3');
+          if (titleElement) {
+            titleElement.textContent = modalInfo.title;
+            console.log('Updated modal title to:', modalInfo.title);
+          } else {
+            console.error('Could not find title element in modal header');
+          }
+        } else {
+          console.error('Could not find modal with ID:', modalInfo.modalId);
+        }
+        
+        // Open the modal first so it's visible in the DOM
+        console.log('Opening modal:', modalInfo.modalId);
+        openModal(modalInfo.modalId);
+        
+        // Add a small delay to ensure the form is fully initialized before setting values
+        setTimeout(() => {
+          // Set input[name="mode"] to "edit" if it exists
+          const modeInput = document.querySelector(`#${modalInfo.formId} input[name="mode"]`);
+          if (modeInput) {
+            modeInput.value = 'edit';
+            console.log('Set mode input to "edit"');
+          } else {
+            console.error('Could not find mode input in form:', modalInfo.formId);
+          }
+          
+          // Set input[name="id"] to the edit ID
+          const idInput = document.querySelector(`#${modalInfo.formId} input[name="id"]`);
+          if (idInput) {
+            idInput.value = editId;
+            console.log('Set ID input to:', editId);
+          } else {
+            console.error('Could not find ID input in form:', modalInfo.formId);
+          }
+          
+          // Dispatch a custom event to notify the form it should load entity data
+          console.log('Dispatching event:', `${modalInfo.dataType}:edit`);
+          document.dispatchEvent(new CustomEvent(`${modalInfo.dataType}:edit`, { 
+            detail: { id: editId } 
+          }));
+        }, 50);
+      } else {
+        console.error('No modal info found for pathname:', pathname);
+      }
+    }
+  }
 
   // Initialize modal functionality
   function initModals() {
@@ -66,6 +231,16 @@ const sizeClasses = {
       // Close when clicking outside the modal content
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
+          closeModal(modal.id);
+        }
+      });
+    });
+    
+    // Additional close buttons with close-modal class
+    document.querySelectorAll('.close-modal').forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = button.closest('.modal-backdrop');
+        if (modal) {
           closeModal(modal.id);
         }
       });

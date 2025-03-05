@@ -1,247 +1,340 @@
 ---
 /*
   File: src/pages/writing.astro
-  Purpose: Displays user's writing projects, notes, and drafts
-  Dependencies: BaseLayout, writing data
+  Purpose: Display and manage writing pieces
+  Dependencies: Layout, WritingForm for creating/editing writing pieces
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleWriting, getWritingStats } from '../data/writing';
+import Modal from '../components/Modal.astro';
+import WritingForm from '../components/writing/WritingForm.astro';
+import Toast from '../components/Toast.astro';
+import { isAuthenticated } from '../utils/auth';
+import { getAllWriting, getWritingStats, createEmptyWriting, getWritingById } from '../data/writing';
 
-// Get visible writing content and stats
-const writingPieces = getVisibleWriting();
-const stats = getWritingStats();
+// Get the authenticated status
+const authenticated = isAuthenticated();
 
-// Filter pieces by status
-const published = writingPieces.filter(piece => piece.status === 'published');
-const drafts = writingPieces.filter(piece => piece.status === 'draft');
-const scheduled = writingPieces.filter(piece => piece.status === 'scheduled');
+// Get writing pieces and stats
+const writings = await getAllWriting();
+const stats = await getWritingStats();
+
+// Check for success/error messages from form submission
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get('success');
+const error = url.searchParams.get('error');
+const editId = url.searchParams.get('edit');
+
+// If editing, get the writing piece
+let editingWriting = null;
+if (editId) {
+  editingWriting = await getWritingById(editId);
+}
+
+// Group writings by status for easy filtering
+const publishedWritings = writings.filter(writing => writing.status === 'published');
+const draftWritings = writings.filter(writing => writing.status === 'draft');
+const scheduledWritings = writings.filter(writing => writing.status === 'scheduled');
 ---
 
-<BaseLayout title="Writing" activePage="writing">
-  <div class="container mx-auto px-4">
+<BaseLayout title="Writing | Control Panel" activePage="writing">
+  <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-      <h1 class="text-3xl font-bold mb-4 md:mb-0">Writing</h1>
-      <div class="flex gap-2">
-        <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-          <i class="ri-add-line mr-1"></i> New Project
-        </button>
-        <button class="bg-paper text-ink border border-gray-300 px-4 py-2 rounded hover:bg-gray-100 transition-colors">
-          <i class="ri-edit-line mr-1"></i> Quick Note
-        </button>
-      </div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Writing</h1>
+      <button 
+        id="add-writing-btn" 
+        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors flex items-center"
+      >
+        <i class="ri-add-line mr-1"></i> Add Writing
+      </button>
     </div>
+    
+    <!-- Success/Error Messages -->
+    {success && <Toast type="success" message={success} />}
+    {error && <Toast type="error" message={error} />}
     
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Active Projects</h3>
-        <p class="text-2xl font-bold">{stats.total}</p>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Total</h3>
+        <p class="text-3xl font-bold text-primary">{stats.total}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Published</h3>
-        <p class="text-2xl font-bold">{stats.published}</p>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Published</h3>
+        <p class="text-3xl font-bold text-green-600">{stats.byStatus.published || 0}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">In Draft</h3>
-        <p class="text-2xl font-bold">{stats.drafts}</p>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Drafts</h3>
+        <p class="text-3xl font-bold text-yellow-600">{stats.byStatus.draft || 0}</p>
       </div>
-      <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Total Words</h3>
-        <p class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</p>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Words Written</h3>
+        <p class="text-3xl font-bold text-blue-600">{stats.wordCount}</p>
       </div>
     </div>
     
-    <!-- Filter Controls -->
-    <div class="bg-paper border border-gray-200 rounded-lg p-4 mb-8">
+    <!-- Writing Controls -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-4 mb-8">
       <div class="flex flex-wrap gap-4">
         <div>
-          <label class="block text-sm text-light-ink mb-1">Status</label>
-          <select class="border rounded px-3 py-2 w-full">
-            <option>All</option>
-            <option>In Progress</option>
-            <option>Draft</option>
-            <option>Published</option>
-            <option>Archived</option>
+          <label class="block text-sm text-gray-600 mb-1">Status</label>
+          <select id="status-filter" class="status-filter border rounded px-3 py-2 w-full">
+            <option value="">All Statuses</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="scheduled">Scheduled</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm text-light-ink mb-1">Category</label>
-          <select class="border rounded px-3 py-2 w-full">
-            <option>All</option>
-            <option>Blog Posts</option>
-            <option>Articles</option>
-            <option>Newsletter</option>
-            <option>Book</option>
-            <option>Academic</option>
+          <label class="block text-sm text-gray-600 mb-1">Category</label>
+          <select id="category-filter" class="category-filter border rounded px-3 py-2 w-full">
+            <option value="">All Categories</option>
+            <option value="blog">Blog</option>
+            <option value="newsletter">Newsletter</option>
+            <option value="documentation">Documentation</option>
+            <option value="other">Other</option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm text-light-ink mb-1">Search</label>
-          <input type="text" placeholder="Search writing..." class="border rounded px-3 py-2 w-full" />
+        <div class="flex-1">
+          <label class="block text-sm text-gray-600 mb-1">Search</label>
+          <input type="text" id="search-input" placeholder="Search writings..." class="border rounded px-3 py-2 w-full" />
         </div>
-        <div class="flex-1"></div>
         <div class="flex items-end">
-          <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-            Apply Filters
+          <button id="reset-filters" class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors">
+            Reset
           </button>
         </div>
       </div>
     </div>
     
-    <!-- Writing Projects -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-      <!-- Project Card 1 -->
-      <div class="bg-white rounded-lg shadow-card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <div class="flex justify-between items-start">
-            <h3 class="text-lg font-bold">The Future of AI in Content Creation</h3>
-            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">In Progress</span>
-          </div>
-          <p class="text-sm text-light-ink mt-2">A comprehensive analysis of how AI tools are transforming the content creation landscape.</p>
-        </div>
-        <div class="p-4">
-          <div class="flex justify-between text-sm mb-2">
-            <span>Category</span>
-            <span>Blog Post</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Current Word Count</span>
-            <span>1,450 / 2,000</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Due Date</span>
-            <span>Mar 15, 2025</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-            <div class="bg-highlight h-2 rounded-full" style="width: 72%"></div>
-          </div>
-          <div class="flex justify-between text-xs text-light-ink mt-1">
-            <span>Progress</span>
-            <span>72%</span>
-          </div>
-        </div>
-        <div class="bg-gray-50 p-3 flex justify-between border-t border-gray-200">
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-edit-line mr-1"></i> Edit
-          </button>
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-more-line"></i>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Project Card 2 -->
-      <div class="bg-white rounded-lg shadow-card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <div class="flex justify-between items-start">
-            <h3 class="text-lg font-bold">Getting Started with Astro Framework</h3>
-            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Published</span>
-          </div>
-          <p class="text-sm text-light-ink mt-2">A beginner's guide to building static and partially hydrated sites with Astro.</p>
-        </div>
-        <div class="p-4">
-          <div class="flex justify-between text-sm mb-2">
-            <span>Category</span>
-            <span>Tutorial</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Final Word Count</span>
-            <span>2,850</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Published On</span>
-            <span>Feb 10, 2025</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-            <div class="bg-success h-2 rounded-full" style="width: 100%"></div>
-          </div>
-          <div class="flex justify-between text-xs text-light-ink mt-1">
-            <span>Views</span>
-            <span>1,245</span>
-          </div>
-        </div>
-        <div class="bg-gray-50 p-3 flex justify-between border-t border-gray-200">
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-eye-line mr-1"></i> View
-          </button>
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-more-line"></i>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Project Card 3 -->
-      <div class="bg-white rounded-lg shadow-card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <div class="flex justify-between items-start">
-            <h3 class="text-lg font-bold">Sustainable Development Approaches</h3>
-            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded">Draft</span>
-          </div>
-          <p class="text-sm text-light-ink mt-2">Exploring sustainable development practices for modern software engineering teams.</p>
-        </div>
-        <div class="p-4">
-          <div class="flex justify-between text-sm mb-2">
-            <span>Category</span>
-            <span>Article</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Current Word Count</span>
-            <span>850 / 3,000</span>
-          </div>
-          <div class="flex justify-between text-sm mb-2">
-            <span>Started On</span>
-            <span>Feb 5, 2025</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-            <div class="bg-amber-500 h-2 rounded-full" style="width: 28%"></div>
-          </div>
-          <div class="flex justify-between text-xs text-light-ink mt-1">
-            <span>Progress</span>
-            <span>28%</span>
-          </div>
-        </div>
-        <div class="bg-gray-50 p-3 flex justify-between border-t border-gray-200">
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-edit-line mr-1"></i> Edit
-          </button>
-          <button class="text-highlight hover:underline text-sm">
-            <i class="ri-more-line"></i>
-          </button>
-        </div>
-      </div>
+    <!-- Writing Pieces Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Words</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="writing-table-body">
+          {writings.length === 0 ? (
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                No writing pieces found. Click "Add Writing" to create one.
+              </td>
+            </tr>
+          ) : (
+            writings.map(writing => (
+              <tr class="writing-row" data-category={writing.category} data-status={writing.status}>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{writing.title}</div>
+                  <div class="text-xs text-gray-500">{writing.summary.substring(0, 60)}...</div>
+                  {writing.externalUrl && (
+                    <a href={writing.externalUrl} target="_blank" rel="noopener noreferrer" class="text-xs text-primary hover:underline mt-1 inline-block">
+                      View Published
+                    </a>
+                  )}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                    {writing.category}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${writing.status === 'published' ? 'bg-green-100 text-green-800' : 
+                      writing.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 
+                      'bg-blue-100 text-blue-800'}`}>
+                    {writing.status}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {writing.wordCount}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(writing.lastUpdated).toLocaleDateString()}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button 
+                    class="text-primary hover:text-primary-dark mr-3 edit-writing-btn"
+                    data-id={writing.id}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="text-gray-600 hover:text-gray-900 view-content-btn"
+                    data-content={writing.content}
+                    data-title={writing.title}
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
-    
-    <!-- Notes and Ideas -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden">
+  </div>
+
+  <!-- Modal for Adding/Editing Writing Pieces -->
+  <Modal id="writing-modal" title={editingWriting ? `Edit: ${editingWriting.title}` : 'Add New Writing Piece'}>
+    <WritingForm 
+      writing={editingWriting || createEmptyWriting()} 
+      mode={editingWriting ? 'edit' : 'create'} 
+    />
+  </Modal>
+  
+  <!-- Modal for Viewing Content -->
+  <div id="content-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow max-w-3xl w-full max-h-[80vh] flex flex-col">
       <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Quick Notes & Ideas</h3>
-        <button class="text-highlight hover:underline text-sm">View All</button>
+        <h3 class="text-xl font-bold" id="content-modal-title">Content</h3>
+        <button class="text-gray-500 hover:text-gray-700" id="close-content-modal">✕</button>
       </div>
-      
-      <div class="divide-y">
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex justify-between mb-1">
-            <h4 class="font-semibold">Feature comparison: Astro vs Next.js</h4>
-            <span class="text-xs text-light-ink">2 days ago</span>
-          </div>
-          <p class="text-sm text-light-ink">Compare build times, performance metrics, and developer experience between the two frameworks.</p>
-        </div>
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex justify-between mb-1">
-            <h4 class="font-semibold">Newsletter topics for March</h4>
-            <span class="text-xs text-light-ink">4 days ago</span>
-          </div>
-          <p class="text-sm text-light-ink">1. New Tailwind features, 2. Astro integrations, 3. Accessibility tips for SPAs</p>
-        </div>
-        <div class="p-4 hover:bg-gray-50">
-          <div class="flex justify-between mb-1">
-            <h4 class="font-semibold">Book chapter outline</h4>
-            <span class="text-xs text-light-ink">1 week ago</span>
-          </div>
-          <p class="text-sm text-light-ink">Structure for Chapter 4: Testing strategies for modern web applications</p>
-        </div>
+      <div class="p-4 overflow-y-auto flex-grow">
+        <div id="content-preview" class="prose max-w-none"></div>
       </div>
     </div>
   </div>
-</BaseLayout> 
+</BaseLayout>
+
+<script>
+  // Show modal when Add Writing button is clicked
+  document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.getElementById('add-writing-btn');
+    const modal = document.getElementById('writing-modal');
+    const closeButtons = modal?.querySelectorAll('.close-modal');
+    
+    // Open modal when Add Writing button is clicked
+    addButton?.addEventListener('click', () => {
+      modal?.classList.remove('hidden');
+      // Clear edit parameter from URL if present
+      const url = new URL(window.location.href);
+      url.searchParams.delete('edit');
+      window.history.replaceState({}, '', url);
+    });
+    
+    // Close modal when close button is clicked
+    closeButtons?.forEach(button => {
+      button.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+      });
+    });
+    
+    // Handle edit buttons
+    const editButtons = document.querySelectorAll('.edit-writing-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        if (id) {
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', id);
+          window.history.replaceState({}, '', url);
+          // Open modal
+          modal?.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Show modal if edit parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      modal?.classList.remove('hidden');
+    }
+    
+    // Content viewing modal
+    const contentModal = document.getElementById('content-modal');
+    const contentModalTitle = document.getElementById('content-modal-title');
+    const contentPreview = document.getElementById('content-preview');
+    const closeContentModal = document.getElementById('close-content-modal');
+    const viewContentButtons = document.querySelectorAll('.view-content-btn');
+    
+    // Show content modal when View button is clicked
+    viewContentButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const content = button.getAttribute('data-content');
+        const title = button.getAttribute('data-title');
+        if (content) {
+          contentModalTitle.textContent = title || 'Content';
+          // Simple markdown-like rendering (could use a proper markdown library)
+          const htmlContent = content
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*)\*/gim, '<em>$1</em>')
+            .replace(/- (.*)/gim, '<li>$1</li>')
+            .replace(/\n/gim, '<br>');
+          contentPreview.innerHTML = htmlContent;
+          contentModal?.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Close content modal when close button is clicked
+    closeContentModal?.addEventListener('click', () => {
+      contentModal?.classList.add('hidden');
+    });
+    
+    // Filtering functionality
+    const statusFilter = document.getElementById('status-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const searchInput = document.getElementById('search-input');
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const writingRows = document.querySelectorAll('.writing-row');
+    
+    function applyFilters() {
+      const statusValue = statusFilter?.value.toLowerCase();
+      const categoryValue = categoryFilter?.value.toLowerCase();
+      const searchValue = searchInput?.value.toLowerCase();
+      
+      writingRows.forEach(row => {
+        const status = row.getAttribute('data-status')?.toLowerCase();
+        const category = row.getAttribute('data-category')?.toLowerCase();
+        const rowContent = row.textContent?.toLowerCase();
+        
+        let showRow = true;
+        
+        // Apply status filter
+        if (statusValue && status !== statusValue) {
+          showRow = false;
+        }
+        
+        // Apply category filter
+        if (categoryValue && category !== categoryValue) {
+          showRow = false;
+        }
+        
+        // Apply search filter
+        if (searchValue && rowContent && !rowContent.includes(searchValue)) {
+          showRow = false;
+        }
+        
+        // Show or hide row
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+    
+    // Add event listeners to filters
+    statusFilter?.addEventListener('change', applyFilters);
+    categoryFilter?.addEventListener('change', applyFilters);
+    searchInput?.addEventListener('input', applyFilters);
+    
+    // Reset filters
+    resetFiltersBtn?.addEventListener('click', () => {
+      if (statusFilter) statusFilter.value = '';
+      if (categoryFilter) categoryFilter.value = '';
+      if (searchInput) searchInput.value = '';
+      
+      writingRows.forEach(row => {
+        row.style.display = '';
+      });
+    });
+  });
+</script> 

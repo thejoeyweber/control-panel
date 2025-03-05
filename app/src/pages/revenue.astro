@@ -2,37 +2,67 @@
 /*
   File: src/pages/revenue.astro
   Purpose: Displays revenue data, income sources, and financial goals
-  Dependencies: BaseLayout, revenue data
+  Dependencies: Layout, RevenueForm for creating/editing revenue
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleRevenueEntries, getVisibleRevenueGoals, getRevenueStats } from '../data/revenue';
+import Modal from '../components/Modal.astro';
+import RevenueForm from '../components/revenue/RevenueForm.astro';
+import Toast from '../components/Toast.astro';
+import { isAuthenticated } from '../utils/auth';
+import { getAllRevenue, getRevenueStats, createEmptyRevenue, getRevenueById } from '../data/revenue';
 
-// Get visible revenue data and stats
-const revenueEntries = getVisibleRevenueEntries();
-const revenueGoals = getVisibleRevenueGoals();
-const stats = getRevenueStats();
+// Get authenticated status
+const authenticated = isAuthenticated();
 
-// Get current year and month for filtering
-const currentYear = new Date().getFullYear();
-const currentMonth = new Date().getMonth() + 1;
+// Get revenue data and stats
+const revenueEntries = await getAllRevenue();
+const stats = await getRevenueStats();
+
+// Check for success/error messages from form submission
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get('success');
+const error = url.searchParams.get('error');
+const editId = url.searchParams.get('edit');
+
+// If editing, get the revenue entry
+let editingRevenue = null;
+if (editId) {
+  editingRevenue = await getRevenueById(editId);
+}
+
+// Filter recent transactions for display
+const recentTransactions = revenueEntries
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 5);
+
+// Calculate revenue by type for display
+const revenueByType = stats.byType;
+const totalRevenue = stats.total;
 ---
 
-<BaseLayout title="Revenue" activePage="revenue">
-  <div class="container mx-auto px-4">
+<BaseLayout title="Revenue Dashboard | Control Panel" activePage="revenue">
+  <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-      <h1 class="text-3xl font-bold mb-4 md:mb-0">Revenue</h1>
-      <button class="bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-        <i class="ri-add-line mr-1"></i> Add Income
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Revenue Dashboard</h1>
+      <button 
+        id="add-revenue-btn" 
+        class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors flex items-center"
+      >
+        <i class="ri-add-line mr-1"></i> Add Revenue
       </button>
     </div>
+    
+    <!-- Success/Error Messages -->
+    {success && <Toast type="success" message={success} />}
+    {error && <Toast type="error" message={error} />}
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <!-- Monthly Revenue Chart -->
       <div class="lg:col-span-2">
-        <div class="bg-white rounded-lg shadow-card overflow-hidden">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
           <div class="flex justify-between items-center p-4 border-b border-gray-200">
-            <h3 class="text-lg font-bold">Monthly Revenue</h3>
+            <h3 class="text-lg font-bold text-gray-800">Monthly Revenue</h3>
             <div class="flex gap-2">
               <select class="border rounded px-2 py-1 text-sm">
                 <option>Last 6 Months</option>
@@ -41,7 +71,7 @@ const currentMonth = new Date().getMonth() + 1;
               </select>
             </div>
           </div>
-          <div class="h-64 bg-gray-100 flex items-center justify-center text-light-ink p-4">
+          <div class="h-64 bg-gray-100 flex items-center justify-center text-gray-500 p-4">
             [Revenue Chart Placeholder]
           </div>
         </div>
@@ -49,50 +79,42 @@ const currentMonth = new Date().getMonth() + 1;
       
       <!-- Revenue Summary Card -->
       <div>
-        <div class="bg-white rounded-lg shadow-card p-4">
-          <h3 class="text-lg font-bold mb-4">Summary</h3>
+        <div class="bg-white rounded-lg shadow p-4">
+          <h3 class="text-lg font-bold mb-4 text-gray-800">Summary</h3>
           
           <div class="space-y-4">
             <div>
               <div class="flex justify-between text-sm mb-1">
-                <span>Monthly Goal</span>
-                <span class="font-bold">$4,000</span>
+                <span>Total Revenue</span>
+                <span class="font-bold">${totalRevenue.toFixed(2)}</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-highlight h-2 rounded-full" style="width: 62.5%"></div>
-              </div>
-              <div class="flex justify-between text-xs text-light-ink mt-1">
-                <span>Current: $2,500</span>
-                <span>62.5%</span>
+                <div class="bg-primary h-2 rounded-full" style={`width: 100%`}></div>
               </div>
             </div>
             
-            <div>
-              <div class="flex justify-between text-sm mb-1">
-                <span>Annual Goal</span>
-                <span class="font-bold">$48,000</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-success h-2 rounded-full" style="width: 28%"></div>
-              </div>
-              <div class="flex justify-between text-xs text-light-ink mt-1">
-                <span>YTD: $13,500</span>
-                <span>28%</span>
-              </div>
+            <div class="pt-4 border-t border-gray-200">
+              <h4 class="text-sm font-medium mb-2 text-gray-700">Revenue by Type</h4>
+              {Object.entries(revenueByType).map(([type, amount]) => (
+                <div class="flex justify-between mb-2">
+                  <span class="capitalize">{type}</span>
+                  <span class="font-medium">${amount.toFixed(2)}</span>
+                </div>
+              ))}
             </div>
             
-            <div class="pt-2 border-t border-gray-200">
+            <div class="pt-4 border-t border-gray-200">
               <div class="flex justify-between mb-2">
-                <span>This Month</span>
-                <span class="font-bold text-highlight">$2,500</span>
+                <span>Paid</span>
+                <span class="font-bold text-green-600">${stats.byStatus.paid?.toFixed(2) || '0.00'}</span>
               </div>
               <div class="flex justify-between mb-2">
-                <span>Last Month</span>
-                <span>$3,200</span>
+                <span>Pending</span>
+                <span class="font-bold text-yellow-600">${stats.byStatus.pending?.toFixed(2) || '0.00'}</span>
               </div>
               <div class="flex justify-between">
-                <span>Average (6mo)</span>
-                <span>$2,800</span>
+                <span>Overdue</span>
+                <span class="font-bold text-red-600">${stats.byStatus.overdue?.toFixed(2) || '0.00'}</span>
               </div>
             </div>
           </div>
@@ -101,62 +123,73 @@ const currentMonth = new Date().getMonth() + 1;
     </div>
     
     <!-- Recent Transactions -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
       <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Recent Transactions</h3>
-        <button class="text-highlight hover:underline text-sm">View All</button>
+        <h3 class="text-lg font-bold text-gray-800">Recent Transactions</h3>
+        <button class="text-primary hover:underline text-sm">View All</button>
       </div>
       
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
-            <tr class="text-left text-light-ink">
+            <tr class="text-left text-gray-500">
               <th class="p-4 font-medium">Date</th>
-              <th class="p-4 font-medium">Source</th>
+              <th class="p-4 font-medium">Project</th>
+              <th class="p-4 font-medium">Type</th>
               <th class="p-4 font-medium">Description</th>
+              <th class="p-4 font-medium">Status</th>
               <th class="p-4 font-medium text-right">Amount</th>
+              <th class="p-4 font-medium text-center">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr class="hover:bg-gray-50">
-              <td class="p-4">Mar 1, 2025</td>
-              <td class="p-4">Consulting</td>
-              <td class="p-4">Website Audit for Client A</td>
-              <td class="p-4 text-right font-bold">$700</td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="p-4">Feb 28, 2025</td>
-              <td class="p-4">Digital Products</td>
-              <td class="p-4">E-book Sales</td>
-              <td class="p-4 text-right font-bold">$350</td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="p-4">Feb 25, 2025</td>
-              <td class="p-4">Affiliate</td>
-              <td class="p-4">Software Referrals</td>
-              <td class="p-4 text-right font-bold">$120</td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="p-4">Feb 22, 2025</td>
-              <td class="p-4">Consulting</td>
-              <td class="p-4">Technical Consultation</td>
-              <td class="p-4 text-right font-bold">$500</td>
-            </tr>
+            {recentTransactions.length === 0 ? (
+              <tr>
+                <td colspan="7" class="p-4 text-center text-gray-500">No revenue entries found</td>
+              </tr>
+            ) : (
+              recentTransactions.map(transaction => (
+                <tr class="hover:bg-gray-50">
+                  <td class="p-4">{new Date(transaction.date).toLocaleDateString()}</td>
+                  <td class="p-4">{transaction.projectId}</td>
+                  <td class="p-4 capitalize">{transaction.type}</td>
+                  <td class="p-4">{transaction.description}</td>
+                  <td class="p-4">
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      ${transaction.status === 'paid' ? 'bg-green-100 text-green-800' : 
+                        transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                        transaction.status === 'overdue' ? 'bg-red-100 text-red-800' : 
+                        'bg-gray-100 text-gray-800'}`}>
+                      {transaction.status}
+                    </span>
+                  </td>
+                  <td class="p-4 text-right font-bold">${transaction.amount.toFixed(2)}</td>
+                  <td class="p-4 text-center">
+                    <button 
+                      class="text-primary hover:text-primary-dark edit-revenue-btn"
+                      data-id={transaction.id}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
     </div>
     
-    <!-- Income Sources Breakdown -->
-    <div class="bg-white rounded-lg shadow-card overflow-hidden">
+    <!-- Revenue by Type Breakdown -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold">Income Sources</h3>
+        <h3 class="text-lg font-bold text-gray-800">Revenue by Type</h3>
         <div>
           <select class="border rounded px-2 py-1 text-sm">
+            <option>All Time</option>
             <option>This Month</option>
             <option>Last Month</option>
-            <option>Year to Date</option>
-            <option>Last Year</option>
+            <option>This Year</option>
           </select>
         </div>
       </div>
@@ -164,46 +197,81 @@ const currentMonth = new Date().getMonth() + 1;
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
-            <tr class="text-left text-light-ink">
-              <th class="p-4 font-medium">Source</th>
-              <th class="p-4 font-medium text-right">This Month</th>
-              <th class="p-4 font-medium text-right">Last Month</th>
-              <th class="p-4 font-medium text-right">YTD</th>
+            <tr class="text-left text-gray-500">
+              <th class="p-4 font-medium">Type</th>
+              <th class="p-4 font-medium text-right">Amount</th>
               <th class="p-4 font-medium text-right">%</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b">
-              <td class="py-3 px-4">Consulting</td>
-              <td class="text-right py-3 px-4">$1,200</td>
-              <td class="text-right py-3 px-4">$1,200</td>
-              <td class="text-right py-3 px-4">$7,200</td>
-              <td class="text-right py-3 px-4">48%</td>
-            </tr>
-            <tr class="border-b">
-              <td class="py-3 px-4">Digital Products</td>
-              <td class="text-right py-3 px-4">$850</td>
-              <td class="text-right py-3 px-4">$650</td>
-              <td class="text-right py-3 px-4">$4,800</td>
-              <td class="text-right py-3 px-4">32%</td>
-            </tr>
-            <tr class="border-b">
-              <td class="py-3 px-4">Affiliate</td>
-              <td class="text-right py-3 px-4">$320</td>
-              <td class="text-right py-3 px-4">$150</td>
-              <td class="text-right py-3 px-4">$1,500</td>
-              <td class="text-right py-3 px-4">10%</td>
-            </tr>
-            <tr>
-              <td class="py-3 px-4">Other</td>
-              <td class="text-right py-3 px-4">$130</td>
-              <td class="text-right py-3 px-4">$0</td>
-              <td class="text-right py-3 px-4">$1,000</td>
-              <td class="text-right py-3 px-4">10%</td>
-            </tr>
+            {Object.entries(revenueByType).map(([type, amount]) => {
+              const percentage = totalRevenue > 0 ? (amount / totalRevenue) * 100 : 0;
+              return (
+                <tr class="border-b">
+                  <td class="py-3 px-4 capitalize">{type}</td>
+                  <td class="text-right py-3 px-4">${amount.toFixed(2)}</td>
+                  <td class="text-right py-3 px-4">{percentage.toFixed(1)}%</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     </div>
   </div>
-</BaseLayout> 
+
+  <!-- Modal for Adding/Editing Revenue -->
+  <Modal id="revenue-modal" title={editingRevenue ? `Edit Revenue Entry` : 'Add New Revenue'}>
+    <RevenueForm 
+      revenue={editingRevenue || createEmptyRevenue()} 
+      mode={editingRevenue ? 'edit' : 'create'} 
+    />
+  </Modal>
+</BaseLayout>
+
+<script>
+  // Show modal when Add Revenue button is clicked
+  document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.getElementById('add-revenue-btn');
+    const modal = document.getElementById('revenue-modal');
+    const closeButtons = modal?.querySelectorAll('.close-modal');
+    
+    // Open modal when Add Revenue button is clicked
+    addButton?.addEventListener('click', () => {
+      modal?.classList.remove('hidden');
+      // Clear edit parameter from URL if present
+      const url = new URL(window.location.href);
+      url.searchParams.delete('edit');
+      window.history.replaceState({}, '', url);
+    });
+    
+    // Close modal when close button is clicked
+    closeButtons?.forEach(button => {
+      button.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+      });
+    });
+    
+    // Handle edit buttons
+    const editButtons = document.querySelectorAll('.edit-revenue-btn');
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        if (id) {
+          // Update URL with edit parameter
+          const url = new URL(window.location.href);
+          url.searchParams.set('edit', id);
+          window.history.replaceState({}, '', url);
+          // Open modal
+          modal?.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Show modal if edit parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('edit')) {
+      modal?.classList.remove('hidden');
+    }
+  });
+</script> 
