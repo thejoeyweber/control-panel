@@ -2,11 +2,20 @@
 /*
   File: src/pages/books.astro
   Purpose: Displays user's book collection, reading progress, and wishlists
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, books data
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent } from '../utils/auth';
+import { getVisibleBooks, getBookStats } from '../data/books';
+
+// Get visible books and stats
+const books = getVisibleBooks();
+const stats = getBookStats();
+
+// Filter books by status
+const reading = books.filter(book => book.status === 'reading');
+const toRead = books.filter(book => book.status === 'to-read');
+const completed = books.filter(book => book.status === 'completed');
 ---
 
 <BaseLayout title="Books" activePage="books">
@@ -22,19 +31,19 @@ import { getVisibleContent } from '../utils/auth';
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-lg shadow-card p-4">
         <h3 class="text-sm text-light-ink mb-1">Currently Reading</h3>
-        <p class="text-2xl font-bold">3</p>
+        <p class="text-2xl font-bold">{stats.reading}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
-        <h3 class="text-sm text-light-ink mb-1">Books Read (2025)</h3>
-        <p class="text-2xl font-bold">7</p>
+        <h3 class="text-sm text-light-ink mb-1">Books Read</h3>
+        <p class="text-2xl font-bold">{stats.completed}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
         <h3 class="text-sm text-light-ink mb-1">Total Collection</h3>
-        <p class="text-2xl font-bold">126</p>
+        <p class="text-2xl font-bold">{stats.total}</p>
       </div>
       <div class="bg-white rounded-lg shadow-card p-4">
         <h3 class="text-sm text-light-ink mb-1">On Wishlist</h3>
-        <p class="text-2xl font-bold">14</p>
+        <p class="text-2xl font-bold">{stats.toRead}</p>
       </div>
     </div>
     

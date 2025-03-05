@@ -2,11 +2,20 @@
 /*
   File: src/pages/revenue.astro
   Purpose: Displays revenue data, income sources, and financial goals
-  Dependencies: BaseLayout
+  Dependencies: BaseLayout, revenue data
 */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getVisibleContent } from '../utils/auth';
+import { getVisibleRevenueEntries, getVisibleRevenueGoals, getRevenueStats } from '../data/revenue';
+
+// Get visible revenue data and stats
+const revenueEntries = getVisibleRevenueEntries();
+const revenueGoals = getVisibleRevenueGoals();
+const stats = getRevenueStats();
+
+// Get current year and month for filtering
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth() + 1;
 ---
 
 <BaseLayout title="Revenue" activePage="revenue">
