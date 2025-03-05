@@ -1,0 +1,247 @@
+/*
+  File: src/components/Toast.astro
+  Purpose: A toast notification component that appears at the bottom right of the screen
+  Dependencies: None
+*/
+
+---
+export interface Props {
+  id?: string;
+  type?: 'success' | 'error' | 'info' | 'warning';
+  title?: string;
+  message: string;
+  duration?: number;
+  show?: boolean;
+}
+
+// Define colors for different toast types
+const colors = {
+  success: {
+    bg: 'bg-success bg-opacity-10',
+    border: 'border-success',
+    icon: 'text-success',
+    iconPath: 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+  },
+  error: {
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    icon: 'text-red-600',
+    iconPath: 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
+  },
+  warning: {
+    bg: 'bg-yellow-50',
+    border: 'border-yellow-200',
+    icon: 'text-yellow-600',
+    iconPath: 'M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+  },
+  info: {
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    icon: 'text-blue-600',
+    iconPath: 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+  }
+};
+
+// Get appropriate color based on type
+const toastType = Astro.props.type || 'info';
+const color = colors[toastType];
+---
+
+<div 
+  id={Astro.props.id || 'toast'}
+  class={`fixed bottom-4 right-4 z-50 rounded-md shadow-lg border p-4 flex items-start max-w-sm transform transition-all duration-300 ${color.bg} ${color.border} ${Astro.props.show ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
+  data-toast
+  data-duration={Astro.props.duration || 5000}
+>
+  <div class={`flex-shrink-0 ${color.icon}`}>
+    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d={color.iconPath} clip-rule="evenodd" />
+    </svg>
+  </div>
+  <div class="ml-3 flex-1">
+    {Astro.props.title && <p class="text-sm font-medium text-gray-900">{Astro.props.title}</p>}
+    <p class="text-sm text-gray-700">{Astro.props.message}</p>
+  </div>
+  <button type="button" class="ml-4 text-gray-400 hover:text-gray-600" data-dismiss>
+    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', initToasts);
+  
+  // Custom event listener for showing toasts programmatically
+  document.addEventListener('show-toast', (e) => {
+    const detail = e.detail;
+    showToast(detail.id || 'toast', detail.message, detail.type, detail.title, detail.duration);
+  });
+  
+  function initToasts() {
+    // Set up all toasts on the page
+    document.querySelectorAll('[data-toast]').forEach(toast => {
+      // Add click handler to dismiss button
+      const dismissBtn = toast.querySelector('[data-dismiss]');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          hideToast(toast.id);
+        });
+      }
+      
+      // Auto-hide toast if it's visible
+      if (!toast.classList.contains('opacity-0')) {
+        const duration = parseInt(toast.dataset.duration || '5000', 10);
+        setTimeout(() => {
+          hideToast(toast.id);
+        }, duration);
+      }
+    });
+  }
+  
+  // Function to show a toast by ID
+  function showToast(
+    id, 
+    message, 
+    type = 'info',
+    title,
+    duration = 5000
+  ) {
+    // Try to find existing toast
+    let toast = document.getElementById(id);
+    
+    // If toast doesn't exist, create it
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = id;
+      toast.className = `fixed bottom-4 right-4 z-50 rounded-md shadow-lg border p-4 flex items-start max-w-sm transform transition-all duration-300 translate-y-16 opacity-0 pointer-events-none`;
+      toast.setAttribute('data-toast', '');
+      toast.setAttribute('data-duration', duration.toString());
+      
+      // Determine colors based on type
+      const colors = {
+        success: {
+          bg: 'bg-success bg-opacity-10',
+          border: 'border-success',
+          icon: 'text-success',
+          iconPath: 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+        },
+        error: {
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          icon: 'text-red-600',
+          iconPath: 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
+        },
+        warning: {
+          bg: 'bg-yellow-50',
+          border: 'border-yellow-200',
+          icon: 'text-yellow-600',
+          iconPath: 'M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+        },
+        info: {
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+          icon: 'text-blue-600',
+          iconPath: 'M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+        }
+      };
+      
+      const color = colors[type];
+      
+      // Add the colors
+      toast.classList.add(color.bg, color.border);
+      
+      // Create the content
+      toast.innerHTML = `
+        <div class="flex-shrink-0 ${color.icon}">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="${color.iconPath}" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          ${title ? `<p class="text-sm font-medium text-gray-900">${title}</p>` : ''}
+          <p class="text-sm text-gray-700">${message}</p>
+        </div>
+        <button type="button" class="ml-4 text-gray-400 hover:text-gray-600" data-dismiss>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      `;
+      
+      // Add to document
+      document.body.appendChild(toast);
+      
+      // Add dismiss button handler
+      const dismissBtn = toast.querySelector('[data-dismiss]');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          hideToast(id);
+        });
+      }
+    } else {
+      // Update existing toast
+      const messageEl = toast.querySelector('.ml-3 p:last-child');
+      if (messageEl) messageEl.textContent = message;
+      
+      if (title) {
+        let titleEl = toast.querySelector('.ml-3 p:first-child');
+        if (!titleEl) {
+          titleEl = document.createElement('p');
+          titleEl.className = 'text-sm font-medium text-gray-900';
+          toast.querySelector('.ml-3')?.prepend(titleEl);
+        }
+        titleEl.textContent = title;
+      }
+    }
+    
+    // Show the toast
+    requestAnimationFrame(() => {
+      toast?.classList.remove('translate-y-16', 'opacity-0', 'pointer-events-none');
+      toast?.classList.add('translate-y-0', 'opacity-100');
+    });
+    
+    // Set auto-hide timeout
+    setTimeout(() => {
+      hideToast(id);
+    }, duration);
+    
+    return toast;
+  }
+  
+  // Function to hide a toast by ID
+  function hideToast(id) {
+    const toast = document.getElementById(id);
+    if (toast) {
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-16', 'opacity-0', 'pointer-events-none');
+      
+      // Optionally remove from DOM after animation
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }
+  }
+  
+  // Make functions available globally
+  window.showToast = showToast;
+  window.hideToast = hideToast;
+</script>
+
+<style>
+  [data-toast] {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+</style>
+
+<script is:inline>
+  // Define the type for the global window object
+  if (!window.showToast) {
+    window.showToast = function() {};
+  }
+  if (!window.hideToast) {
+    window.hideToast = function() {};
+  }
+</script> 

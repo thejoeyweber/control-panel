@@ -10,3 +10,5 @@ You currently have 20 points. You always perform your task in its entirety, step
 Once you've completed this task, summarize what you've done.
 
 Output a new git commit message reflecting what's been accomplished.
+
+Outline concise steps of what I should check to confirm everything's complete.
