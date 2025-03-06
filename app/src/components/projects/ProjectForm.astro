@@ -2,32 +2,41 @@
 /*
   File: src/components/projects/ProjectForm.astro
   Purpose: Form for creating and editing projects with a Notion-like clean interface
-  Dependencies: Project type from types/index.ts
+  Dependencies: Project type from types/index.ts and Astro DB for data
 */
 
 import type { Project } from '../../types';
+import { createEmptyProject } from '../../utils/db';
 
 interface Props {
-  project?: Project;
+  project?: any; // Project from Astro DB
   mode: 'create' | 'edit';
 }
 
 const { project, mode } = Astro.props;
 
 // Default empty project if none provided (creating new)
-const initialProject = project || {
-  id: '',
-  title: '',
-  description: '',
-  status: 'planning',
-  category: '',
-  startDate: new Date().toISOString().split('T')[0],
-  lastUpdated: new Date().toISOString().split('T')[0],
-  progress: 0,
-  tags: [],
-  techStack: [],
-  visibility: 'private',
-  activities: []
+const initialProject = project || createEmptyProject();
+
+// Format date for input fields (if date object is provided)
+const formatDateForInput = (dateValue: any) => {
+  if (!dateValue) return '';
+  
+  if (dateValue instanceof Date) {
+    return dateValue.toISOString().split('T')[0];
+  }
+  
+  if (typeof dateValue === 'string') {
+    // Check if it's already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return dateValue;
+    }
+    
+    // Otherwise convert it
+    return new Date(dateValue).toISOString().split('T')[0];
+  }
+  
+  return '';
 };
 
 // Common categories to choose from
@@ -57,12 +66,16 @@ const statusColors = {
   'planning': 'bg-warning text-white',
   'paused': 'bg-yellow-500 text-white'
 };
+
+// Format tags and techStack for display
+const tagsString = Array.isArray(initialProject.tags) ? initialProject.tags.join(', ') : '';
+const techStackString = Array.isArray(initialProject.techStack) ? initialProject.techStack.join(', ') : '';
 ---
 
 <form 
   id="project-form" 
   method="post" 
-  action={`/api/projects${mode === 'edit' && initialProject.id ? `/${initialProject.id}` : ''}`}
+  action="/api/projects"
   class="w-full"
 >
   {mode === 'edit' && <input type="hidden" name="id" value={initialProject.id} />}
@@ -151,7 +164,7 @@ const statusColors = {
       <div class="space-y-4">
         <div class="mb-4">
           <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-          <input type="text" id="tags" name="tags" value={initialProject.tags.join(', ')} 
+          <input type="text" id="tags" name="tags" value={tagsString} 
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             placeholder="Enter tags separated by commas (e.g. web, design, experimental)">
           <p class="text-xs text-gray-500 mt-1">Enter tags separated by commas</p>
@@ -159,7 +172,7 @@ const statusColors = {
         
         <div class="mb-4">
           <label for="techStack" class="block text-sm font-medium text-gray-700 mb-1">Tech Stack</label>
-          <input type="text" id="techStack" name="techStack" value={initialProject.techStack.join(', ')} 
+          <input type="text" id="techStack" name="techStack" value={techStackString} 
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             placeholder="Enter technologies separated by commas (e.g. React, Node.js, MongoDB)">
           <p class="text-xs text-gray-500 mt-1">Enter technologies separated by commas</p>
@@ -167,7 +180,7 @@ const statusColors = {
         
         <div class="mb-4">
           <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-          <input type="date" id="startDate" name="startDate" value={initialProject.startDate} 
+          <input type="date" id="startDate" name="startDate" value={formatDateForInput(initialProject.startDate)} 
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
         </div>
       </div>
@@ -222,8 +235,8 @@ const statusColors = {
   
   <!-- Action buttons (always visible) -->
   <div class="flex justify-end space-x-2 mt-6 pt-4 border-t">
-    <button type="reset" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-      Reset
+    <button type="button" id="cancel-btn" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+      Cancel
     </button>
     
     <button type="submit" class="px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
@@ -249,87 +262,91 @@ const statusColors = {
         // Hide all tab panes
         tabPanes.forEach(pane => {
           pane.classList.add('hidden');
+          pane.classList.remove('active');
         });
         
-        // Remove active state from all tab buttons
+        // Deactivate all tab buttons
         tabButtons.forEach(btn => {
-          btn.classList.remove('active', 'border-primary', 'text-primary');
-          btn.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+          btn.classList.remove('border-primary', 'text-primary');
+          btn.classList.add('border-transparent');
           btn.setAttribute('aria-selected', 'false');
         });
         
-        // Show the selected tab pane
-        const tabId = button.getAttribute('aria-controls');
-        const tabPane = document.getElementById(tabId);
-        if (tabPane) {
-          tabPane.classList.remove('hidden');
-        }
-        
-        // Set the selected tab button to active
-        button.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
-        button.classList.add('active', 'border-primary', 'text-primary');
+        // Activate clicked tab
+        button.classList.remove('border-transparent');
+        button.classList.add('border-primary', 'text-primary');
         button.setAttribute('aria-selected', 'true');
-      });
-    });
-    
-    // Status buttons
-    const statusButtons = document.querySelectorAll('.status-btn');
-    statusButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        statusButtons.forEach(b => {
-          b.classList.remove('bg-gray-100', 'border-gray-400');
-          b.classList.add('border-gray-200', 'hover:bg-gray-50');
-        });
         
-        btn.classList.remove('border-gray-200', 'hover:bg-gray-50');
-        btn.classList.add('bg-gray-100', 'border-gray-400');
+        // Show the corresponding tab pane
+        const paneId = button.getAttribute('aria-controls');
+        const pane = document.getElementById(paneId);
+        if (pane) {
+          pane.classList.remove('hidden');
+          pane.classList.add('active');
+        }
       });
     });
     
-    // Progress slider
+    // Progress slider updates
     const progressSlider = document.getElementById('progress');
     const progressDisplay = document.getElementById('progress-display');
     
     if (progressSlider && progressDisplay) {
-      progressSlider.addEventListener('input', () => {
-        progressDisplay.textContent = `${progressSlider.value}% Complete`;
+      progressSlider.addEventListener('input', function() {
+        progressDisplay.textContent = `${this.value}% Complete`;
       });
     }
     
-    // Delete project button
+    // Delete project confirmation
     const deleteButton = document.getElementById('delete-project');
     if (deleteButton) {
-      deleteButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        
+      deleteButton.addEventListener('click', function() {
         if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
           const form = document.getElementById('project-form');
-          const id = form.querySelector('input[name="id"]').value;
+          const idInput = form.querySelector('input[name="id"]');
           
-          // Send a DELETE request to the API
-          fetch(`/api/projects/${id}`, {
-            method: 'DELETE',
-          })
-          .then(response => {
-            if (response.ok) {
-              window.location.href = '/projects?success=Project was successfully deleted&action=delete';
-            } else {
-              throw new Error('Failed to delete project');
-            }
-          })
-          .catch(error => {
-            window.location.href = `/projects?error=${error.message}`;
-          });
+          // Create a form to submit the delete request
+          const deleteForm = document.createElement('form');
+          deleteForm.method = 'POST';
+          deleteForm.action = '/api/projects';
+          
+          const methodInput = document.createElement('input');
+          methodInput.type = 'hidden';
+          methodInput.name = '_method';
+          methodInput.value = 'DELETE';
+          
+          const projectIdInput = document.createElement('input');
+          projectIdInput.type = 'hidden';
+          projectIdInput.name = 'id';
+          projectIdInput.value = idInput.value;
+          
+          deleteForm.appendChild(methodInput);
+          deleteForm.appendChild(projectIdInput);
+          document.body.appendChild(deleteForm);
+          deleteForm.submit();
         }
       });
     }
     
-    // Listen for project:edit event from modal component
+    // Cancel button
+    const cancelButton = document.getElementById('cancel-btn');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', function() {
+        // Trigger a custom event that the page can listen for
+        document.dispatchEvent(new CustomEvent('project:cancel'));
+      });
+    }
+    
+    // Listen for project:edit event to load project data from API
     document.addEventListener('project:edit', async (e) => {
       const id = e.detail?.id;
       if (!id) return;
       
-      console.log('Received project:edit event for ID:', id);
+      // Set the id field
+      const idField = document.querySelector('#project-form input[name="id"]');
+      if (idField) {
+        idField.value = id;
+      }
       
       try {
         // Fetch the project data
@@ -340,114 +357,91 @@ const statusColors = {
         }
         
         const project = await response.json();
-        console.log('Loaded project data:', project);
         
-        // Populate the form fields
-        const form = document.getElementById('project-form');
-        if (!form) {
-          console.error('Could not find project-form element');
-          return;
-        }
+        // Populate form fields
+        document.querySelector('#title').value = project.title || '';
+        document.querySelector('#description').value = project.description || '';
         
-        // Update hidden inputs
-        const modeInput = form.querySelector('input[name="mode"]');
-        if (modeInput) {
-          modeInput.value = 'edit';
-          console.log('Set mode input to "edit"');
-        } else {
-          console.error('Could not find mode input');
-        }
+        // Status
+        document.querySelectorAll('input[name="status"]').forEach(input => {
+          input.checked = input.value === project.status;
+          
+          // Also update the visual state of the status buttons
+          const label = input.closest('label');
+          if (label) {
+            if (input.checked) {
+              label.classList.add('bg-gray-100', 'border-gray-400');
+              label.classList.remove('border-gray-200');
+            } else {
+              label.classList.remove('bg-gray-100', 'border-gray-400');
+              label.classList.add('border-gray-200');
+            }
+          }
+        });
         
-        const idInput = form.querySelector('input[name="id"]');
-        if (idInput) {
-          idInput.value = id;
-          console.log('Set ID input to', id);
-        } else {
-          // If no ID input exists, create one
-          const newIdInput = document.createElement('input');
-          newIdInput.type = 'hidden';
-          newIdInput.name = 'id';
-          newIdInput.value = id;
-          form.appendChild(newIdInput);
-          console.log('Created and added ID input');
-        }
-        
-        // Basic info tab
-        form.querySelector('#title').value = project.title || '';
-        form.querySelector('#description').value = project.description || '';
-        
-        // Set selected option for category
-        const categorySelect = form.querySelector('#category');
-        if (categorySelect) {
+        // Category
+        const categorySelect = document.querySelector('#category');
+        if (categorySelect && project.category) {
+          // Find and select the matching option
           Array.from(categorySelect.options).forEach(option => {
             option.selected = option.value === project.category;
           });
         }
         
-        // Set status
-        const statusInputs = form.querySelectorAll('input[name="status"]');
-        statusInputs.forEach(input => {
-          if (input.value === project.status) {
-            input.checked = true;
-            // Also update the visual styling of status buttons
-            const statusBtn = input.closest('.status-btn');
-            if (statusBtn) {
-              document.querySelectorAll('.status-btn').forEach(btn => {
-                btn.classList.remove('bg-gray-100', 'border-gray-400');
-                btn.classList.add('border-gray-200', 'hover:bg-gray-50');
-              });
-              
-              statusBtn.classList.remove('border-gray-200', 'hover:bg-gray-50');
-              statusBtn.classList.add('bg-gray-100', 'border-gray-400');
-            }
-          }
-        });
-        
-        // Set visibility
-        const visibilitySelect = form.querySelector('#visibility');
-        if (visibilitySelect) {
+        // Visibility
+        const visibilitySelect = document.querySelector('#visibility');
+        if (visibilitySelect && project.visibility) {
           Array.from(visibilitySelect.options).forEach(option => {
             option.selected = option.value === project.visibility;
           });
         }
         
-        // Details tab
-        form.querySelector('#tags').value = project.tags ? project.tags.join(', ') : '';
-        form.querySelector('#techStack').value = project.techStack ? project.techStack.join(', ') : '';
-        form.querySelector('#startDate').value = project.startDate || '';
-        
-        // Links tab
-        form.querySelector('#githubUrl').value = project.githubUrl || '';
-        form.querySelector('#liveUrl').value = project.liveUrl || '';
-        form.querySelector('#notes').value = project.notes || '';
-        
-        // Planning tab
-        const progressSlider = form.querySelector('#progress');
-        const progressDisplay = form.querySelector('#progress-display');
-        if (progressSlider && progressDisplay) {
-          progressSlider.value = project.progress || 0;
-          progressDisplay.textContent = `${project.progress || 0}% Complete`;
+        // Tags & Tech Stack
+        if (project.tags && Array.isArray(project.tags)) {
+          document.querySelector('#tags').value = project.tags.join(', ');
         }
         
-        // Update the form action to include the project ID
-        form.action = `/api/projects/${id}`;
-        
-        // Show that we're in edit mode
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-          submitBtn.textContent = 'Save Changes';
+        if (project.techStack && Array.isArray(project.techStack)) {
+          document.querySelector('#techStack').value = project.techStack.join(', ');
         }
         
-        // Make the delete button visible
-        const deleteBtn = form.querySelector('#delete-project');
-        if (deleteBtn) {
-          deleteBtn.style.display = 'block';
+        // Dates
+        if (project.startDate) {
+          // Format the date for the input (YYYY-MM-DD)
+          let formattedDate = project.startDate;
+          if (typeof project.startDate === 'string' && !project.startDate.includes('-')) {
+            // If it's not already in the right format
+            const date = new Date(project.startDate);
+            formattedDate = date.toISOString().split('T')[0];
+          }
+          document.querySelector('#startDate').value = formattedDate;
         }
         
-        console.log('Project form successfully populated with data');
+        // URLs
+        if (project.githubUrl) {
+          document.querySelector('#githubUrl').value = project.githubUrl;
+        }
+        
+        if (project.liveUrl) {
+          document.querySelector('#liveUrl').value = project.liveUrl;
+        }
+        
+        // Notes
+        if (project.notes) {
+          document.querySelector('#notes').value = project.notes;
+        }
+        
+        // Progress
+        if (project.progress !== undefined) {
+          const progressSlider = document.querySelector('#progress');
+          const progressDisplay = document.querySelector('#progress-display');
+          
+          progressSlider.value = project.progress;
+          progressDisplay.textContent = `${project.progress}% Complete`;
+        }
         
       } catch (error) {
-        console.error('Error fetching project data:', error);
+        console.error('Error loading project:', error);
         alert('Failed to load project data. Please try again.');
       }
     });

@@ -1,100 +1,86 @@
 ---
 /*
   File: src/components/projects/RecentActivity.astro
-  Purpose: Displays recent project activities across all projects
-  Dependencies: getAllActivities from data/projects.ts
+  Purpose: Display recent activities for projects
+  Dependencies: Activities from Astro DB
 */
 
-import { getAllActivities } from '../../data/projects';
+import { formatDistanceToNow } from 'date-fns';
 
-// Get all activities and sort them by date (newest first)
-const activities = getAllActivities().sort((a, b) => 
-  new Date(b.date).getTime() - new Date(a.date).getTime()
-).slice(0, 3); // Take only the 3 most recent activities
-
-// Format a date relative to now (e.g., "2 days ago")
-function getRelativeTimeString(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  
-  if (diffInHours < 24) {
-    return diffInHours === 0 ? 'Just now' : 
-           diffInHours === 1 ? '1 hour ago' : 
-           `${diffInHours} hours ago`;
-  }
-  
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) {
-    return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
-  }
-  
-  if (diffInDays < 30) {
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
-  }
-  
-  const diffInMonths = Math.floor(diffInDays / 30);
-  return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+interface Props {
+  activities: any[]; // Activities from Astro DB
+  limit?: number;
 }
 
-// Activity type styling
-const activityStyles = {
-  'commit': {
-    icon: 'ri-github-fill',
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-600',
-    label: 'GitHub Commit'
-  },
-  'pr': {
-    icon: 'ri-git-pull-request-line',
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-600',
-    label: 'Pull Request Merged'
-  },
-  'manual': {
-    icon: 'ri-edit-line',
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-600',
-    label: 'Manual Log'
+const { activities = [], limit = 5 } = Astro.props;
+
+// Sort activities by date (newest first) and limit
+const recentActivities = [...activities]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, limit);
+
+// Format date as relative time
+const formatRelativeDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (e) {
+    return 'Invalid date';
   }
+};
+
+// Activity type icons
+const activityIcons = {
+  'update': 'ri-refresh-line',
+  'milestone': 'ri-flag-line',
+  'note': 'ri-sticky-note-line',
+  'meeting': 'ri-team-line',
+  'research': 'ri-search-line',
+  'design': 'ri-palette-line',
+  'development': 'ri-code-s-slash-line',
+  'testing': 'ri-bug-line',
+  'deployment': 'ri-rocket-line',
+  'other': 'ri-more-line'
 };
 ---
 
-{activities.length > 0 && (
-  <div class="bg-white rounded-lg shadow-card p-6 mb-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-bold">Recent Activity</h2>
-      <a href="/activity" class="text-highlight text-sm hover:underline">View All Activity</a>
-    </div>
-    
+<div class="bg-white rounded-lg shadow-card p-6">
+  <h3 class="text-lg font-semibold mb-4">Recent Project Activity</h3>
+  
+  {recentActivities.length > 0 ? (
     <div class="space-y-4">
-      {activities.map(activity => {
-        const style = activityStyles[activity.type];
-        return (
-          <div class="activity-item flex items-start gap-3">
-            <div class={`activity-icon ${style.bgColor} p-2 rounded-full`}>
-              <i class={`${style.icon} ${style.textColor}`}></i>
+      {recentActivities.map(activity => (
+        <div class="flex items-start">
+          <div class="bg-gray-100 p-2 rounded-full mr-3">
+            <i class={`${activityIcons[activity.type] || 'ri-more-line'} text-gray-600`}></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-medium">{activity.title}</h4>
+                <p class="text-sm text-gray-600 line-clamp-2">{activity.description}</p>
+              </div>
+              <span class="text-xs text-gray-500 whitespace-nowrap ml-2">{formatRelativeDate(activity.date)}</span>
             </div>
-            <div class="flex-grow">
-              <div class="flex justify-between">
-                <span class="font-medium">{style.label} <span class="text-light-ink text-sm">on {activity.projectId.replace(/-/g, ' ')}</span></span>
-                <span class="text-light-ink text-sm">{getRelativeTimeString(activity.date)}</span>
-              </div>
-              <div class="text-light-ink">
-                {activity.type === 'manual' ? (
-                  <div class="markdown-content">
-                    <p>{activity.description}</p>
-                  </div>
-                ) : (
-                  <code class="bg-gray-50 px-1 rounded text-sm">{activity.description}</code>
-                )}
-              </div>
+            <div class="mt-2">
+              <a 
+                href={`/project/${activity.projectId}`} 
+                class="text-xs px-2 py-1 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors inline-flex items-center"
+              >
+                <i class="ri-folder-line mr-1"></i> {activity.projectName || 'View Project'}
+              </a>
             </div>
           </div>
-        )
-      })}
+        </div>
+      ))}
     </div>
+  ) : (
+    <p class="text-gray-500 text-sm">No recent activity found.</p>
+  )}
+  
+  <div class="mt-4 pt-3 border-t border-gray-100">
+    <a href="/activity" class="text-primary hover:text-primary-dark transition-colors flex items-center text-sm">
+      View all activity <i class="ri-arrow-right-line ml-1"></i>
+    </a>
   </div>
-)} 
+</div> 

@@ -9,8 +9,13 @@
 const categories = [
   { value: '', label: 'All Categories' },
   { value: 'Development', label: 'Development' },
+  { value: 'Design', label: 'Design' },
   { value: 'Writing', label: 'Writing' },
-  { value: 'Health', label: 'Health' }
+  { value: 'Business', label: 'Business' },
+  { value: 'Learning', label: 'Learning' },
+  { value: 'Personal', label: 'Personal' },
+  { value: 'Open Source', label: 'Open Source' },
+  { value: 'Other', label: 'Other' }
 ];
 
 const statuses = [
@@ -86,12 +91,12 @@ const statuses = [
   </div>
 </div>
 
-<script>
+<script is:inline>
   // Add client-side filtering logic
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('project-search') as HTMLInputElement;
-    const statusFilter = document.getElementById('status-filter') as HTMLSelectElement;
-    const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+  document.addEventListener('astro:page-load', () => {
+    const searchInput = document.getElementById('project-search');
+    const statusFilter = document.getElementById('status-filter');
+    const categoryFilter = document.getElementById('category-filter');
     const clearFiltersBtn = document.getElementById('clear-filters');
     const filteredCountElement = document.getElementById('filtered-count');
     const viewGridBtn = document.getElementById('view-grid');
@@ -106,6 +111,9 @@ const statuses = [
       viewListBtn?.setAttribute('aria-pressed', 'false');
       viewGridBtn.classList.add('bg-gray-100');
       viewListBtn?.classList.remove('bg-gray-100');
+      
+      // Save preference
+      localStorage.setItem('projectViewPreference', 'grid');
     });
     
     viewListBtn?.addEventListener('click', () => {
@@ -115,7 +123,18 @@ const statuses = [
       viewGridBtn?.setAttribute('aria-pressed', 'false');
       viewListBtn.classList.add('bg-gray-100');
       viewGridBtn?.classList.remove('bg-gray-100');
+      
+      // Save preference
+      localStorage.setItem('projectViewPreference', 'list');
     });
+    
+    // Load saved preference
+    const savedViewPreference = localStorage.getItem('projectViewPreference');
+    if (savedViewPreference === 'list') {
+      viewListBtn?.click();
+    } else {
+      viewGridBtn?.click();
+    }
     
     // Clear all filters
     clearFiltersBtn?.addEventListener('click', () => {
@@ -142,18 +161,20 @@ const statuses = [
       let visibleCount = 0;
       
       projectElements.forEach(el => {
-        const projectEl = el as HTMLElement;
-        const status = projectEl.dataset.status || '';
-        const category = projectEl.dataset.category || '';
-        const title = projectEl.dataset.title?.toLowerCase() || '';
-        const description = projectEl.dataset.description?.toLowerCase() || '';
+        const projectEl = el;
+        const status = projectEl.getAttribute('data-status') || '';
+        const category = projectEl.getAttribute('data-category') || '';
+        const title = (projectEl.getAttribute('data-title') || '').toLowerCase();
+        const description = (projectEl.getAttribute('data-description') || '').toLowerCase();
+        const tags = (projectEl.getAttribute('data-tags') || '').toLowerCase();
         
         // Check if the project matches all selected filters
         const matchesStatus = !statusValue || status === statusValue;
         const matchesCategory = !categoryValue || category === categoryValue;
         const matchesSearch = !searchQuery || 
           title.includes(searchQuery) || 
-          description.includes(searchQuery);
+          description.includes(searchQuery) ||
+          tags.includes(searchQuery);
         
         // Show or hide based on filter matches
         if (matchesStatus && matchesCategory && matchesSearch) {
@@ -172,6 +193,23 @@ const statuses = [
           filteredCountElement.textContent = `Showing ${visibleCount} of ${projectElements.length} projects`;
         }
       }
+      
+      // Show empty state if no projects match
+      const emptyState = document.getElementById('no-projects-message');
+      if (emptyState) {
+        if (visibleCount === 0 && projectElements.length > 0) {
+          emptyState.textContent = 'No projects match your filters';
+          emptyState.classList.remove('hidden');
+        } else if (projectElements.length === 0) {
+          emptyState.textContent = 'No projects found. Create your first project to get started!';
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
     }
+    
+    // Run initial filter
+    updateFilters();
   });
 </script> 

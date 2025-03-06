@@ -1,15 +1,19 @@
 /*
   File: src/pages/api/books/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual books
-  Dependencies: Uses books data service for CRUD operations
+  Dependencies: Uses Astro DB utility functions for CRUD operations
 */
 
 import type { APIRoute } from 'astro';
-import { getBookById, updateBook, deleteBook } from '../../../data/books';
+import { getBook, updateBook, deleteBook } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
     const { id } = params;
     
     if (!id) {
@@ -21,7 +25,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
     
-    const book = await getBookById(id);
+    const book = await getBook(id, authenticated);
     
     if (!book) {
       return new Response(JSON.stringify({ error: 'Book not found' }), {
@@ -32,7 +36,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
     
-    return new Response(JSON.stringify({ book }), {
+    return new Response(JSON.stringify(book), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
@@ -51,6 +55,16 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const POST: APIRoute = async ({ params, request, redirect }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
     const { id } = params;
     
     if (!id) {
@@ -88,10 +102,6 @@ export const POST: APIRoute = async ({ params, request, redirect }) => {
     
     // Update the book
     const book = await updateBook(id, bookData);
-    
-    if (!book) {
-      return redirect(`/books?error=${encodeURIComponent('Book not found')}`, 303);
-    }
     
     return redirect(`/books?success=Book updated successfully`, 303);
   } catch (error) {

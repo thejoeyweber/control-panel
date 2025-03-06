@@ -1,16 +1,22 @@
 /*
   File: src/pages/api/revenue/index.ts
   Purpose: API endpoint for listing and creating revenue entries
-  Dependencies: Revenue data service
+  Dependencies: Astro DB utility functions for Revenue operations
 */
 
 import type { APIRoute } from 'astro';
-import { getAllRevenue, createRevenue } from '../../../data/revenue';
+import { getAllRevenue, createRevenue } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async () => {
   try {
-    const revenue = await getAllRevenue();
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
+    // Get all revenue entries
+    const revenue = await getAllRevenue(authenticated);
+    
     return new Response(JSON.stringify(revenue), {
       status: 200,
       headers: {
@@ -30,13 +36,19 @@ export const GET: APIRoute = async () => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+    
+    // Parse form data
     const formData = await request.formData();
     const revenueData = parseFormData(formData);
-    
-    // Parse amount to number
-    if (revenueData.amount) {
-      revenueData.amount = parseFloat(revenueData.amount as string);
-    }
     
     // Create the revenue entry
     await createRevenue(revenueData);

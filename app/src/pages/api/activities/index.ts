@@ -1,17 +1,23 @@
 /*
   File: src/pages/api/activities/index.ts
   Purpose: API endpoint for listing and creating activities
-  Dependencies: Uses activities data service for CRUD operations
+  Dependencies: Astro DB utility functions for Activities operations
 */
 
 import type { APIRoute } from 'astro';
-import { getAllActivities, createActivity } from '../../../data/activities';
+import { getAllActivities, createActivity } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
-export const GET: APIRoute = async ({ request, redirect }) => {
+export const GET: APIRoute = async () => {
   try {
-    const activities = await getAllActivities();
-    return new Response(JSON.stringify({ activities }), {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
+    // Get all activities
+    const activities = await getAllActivities(authenticated);
+    
+    return new Response(JSON.stringify(activities), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
@@ -30,27 +36,34 @@ export const GET: APIRoute = async ({ request, redirect }) => {
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
     const formData = await request.formData();
     const activityData = parseFormData(formData);
     
     // Process tags (convert comma-separated string to array)
     if (typeof activityData.tags === 'string') {
-      activityData.tags = activityData.tags
+      activityData.tags = (activityData.tags as string)
         .split(',')
         .map(tag => tag.trim())
-        .filter(Boolean);
+        .filter(tag => tag.length > 0);
     }
     
-    // Convert duration to number if provided
-    if (activityData.duration) {
-      activityData.duration = parseInt(activityData.duration as string, 10) || 0;
-    }
+    // Create the activity
+    await createActivity(activityData);
     
-    const activity = await createActivity(activityData);
-    
-    return redirect(`/activity?success=Activity logged successfully`, 303);
+    // Redirect back to the activities page with success message
+    return redirect(`/activity?success=Activity created successfully`, 303);
   } catch (error) {
     console.error('Error creating activity:', error);
-    return redirect(`/activity?error=${encodeURIComponent('Failed to log activity')}`, 303);
+    return redirect(`/activity?error=Failed to create activity`, 303);
   }
 }; 

@@ -1,17 +1,21 @@
 /*
   File: src/pages/api/writing/index.ts
   Purpose: API endpoint for listing and creating writing pieces
-  Dependencies: writing data service, form utility
+  Dependencies: Database utility functions for Writing operations
 */
 
 import type { APIRoute } from 'astro';
-import { getAllWriting, createWriting } from '../../../data/writing';
+import { getAllWriting, createWritingPiece } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async () => {
   try {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+
     // Get all writing pieces
-    const writings = await getAllWriting();
+    const writings = await getAllWriting(authenticated);
     
     return new Response(JSON.stringify(writings), {
       status: 200,
@@ -32,20 +36,22 @@ export const GET: APIRoute = async () => {
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
     // Parse form data
     const formData = await request.formData();
     const writingData = parseFormData(formData);
     
-    // Process tags (convert from comma-separated string to array)
-    if (typeof writingData.tags === 'string') {
-      writingData.tags = writingData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag);
-    }
-    
     // Create the writing piece
-    await createWriting(writingData);
+    await createWritingPiece(writingData);
     
     // Redirect back to writing page with success message
     return redirect('/writing?success=Writing piece created successfully', 303);

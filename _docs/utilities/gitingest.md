@@ -1,0 +1,1 @@
+_docs/,prototype/,.cursorrules,app/.vscode/,app/.dir,app/.gitignore,app/package-lock.json

@@ -31,7 +31,7 @@ const activityTypeLabels = {
         <option value="all">All Projects</option>
         {projects.map(project => (
           <option value={typeof project === 'object' ? project.id : project}>
-            {typeof project === 'object' ? project.name : project.replace(/-/g, ' ')}
+            {typeof project === 'object' ? project.title : project.replace(/-/g, ' ')}
           </option>
         ))}
       </select>

@@ -1,17 +1,17 @@
 /*
   File: src/pages/api/activities/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual activities
-  Dependencies: Uses activities data service for CRUD operations
+  Dependencies: Astro DB utility functions for Activities operations
 */
 
 import type { APIRoute } from 'astro';
-import { getActivityById, updateActivity, deleteActivity } from '../../../data/activities';
+import { getActivity, updateActivity, deleteActivity } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params }) => {
   try {
-    const { id } = params;
-    
+    const id = params.id;
     if (!id) {
       return new Response(JSON.stringify({ error: 'Activity ID is required' }), {
         status: 400,
@@ -21,8 +21,10 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
     
-    const activity = await getActivityById(id);
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
     
+    const activity = await getActivity(id, authenticated);
     if (!activity) {
       return new Response(JSON.stringify({ error: 'Activity not found' }), {
         status: 404,
@@ -32,7 +34,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
     
-    return new Response(JSON.stringify({ activity }), {
+    return new Response(JSON.stringify(activity), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
@@ -49,50 +51,83 @@ export const GET: APIRoute = async ({ params, request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ params, request, redirect }) => {
+export const PUT: APIRoute = async ({ params, request, redirect }) => {
   try {
-    const { id } = params;
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
     
+    const id = params.id;
     if (!id) {
-      return redirect('/activity?error=Activity ID is required', 303);
+      return new Response(JSON.stringify({ error: 'Activity ID is required' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
     
     const formData = await request.formData();
-    
-    // Check if this is a DELETE request
-    const method = formData.get('_method');
-    
-    if (method === 'DELETE') {
-      await deleteActivity(id);
-      return redirect('/activity?success=Activity deleted successfully', 303);
-    }
-    
-    // Otherwise, it's an UPDATE
     const activityData = parseFormData(formData);
     
     // Process tags (convert comma-separated string to array)
     if (typeof activityData.tags === 'string') {
-      activityData.tags = activityData.tags
+      activityData.tags = (activityData.tags as string)
         .split(',')
         .map(tag => tag.trim())
-        .filter(Boolean);
+        .filter(tag => tag.length > 0);
     }
     
-    // Convert duration to number if provided
-    if (activityData.duration) {
-      activityData.duration = parseInt(activityData.duration as string, 10) || 0;
-    }
-    
-    // Update the activity
-    const activity = await updateActivity(id, activityData);
-    
-    if (!activity) {
-      return redirect(`/activity?error=${encodeURIComponent('Activity not found')}`, 303);
+    const updatedActivity = await updateActivity(id, activityData);
+    if (!updatedActivity) {
+      return new Response(JSON.stringify({ error: 'Activity not found' }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
     
     return redirect(`/activity?success=Activity updated successfully`, 303);
   } catch (error) {
     console.error('Error updating activity:', error);
-    return redirect(`/activity?error=${encodeURIComponent('Failed to update activity')}`, 303);
+    return redirect(`/activity?error=Failed to update activity`, 303);
+  }
+};
+
+export const DELETE: APIRoute = async ({ params, redirect }) => {
+  try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
+    const id = params.id;
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Activity ID is required' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
+    await deleteActivity(id);
+    
+    return redirect(`/activity?success=Activity deleted successfully`, 303);
+  } catch (error) {
+    console.error('Error deleting activity:', error);
+    return redirect(`/activity?error=Failed to delete activity`, 303);
   }
 }; 
