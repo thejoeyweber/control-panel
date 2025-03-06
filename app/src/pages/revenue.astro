@@ -10,7 +10,7 @@ import Modal from '../components/Modal.astro';
 import RevenueForm from '../components/revenue/RevenueForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllRevenue, getRevenueStats, createEmptyRevenue, getRevenueById } from '../data/revenue';
+import { getAllRevenue, getRevenueStats, createEmptyRevenue, getRevenue as getRevenueById } from '../utils/db';
 
 // Get authenticated status
 const authenticated = isAuthenticated();

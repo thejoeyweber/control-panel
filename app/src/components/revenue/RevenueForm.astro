@@ -6,7 +6,7 @@
 */
 
 import { Revenue } from '../../types';
-import { getVisibleContent as getProjects } from '../../data/projects';
+import { getAllProjects } from '../../utils/db';
 
 interface Props {
   revenue?: Revenue;
@@ -28,7 +28,7 @@ const initialRevenue = revenue || {
 };
 
 // Get projects for dropdown
-const projects = await getProjects();
+const projects = await getAllProjects();
 
 // Revenue type options
 const revenueTypes = [

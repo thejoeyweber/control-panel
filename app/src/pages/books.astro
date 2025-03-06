@@ -10,7 +10,7 @@ import Modal from '../components/Modal.astro';
 import BookForm from '../components/books/BookForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllBooks, getBookStats, createEmptyBook, getBookById } from '../data/books';
+import { getAllBooks, getBookStats, createEmptyBook, getBook as getBookById } from '../utils/db';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();

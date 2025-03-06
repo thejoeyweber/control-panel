@@ -10,7 +10,7 @@ import Modal from '../components/Modal.astro';
 import AIToolForm from '../components/ai/AIToolForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllAITools, getAIToolStats, createEmptyAITool, getAIToolById } from '../data/ai-tools';
+import { getAllAITools, getAIToolStats, createEmptyAITool, getAITool as getAIToolById } from '../utils/db';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();

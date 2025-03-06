@@ -1,12 +1,13 @@
 /*
   File: src/pages/api/activity/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual activities
-  Dependencies: Uses activity.ts data service
+  Dependencies: Uses Astro DB utility functions for Activities operations
 */
 
 import type { APIRoute } from 'astro';
-import { getActivityById, updateActivity, deleteActivity } from '../../../data/activities';
+import { getActivity, updateActivity, deleteActivity } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async ({ params }) => {
   try {
@@ -20,7 +21,10 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
-    const activity = await getActivityById(id);
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+
+    const activity = await getActivity(id, authenticated);
     if (!activity) {
       return new Response(JSON.stringify({ error: 'Activity not found' }), {
         status: 404,
@@ -49,6 +53,16 @@ export const GET: APIRoute = async ({ params }) => {
 
 export const POST: APIRoute = async ({ request, params }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
     const { id } = params;
     if (!id) {
       return new Response(JSON.stringify({ error: 'Activity ID is required' }), {

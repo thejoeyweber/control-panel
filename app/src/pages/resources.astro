@@ -10,7 +10,7 @@ import Modal from '../components/Modal.astro';
 import ResourceForm from '../components/resources/ResourceForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllResources, getResourceStats, createEmptyResource, getResourceById } from '../data/resources';
+import { getAllResources, getResourceStats, createEmptyResource, getResource as getResourceById } from '../utils/db';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();

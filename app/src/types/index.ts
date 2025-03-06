@@ -5,7 +5,7 @@
 */
 
 // ------------------ Project Types ------------------
-// Note: These are duplicated from data/projects.ts for centralization
+// Central type definitions for projects
 export interface Project {
   id: string;
   title: string;

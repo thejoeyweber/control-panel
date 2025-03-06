@@ -413,6 +413,66 @@ export function createEmptyProject() {
   };
 }
 
+// Calculate project statistics
+export async function getProjectStats(isAuthenticated = false) {
+  try {
+    const projects = await getAllProjects(isAuthenticated);
+    
+    // Count by status
+    const statusCount: Record<string, number> = {};
+    projects.forEach(project => {
+      const status = project.status;
+      statusCount[status] = (statusCount[status] || 0) + 1;
+    });
+
+    // Count by category
+    const categoryCount: Record<string, number> = {};
+    projects.forEach(project => {
+      const category = project.category;
+      if (category) {
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      }
+    });
+    
+    // Calculate average progress
+    const totalProgress = projects.reduce((sum, project) => sum + (project.progress || 0), 0);
+    const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : 0;
+    
+    // Count tags
+    const tagCounts: Record<string, number> = {};
+    projects.forEach(project => {
+      if (Array.isArray(project.tags)) {
+        project.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Get top tags
+    const topTags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      total: projects.length,
+      byStatus: statusCount,
+      byCategory: categoryCount,
+      averageProgress,
+      topTags
+    };
+  } catch (error) {
+    console.error('Error calculating project stats:', error);
+    return { 
+      total: 0, 
+      byStatus: {}, 
+      byCategory: {}, 
+      averageProgress: 0,
+      topTags: []
+    };
+  }
+}
+
 // --------------------- Writing Operations -----------------------
 
 // Helper for writing visibility
@@ -575,6 +635,57 @@ export function createEmptyWritingPiece() {
     externalUrl: null,
     visibility: 'private'
   };
+}
+
+// Calculate writing statistics (counts by status, category, etc.)
+export async function getWritingStats(isAuthenticated = false) {
+  try {
+    const writings = await getAllWriting(isAuthenticated);
+    
+    // Count by status
+    const statusCount: Record<string, number> = {};
+    writings.forEach(writing => {
+      const status = writing.status;
+      statusCount[status] = (statusCount[status] || 0) + 1;
+    });
+
+    // Count by category
+    const categoryCount: Record<string, number> = {};
+    writings.forEach(writing => {
+      const category = writing.category;
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
+
+    // Calculate total word count
+    const wordCount = writings.reduce((total, writing) => total + (writing.wordCount || 0), 0);
+    
+    // Count tags
+    const tagCounts: Record<string, number> = {};
+    writings.forEach(writing => {
+      if (Array.isArray(writing.tags)) {
+        writing.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Get top tags
+    const topTags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      total: writings.length,
+      byStatus: statusCount,
+      byCategory: categoryCount,
+      wordCount,
+      topTags
+    };
+  } catch (error) {
+    console.error('Error calculating writing stats:', error);
+    return { total: 0, byStatus: {}, byCategory: {}, wordCount: 0, topTags: [] };
+  }
 }
 
 // --------------------- Books Operations -----------------------
@@ -762,6 +873,79 @@ export function createEmptyBook() {
     purchaseUrl: null,
     visibility: 'private'
   };
+}
+
+// Calculate book statistics (counts by status, format, etc.)
+export async function getBookStats(isAuthenticated = false) {
+  try {
+    const books = await getAllBooks(isAuthenticated);
+    
+    // Count by status
+    const statusCount: Record<string, number> = {};
+    books.forEach(book => {
+      const status = book.status;
+      statusCount[status] = (statusCount[status] || 0) + 1;
+    });
+
+    // Count by category
+    const categoryCount: Record<string, number> = {};
+    books.forEach(book => {
+      const category = book.category;
+      if (category) {
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      }
+    });
+
+    // Count by format
+    const formatCount: Record<string, number> = {};
+    books.forEach(book => {
+      const format = book.format;
+      if (format) {
+        formatCount[format] = (formatCount[format] || 0) + 1;
+      }
+    });
+    
+    // Count tags
+    const tagCounts: Record<string, number> = {};
+    books.forEach(book => {
+      if (Array.isArray(book.tags)) {
+        book.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Get top tags
+    const topTags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Calculate average rating for rated books
+    const ratedBooks = books.filter(book => book.rating && book.rating > 0);
+    const avgRating = ratedBooks.length > 0 
+      ? ratedBooks.reduce((sum, book) => sum + (book.rating || 0), 0) / ratedBooks.length 
+      : 0;
+
+    return {
+      total: books.length,
+      byStatus: statusCount,
+      byCategory: categoryCount,
+      byFormat: formatCount,
+      avgRating,
+      topTags
+    };
+  } catch (error) {
+    console.error('Error calculating book stats:', error);
+    return { 
+      total: 0, 
+      byStatus: {}, 
+      byCategory: {}, 
+      byFormat: {}, 
+      avgRating: 0,
+      topTags: [] 
+    };
+  }
 }
 
 // --------------------- Resources Operations -----------------------
@@ -952,6 +1136,67 @@ export function createEmptyResource() {
   };
 }
 
+// Calculate resource statistics (counts by category, type, etc.)
+export async function getResourceStats(isAuthenticated = false) {
+  try {
+    const resources = await getAllResources(isAuthenticated);
+    
+    // Count by category
+    const categoryCount: Record<string, number> = {};
+    resources.forEach(resource => {
+      const category = resource.category;
+      if (category) {
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      }
+    });
+
+    // Count by type
+    const typeCount: Record<string, number> = {};
+    resources.forEach(resource => {
+      const type = resource.type;
+      if (type) {
+        typeCount[type] = (typeCount[type] || 0) + 1;
+      }
+    });
+    
+    // Count tags
+    const tagCounts: Record<string, number> = {};
+    resources.forEach(resource => {
+      if (Array.isArray(resource.tags)) {
+        resource.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Get top tags
+    const topTags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Count favorites
+    const favoriteCount = resources.filter(resource => resource.isFavorite).length;
+
+    return {
+      total: resources.length,
+      byCategory: categoryCount,
+      byType: typeCount,
+      favoriteCount,
+      topTags
+    };
+  } catch (error) {
+    console.error('Error calculating resource stats:', error);
+    return { 
+      total: 0, 
+      byCategory: {}, 
+      byType: {}, 
+      favoriteCount: 0,
+      topTags: []
+    };
+  }
+}
+
 // --------------------- Revenue Operations -----------------------
 
 // Helper for revenue visibility
@@ -1124,6 +1369,59 @@ export function createEmptyRevenue() {
     status: 'paid',
     visibility: 'private'
   };
+}
+
+// Calculate revenue statistics (counts by type, status, etc.)
+export async function getRevenueStats(isAuthenticated = false) {
+  try {
+    const revenueEntries = await getAllRevenue(isAuthenticated);
+    
+    // Calculate total revenue
+    const total = revenueEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+    
+    // Count by type
+    const typeRevenue: Record<string, number> = {};
+    revenueEntries.forEach(entry => {
+      const type = entry.type;
+      if (type) {
+        typeRevenue[type] = (typeRevenue[type] || 0) + (entry.amount || 0);
+      }
+    });
+
+    // Count by status
+    const statusRevenue: Record<string, number> = {};
+    revenueEntries.forEach(entry => {
+      const status = entry.status;
+      if (status) {
+        statusRevenue[status] = (statusRevenue[status] || 0) + (entry.amount || 0);
+      }
+    });
+    
+    // Count by month (for trend analysis)
+    const monthRevenue: Record<string, number> = {};
+    revenueEntries.forEach(entry => {
+      if (entry.date) {
+        const date = entry.date instanceof Date ? entry.date : new Date(entry.date);
+        const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        monthRevenue[monthYear] = (monthRevenue[monthYear] || 0) + (entry.amount || 0);
+      }
+    });
+
+    return {
+      total,
+      byType: typeRevenue,
+      byStatus: statusRevenue,
+      byMonth: monthRevenue
+    };
+  } catch (error) {
+    console.error('Error calculating revenue stats:', error);
+    return { 
+      total: 0, 
+      byType: {}, 
+      byStatus: {},
+      byMonth: {}
+    };
+  }
 }
 
 // --------------------- Revenue Goals Operations -----------------------
@@ -1431,4 +1729,54 @@ export function createEmptyAITool() {
     isFavorite: false,
     visibility: 'private'
   };
+}
+
+// Calculate AI tool statistics (counts by category, etc.)
+export async function getAIToolStats(isAuthenticated = false) {
+  try {
+    const aiTools = await getAllAITools(isAuthenticated);
+    
+    // Count by category
+    const categoryCount: Record<string, number> = {};
+    aiTools.forEach(tool => {
+      const category = tool.category;
+      if (category) {
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      }
+    });
+    
+    // Count tags
+    const tagCounts: Record<string, number> = {};
+    aiTools.forEach(tool => {
+      if (Array.isArray(tool.tags)) {
+        tool.tags.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Get top tags
+    const topTags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Count favorites
+    const favoriteCount = aiTools.filter(tool => tool.isFavorite).length;
+
+    return {
+      total: aiTools.length,
+      byCategory: categoryCount,
+      favoriteCount,
+      topTags
+    };
+  } catch (error) {
+    console.error('Error calculating AI tool stats:', error);
+    return { 
+      total: 0, 
+      byCategory: {}, 
+      favoriteCount: 0,
+      topTags: []
+    };
+  }
 } 
