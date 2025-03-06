@@ -42,7 +42,7 @@ const editId = url.searchParams.get('edit');
 // If editing, get the activity
 let editingActivity = null;
 if (editId) {
-  editingActivity = await getActivity(editId);
+  editingActivity = await getActivity(editId, authenticated);
 }
 
 // Activity types for filter options

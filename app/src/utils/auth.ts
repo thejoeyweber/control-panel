@@ -9,6 +9,9 @@
  * This is a simple placeholder that will be expanded later with actual session-based auth
  */
 export function isAuthenticated(): boolean {
+  // DEVELOPMENT MODE: Always return true for testing
+  return true;
+  
   // In a browser context, check if we have a token or auth state
   if (typeof window !== 'undefined') {
     return localStorage.getItem('authenticated') === 'true';

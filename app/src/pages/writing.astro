@@ -10,7 +10,7 @@ import Modal from '../components/Modal.astro';
 import WritingForm from '../components/writing/WritingForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getAllWriting, getWritingStats, createEmptyWriting, getWritingById } from '../data/writing';
+import { getAllWriting, getWritingStats, createEmptyWritingPiece as createEmptyWriting, getWritingPiece as getWritingById } from '../utils/db';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();

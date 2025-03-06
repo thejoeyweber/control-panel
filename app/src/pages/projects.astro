@@ -16,12 +16,13 @@ import TechStack from '../components/projects/TechStack.astro';
 import Modal from '../components/Modal.astro';
 import ProjectForm from '../components/projects/ProjectForm.astro';
 import Toast from '../components/Toast.astro';
+import { isAuthenticated } from '../utils/auth';
 
-// Check if user is authenticated (this should be replaced with your actual auth logic)
-const isAuthenticated = true; // For development, assuming authenticated
+// Check if user is authenticated
+const authenticated = isAuthenticated();
 
 // Get projects from database with visibility filtering
-const projects = await getAllProjects(isAuthenticated);
+const projects = await getAllProjects(authenticated);
 
 // Status color mapping for consistency
 const statusColors = {
@@ -46,7 +47,7 @@ const projectToEdit = projectId ? projects.find(p => p.id === projectId) : null;
 // If editing, get the project data from the database
 let editProject = emptyProject;
 if (projectId) {
-  const project = await getProject(projectId, isAuthenticated);
+  const project = await getProject(projectId, authenticated);
   if (project) {
     editProject = project;
   }

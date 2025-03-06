@@ -44,18 +44,18 @@ const colors = {
 
 // Get appropriate color based on type
 const toastType = Astro.props.type || 'info';
-const color = colors[toastType];
+const colorStyles = colors[toastType];
 ---
 
 <div 
   id={Astro.props.id || 'toast'}
-  class={`fixed bottom-4 right-4 z-50 rounded-md shadow-lg border p-4 flex items-start max-w-sm transform transition-all duration-300 ${color.bg} ${color.border} ${Astro.props.show ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
+  class={`fixed bottom-4 right-4 z-50 rounded-md shadow-lg border p-4 flex items-start max-w-sm transform transition-all duration-300 ${colorStyles.bg} ${colorStyles.border} ${Astro.props.show ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
   data-toast
   data-duration={Astro.props.duration || 5000}
 >
-  <div class={`flex-shrink-0 ${color.icon}`}>
+  <div class={`flex-shrink-0 ${colorStyles.icon}`}>
     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-      <path fill-rule="evenodd" d={color.iconPath} clip-rule="evenodd" />
+      <path fill-rule="evenodd" d={colorStyles.iconPath} clip-rule="evenodd" />
     </svg>
   </div>
   <div class="ml-3 flex-1">
