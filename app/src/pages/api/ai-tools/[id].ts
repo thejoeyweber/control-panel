@@ -1,12 +1,13 @@
 /*
   File: src/pages/api/ai-tools/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual AI tools
-  Dependencies: AI tools data service
+  Dependencies: Astro DB utility functions for AI Tools operations
 */
 
 import type { APIRoute } from 'astro';
-import { getAIToolById, updateAITool, deleteAITool } from '../../../data/ai-tools';
+import { getAITool, updateAITool, deleteAITool } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async ({ params }) => {
   try {
@@ -21,8 +22,11 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
     // Get the AI tool
-    const aiTool = await getAIToolById(id);
+    const aiTool = await getAITool(id, authenticated);
     
     // Check if AI tool exists
     if (!aiTool) {
@@ -54,6 +58,16 @@ export const GET: APIRoute = async ({ params }) => {
 
 export const POST: APIRoute = async ({ request, params }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+    
     const id = params.id;
     if (!id) {
       return new Response(JSON.stringify({ error: 'AI tool ID is required' }), {
@@ -98,7 +112,7 @@ export const POST: APIRoute = async ({ request, params }) => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'HX-Redirect': '/ai-library?success=AI+tool+updated+successfully',
+          'HX-Redirect': `/ai-tool/${id}?success=AI+tool+updated+successfully`,
         },
       });
     }
@@ -108,7 +122,7 @@ export const POST: APIRoute = async ({ request, params }) => {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'HX-Redirect': '/ai-library?error=Failed+to+update+AI+tool',
+        'HX-Redirect': `/ai-library?error=Failed+to+update+AI+tool`,
       },
     });
   }

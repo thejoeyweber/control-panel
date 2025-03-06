@@ -14,18 +14,24 @@ import Modal from '../components/Modal.astro';
 import ActivityForm from '../components/activity/ActivityForm.astro';
 import Toast from '../components/Toast.astro';
 import { isAuthenticated } from '../utils/auth';
-import { getRecentActivities, getActivityStats, createEmptyActivity, getActivityById } from '../data/activities';
-import { getVisibleContent as getAllProjects } from '../data/projects';
+import { 
+  getRecentActivities, 
+  getActivityStats, 
+  createEmptyActivity, 
+  getActivity 
+} from '../utils/db';
+import { db } from 'astro:db';
+import { Projects } from 'astro:db';
 
 // Get the authenticated status
 const authenticated = isAuthenticated();
 
 // Get activities and stats
-const activities = await getRecentActivities(20);
-const stats = await getActivityStats();
+const activities = await getRecentActivities(20, authenticated);
+const stats = await getActivityStats(authenticated);
 
-// Get all projects for dropdown
-const projects = await getAllProjects();
+// Get all projects for dropdown - fetch from DB
+const projects = await db.select().from(Projects).orderBy('title');
 
 // Check for success/error messages from form submission
 const url = new URL(Astro.request.url);
@@ -36,7 +42,7 @@ const editId = url.searchParams.get('edit');
 // If editing, get the activity
 let editingActivity = null;
 if (editId) {
-  editingActivity = await getActivityById(editId);
+  editingActivity = await getActivity(editId);
 }
 
 // Activity types for filter options
@@ -48,14 +54,19 @@ const activityTypes = [
   'meeting', 
   'research', 
   'design', 
+  'development',
+  'brainstorming',
   'documentation',
+  'testing',
+  'review',
+  'deploy',
   'other'
 ];
 
 // Helper to get project name by ID
 function getProjectNameById(projectId: string): string {
   const project = projects.find(p => p.id === projectId);
-  return project ? project.name : 'Unknown Project';
+  return project ? project.title : 'Unknown Project';
 }
 
 // Helper to format activity type for display
@@ -112,13 +123,13 @@ function getActivityTypeColor(type: string): string {
           <div class="bg-white p-4 rounded-lg shadow">
             <h3 class="text-lg font-medium text-gray-700">This Month</h3>
             <p class="text-3xl font-bold text-blue-600">
-              {Object.values(stats.recentDays).reduce((sum, count) => sum + count, 0)}
+              {stats.recentDays ? Object.values(stats.recentDays).reduce((sum, count) => sum + count, 0) : 0}
             </p>
           </div>
           <div class="bg-white p-4 rounded-lg shadow">
             <h3 class="text-lg font-medium text-gray-700">Most Active Project</h3>
             <p class="text-xl font-bold text-green-600">
-              {Object.entries(stats.byProject).length > 0 
+              {stats.byProject && Object.entries(stats.byProject).length > 0 
                 ? getProjectNameById(Object.entries(stats.byProject)
                     .sort((a, b) => b[1] - a[1])[0][0])
                 : 'None'
@@ -194,7 +205,7 @@ function getActivityTypeColor(type: string): string {
               <select id="projectId" name="projectId" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 <option value="" disabled selected>Select a project</option>
                 {projects.map(project => (
-                  <option value={project.id}>{project.name}</option>
+                  <option value={project.id}>{project.title}</option>
                 ))}
               </select>
             </div>

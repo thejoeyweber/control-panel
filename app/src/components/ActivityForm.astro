@@ -1,0 +1,187 @@
+---
+/*
+  File: src/components/ActivityForm.astro
+  Purpose: Form component for creating and editing activities
+  Dependencies: Uses projects data for project selection dropdown
+*/
+
+import { getProjects } from '../utils/db';
+import type { Activity } from '../types/Activity';
+
+interface Props {
+  activity?: Activity;
+  projects: Awaited<ReturnType<typeof getProjects>>;
+  action: string;
+  method: string;
+}
+
+const { activity, projects, action, method } = Astro.props;
+
+// Define activity types for the dropdown
+const activityTypes = [
+  'coding',
+  'design',
+  'writing',
+  'research',
+  'meeting',
+  'planning',
+  'learning',
+  'other'
+];
+
+// Format date for input field
+const formatDateForInput = (date: string | Date | null | undefined) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toISOString().split('T')[0];
+};
+
+// Format time for input field
+const formatTimeForInput = (date: string | Date | null | undefined) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toISOString().split('T')[1].substring(0, 5);
+};
+
+// Combine date and time
+const dateValue = formatDateForInput(activity?.date);
+const timeValue = formatTimeForInput(activity?.date);
+---
+
+<form action={action} method="POST" class="space-y-4 p-4 bg-white rounded-lg shadow">
+  {method !== 'POST' && (
+    <input type="hidden" name="_method" value={method} />
+  )}
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Project Selection -->
+    <div>
+      <label for="projectId" class="block text-sm font-medium text-gray-700">Project</label>
+      <select
+        id="projectId"
+        name="projectId"
+        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+      >
+        <option value="">-- Select Project --</option>
+        {projects.map((project) => (
+          <option 
+            value={project.id} 
+            selected={activity?.projectId === project.id}
+          >
+            {project.name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <!-- Activity Type -->
+    <div>
+      <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+      <select
+        id="type"
+        name="type"
+        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        required
+      >
+        <option value="">-- Select Type --</option>
+        {activityTypes.map((type) => (
+          <option 
+            value={type} 
+            selected={activity?.type === type}
+          >
+            {type.charAt(0).toUpperCase() + type.slice(1)}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div>
+    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+    <textarea
+      id="description"
+      name="description"
+      rows="3"
+      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+      placeholder="What did you work on?"
+      required
+    >{activity?.description || ''}</textarea>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Date -->
+    <div>
+      <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+      <input
+        type="date"
+        id="date"
+        name="date"
+        value={dateValue}
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Time -->
+    <div>
+      <label for="time" class="block text-sm font-medium text-gray-700">Time</label>
+      <input
+        type="time"
+        id="time"
+        name="time"
+        value={timeValue}
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+    </div>
+
+    <!-- Duration -->
+    <div>
+      <label for="duration" class="block text-sm font-medium text-gray-700">Duration (minutes)</label>
+      <input
+        type="number"
+        id="duration"
+        name="duration"
+        value={activity?.duration || ''}
+        min="0"
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div>
+    <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+    <input
+      type="text"
+      id="tags"
+      name="tags"
+      value={activity?.tags ? activity.tags.join(', ') : ''}
+      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      placeholder="Comma-separated tags"
+    />
+  </div>
+
+  <!-- Visibility -->
+  <div>
+    <label for="visibility" class="block text-sm font-medium text-gray-700">Visibility</label>
+    <select
+      id="visibility"
+      name="visibility"
+      class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+    >
+      <option value="private" selected={activity?.visibility !== 'public'}>Private</option>
+      <option value="public" selected={activity?.visibility === 'public'}>Public</option>
+    </select>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="flex justify-end">
+    <button
+      type="submit"
+      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+      {activity ? 'Update Activity' : 'Create Activity'}
+    </button>
+  </div>
+</form> 

@@ -1,96 +1,129 @@
 /*
   File: src/pages/api/resources/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual resources
-  Dependencies: Uses resources data service for CRUD operations
+  Dependencies: Astro DB utility functions for Resources operations
 */
 
 import type { APIRoute } from 'astro';
-import { getResourceById, updateResource, deleteResource } from '../../../data/resources';
+import { getResource, updateResource, deleteResource } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params }) => {
   try {
-    const { id } = params;
-    
+    // Check if ID is provided
+    const id = params.id;
     if (!id) {
       return new Response(JSON.stringify({ error: 'Resource ID is required' }), {
         status: 400,
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
     }
+
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
     
-    const resource = await getResourceById(id);
+    // Get the resource
+    const resource = await getResource(id, authenticated);
     
+    // Check if resource exists
     if (!resource) {
       return new Response(JSON.stringify({ error: 'Resource not found' }), {
         status: 404,
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
     }
     
-    return new Response(JSON.stringify({ resource }), {
+    // Return the resource
+    return new Response(JSON.stringify(resource), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   } catch (error) {
     console.error('Error fetching resource:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch resource' }), {
       status: 500,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   }
 };
 
-export const POST: APIRoute = async ({ params, request, redirect }) => {
+export const POST: APIRoute = async ({ request, params }) => {
   try {
-    const { id } = params;
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
     
+    const id = params.id;
     if (!id) {
-      return redirect('/resources?error=Resource ID is required', 303);
+      return new Response(JSON.stringify({ error: 'Resource ID is required' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
     
     const formData = await request.formData();
-    
-    // Check if this is a DELETE request
-    const method = formData.get('_method');
-    
-    if (method === 'DELETE') {
-      await deleteResource(id);
-      return redirect('/resources?success=Resource deleted successfully', 303);
-    }
-    
-    // Otherwise, it's an UPDATE
     const resourceData = parseFormData(formData);
     
-    // Process tags (convert comma-separated string to array)
-    if (typeof resourceData.tags === 'string') {
-      resourceData.tags = resourceData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(Boolean);
+    // Check if this is a DELETE request
+    if (resourceData._method === 'DELETE') {
+      // Delete the resource
+      await deleteResource(id);
+      
+      return new Response(JSON.stringify({ message: 'Resource deleted successfully' }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'HX-Redirect': '/resources?success=Resource+deleted+successfully',
+        },
+      });
+    } else {
+      // Process tags from comma-separated string to array
+      if (typeof resourceData.tags === 'string') {
+        resourceData.tags = (resourceData.tags as string)
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag);
+      }
+      
+      // Convert isFavorite checkbox value to boolean
+      resourceData.isFavorite = !!resourceData.isFavorite;
+      
+      // Update the resource
+      await updateResource(id, resourceData);
+      
+      return new Response(JSON.stringify({ message: 'Resource updated successfully' }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'HX-Redirect': `/resource/${id}?success=Resource+updated+successfully`,
+        },
+      });
     }
-    
-    // Process checkbox values
-    resourceData.isFavorite = resourceData.isFavorite === 'on';
-    
-    // Update the resource
-    const resource = await updateResource(id, resourceData);
-    
-    if (!resource) {
-      return redirect(`/resources?error=${encodeURIComponent('Resource not found')}`, 303);
-    }
-    
-    return redirect(`/resources?success=Resource updated successfully`, 303);
   } catch (error) {
     console.error('Error updating resource:', error);
-    return redirect(`/resources?error=${encodeURIComponent('Failed to update resource')}`, 303);
+    return new Response(JSON.stringify({ error: 'Failed to update resource' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'HX-Redirect': `/resources?error=Failed+to+update+resource`,
+      },
+    });
   }
 }; 

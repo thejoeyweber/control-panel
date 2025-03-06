@@ -1,0 +1,193 @@
+---
+/*
+  File: src/components/ActivityList.astro
+  Purpose: Displays a list of activities with filtering options
+  Dependencies: Uses activity data from Astro DB
+*/
+
+import type { Activity } from '../types/Activity';
+import { formatDate } from '../utils/date';
+
+interface Props {
+  activities: Activity[];
+  title?: string;
+  showFilters?: boolean;
+  limit?: number;
+}
+
+const { 
+  activities = [], 
+  title = 'Activities', 
+  showFilters = true,
+  limit
+} = Astro.props;
+
+// Apply limit if specified
+const displayedActivities = limit ? activities.slice(0, limit) : activities;
+
+// Get unique activity types for filter
+const activityTypes = [...new Set(activities.map(activity => activity.type))];
+
+// Get unique tags for filter
+const allTags = activities.flatMap(activity => activity.tags || []);
+const uniqueTags = [...new Set(allTags)].filter(Boolean);
+---
+
+<div class="bg-white shadow rounded-lg p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-800">{title}</h2>
+    
+    {showFilters && (
+      <div class="flex space-x-2">
+        <!-- Type Filter -->
+        <select 
+          id="type-filter" 
+          class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        >
+          <option value="">All Types</option>
+          {activityTypes.map(type => (
+            <option value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+          ))}
+        </select>
+        
+        <!-- Tag Filter -->
+        {uniqueTags.length > 0 && (
+          <select 
+            id="tag-filter" 
+            class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+            <option value="">All Tags</option>
+            {uniqueTags.map(tag => (
+              <option value={tag}>{tag}</option>
+            ))}
+          </select>
+        )}
+      </div>
+    )}
+  </div>
+  
+  {displayedActivities.length > 0 ? (
+    <div class="space-y-4 activity-list">
+      {displayedActivities.map((activity) => (
+        <div 
+          class="border border-gray-200 rounded-md p-3 hover:bg-gray-50 activity-item"
+          data-type={activity.type}
+          data-tags={activity.tags?.join(',')}
+        >
+          <div class="flex justify-between">
+            <h3 class="font-medium text-gray-900">{activity.description}</h3>
+            <span class="text-sm text-gray-500">{formatDate(activity.date)}</span>
+          </div>
+          
+          <div class="mt-1 flex items-center text-sm text-gray-500">
+            <span class="capitalize mr-2">{activity.type}</span>
+            {activity.projectId && (
+              <span class="mx-1">•</span>
+              <span>{activity.projectName}</span>
+            )}
+            {activity.duration && (
+              <span class="mx-1">•</span>
+              <span>{activity.duration} min</span>
+            )}
+          </div>
+          
+          {activity.tags && activity.tags.length > 0 && (
+            <div class="mt-2 flex flex-wrap gap-1">
+              {activity.tags.map(tag => (
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <div class="mt-2 flex justify-end space-x-2">
+            <a 
+              href={`/activity/edit/${activity.id}`} 
+              class="text-xs text-indigo-600 hover:text-indigo-900"
+            >
+              Edit
+            </a>
+            <button 
+              class="text-xs text-red-600 hover:text-red-900 delete-activity"
+              data-id={activity.id}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-4 text-gray-500">
+      No activities found.
+    </div>
+  )}
+</div>
+
+<script>
+  // Filter functionality
+  const typeFilter = document.getElementById('type-filter');
+  const tagFilter = document.getElementById('tag-filter');
+  const activityItems = document.querySelectorAll('.activity-item');
+  
+  function applyFilters() {
+    const selectedType = typeFilter?.value || '';
+    const selectedTag = tagFilter?.value || '';
+    
+    activityItems.forEach(item => {
+      const itemType = item.getAttribute('data-type');
+      const itemTags = item.getAttribute('data-tags')?.split(',') || [];
+      
+      const typeMatch = !selectedType || itemType === selectedType;
+      const tagMatch = !selectedTag || itemTags.includes(selectedTag);
+      
+      if (typeMatch && tagMatch) {
+        item.classList.remove('hidden');
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  }
+  
+  typeFilter?.addEventListener('change', applyFilters);
+  tagFilter?.addEventListener('change', applyFilters);
+  
+  // Delete functionality
+  document.querySelectorAll('.delete-activity').forEach(button => {
+    button.addEventListener('click', async () => {
+      const id = button.getAttribute('data-id');
+      if (!id) return;
+      
+      if (confirm('Are you sure you want to delete this activity?')) {
+        try {
+          const response = await fetch(`/api/activities/${id}`, {
+            method: 'DELETE',
+          });
+          
+          if (response.ok) {
+            // Remove the activity from the DOM
+            button.closest('.activity-item')?.remove();
+            
+            // If no activities left, show empty message
+            if (document.querySelectorAll('.activity-item:not(.hidden)').length === 0) {
+              const listEl = document.querySelector('.activity-list');
+              if (listEl) {
+                listEl.innerHTML = `
+                  <div class="text-center py-4 text-gray-500">
+                    No activities found.
+                  </div>
+                `;
+              }
+            }
+          } else {
+            alert('Failed to delete activity');
+          }
+        } catch (error) {
+          console.error('Error deleting activity:', error);
+          alert('An error occurred while deleting the activity');
+        }
+      }
+    });
+  });
+</script> 

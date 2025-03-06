@@ -1,16 +1,22 @@
 /*
   File: src/pages/api/ai-tools/index.ts
   Purpose: API endpoint for listing and creating AI tools
-  Dependencies: AI tools data service
+  Dependencies: Astro DB utility functions for AI Tools operations
 */
 
 import type { APIRoute } from 'astro';
-import { getAllAITools, createAITool } from '../../../data/ai-tools';
+import { getAllAITools, createAITool } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async () => {
   try {
-    const aiTools = await getAllAITools();
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
+    // Get all AI tools
+    const aiTools = await getAllAITools(authenticated);
+    
     return new Response(JSON.stringify(aiTools), {
       status: 200,
       headers: {
@@ -30,6 +36,17 @@ export const GET: APIRoute = async () => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+    
+    // Parse form data
     const formData = await request.formData();
     const aiToolData = parseFormData(formData);
     

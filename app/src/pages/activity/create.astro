@@ -1,0 +1,35 @@
+---
+/*
+  File: src/pages/activity/create.astro
+  Purpose: Page for creating a new activity
+  Dependencies: Uses project data from Astro DB
+*/
+
+import Layout from '../../layouts/Layout.astro';
+import ActivityForm from '../../components/ActivityForm.astro';
+import { getProjects, createEmptyActivity } from '../../utils/db';
+
+// Fetch projects for the dropdown
+const projects = await getProjects();
+
+// Create an empty activity object with default values
+const emptyActivity = createEmptyActivity();
+---
+
+<Layout title="Create Activity">
+  <div class="max-w-4xl mx-auto py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Create Activity</h1>
+      <a href="/activity" class="text-indigo-600 hover:text-indigo-900">
+        Back to Activities
+      </a>
+    </div>
+
+    <ActivityForm 
+      activity={emptyActivity} 
+      projects={projects}
+      action="/api/activities"
+      method="POST"
+    />
+  </div>
+</Layout> 

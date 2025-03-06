@@ -6,7 +6,7 @@
 */
 
 import type { Activity } from '../../types/Activity';
-import { getVisibleContent as getAllProjects } from '../../data/projects';
+import { getAllProjects } from '../../utils/db';
 
 interface Props {
   activity: Activity;
@@ -28,8 +28,9 @@ const activityTypes = [
   'other'
 ];
 
-// Get all projects for the dropdown
-const projects = await getAllProjects();
+// Get all projects for the dropdown - using Astro DB
+const isAuthenticated = true; // For development
+const projects = await getAllProjects(isAuthenticated);
 
 // Action URL based on mode
 const actionUrl = mode === 'create' 
@@ -56,7 +57,7 @@ const actionUrl = mode === 'create'
           <option value="">Select a project</option>
           {projects.map(project => (
             <option value={project.id} selected={activity.projectId === project.id}>
-              {project.name}
+              {project.title}
             </option>
           ))}
         </select>

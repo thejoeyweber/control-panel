@@ -1,15 +1,19 @@
 /*
   File: src/pages/api/revenue/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual revenue entries
-  Dependencies: Revenue data service
+  Dependencies: Astro DB utility functions for Revenue operations
 */
 
 import type { APIRoute } from 'astro';
-import { getRevenueById, updateRevenue, deleteRevenue } from '../../../data/revenue';
+import { getRevenue, updateRevenue, deleteRevenue } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async ({ params }) => {
   try {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
     // Check if ID is provided
     const id = params.id;
     if (!id) {
@@ -22,7 +26,7 @@ export const GET: APIRoute = async ({ params }) => {
     }
 
     // Get the revenue entry
-    const revenue = await getRevenueById(id);
+    const revenue = await getRevenue(id, authenticated);
     
     // Check if revenue exists
     if (!revenue) {
@@ -54,6 +58,16 @@ export const GET: APIRoute = async ({ params }) => {
 
 export const POST: APIRoute = async ({ request, params }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+    
     const id = params.id;
     if (!id) {
       return new Response(JSON.stringify({ error: 'Revenue ID is required' }), {
@@ -80,11 +94,6 @@ export const POST: APIRoute = async ({ request, params }) => {
         },
       });
     } else {
-      // Parse amount to number
-      if (revenueData.amount) {
-        revenueData.amount = parseFloat(revenueData.amount as string);
-      }
-      
       // Update the revenue entry
       await updateRevenue(id, revenueData);
       

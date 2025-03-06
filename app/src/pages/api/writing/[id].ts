@@ -1,15 +1,19 @@
 /*
   File: src/pages/api/writing/[id].ts
   Purpose: API endpoint for getting, updating, and deleting individual writing pieces
-  Dependencies: writing data service, form utility
+  Dependencies: Database utility functions for Writing operations
 */
 
 import type { APIRoute } from 'astro';
-import { getWritingById, updateWriting, deleteWriting } from '../../../data/writing';
+import { getWritingPiece, updateWritingPiece, deleteWritingPiece } from '../../../utils/db';
 import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+
     // Get writing ID from params
     const { id } = params;
     
@@ -24,7 +28,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     }
     
     // Get writing by ID
-    const writing = await getWritingById(id);
+    const writing = await getWritingPiece(id, authenticated);
     
     // Check if writing exists
     if (!writing) {
@@ -56,6 +60,16 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const POST: APIRoute = async ({ params, request, redirect }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
     // Get writing ID from params
     const { id } = params;
     
@@ -76,7 +90,7 @@ export const POST: APIRoute = async ({ params, request, redirect }) => {
     const method = formData.get('_method');
     if (method === 'DELETE') {
       // Delete the writing
-      await deleteWriting(id);
+      await deleteWritingPiece(id);
       
       // Redirect back to writing page with success message
       return redirect('/writing?success=Writing deleted successfully', 303);
@@ -85,19 +99,8 @@ export const POST: APIRoute = async ({ params, request, redirect }) => {
     // Otherwise, this is an UPDATE request
     const writingData = parseFormData(formData);
     
-    // Process tags (convert from comma-separated string to array)
-    if (typeof writingData.tags === 'string') {
-      writingData.tags = writingData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag);
-    }
-    
-    // Set lastUpdated to current date
-    writingData.lastUpdated = new Date().toISOString().split('T')[0];
-    
     // Update the writing
-    await updateWriting(id, writingData);
+    await updateWritingPiece(id, writingData);
     
     // Redirect back to writing page with success message
     return redirect('/writing?success=Writing updated successfully', 303);

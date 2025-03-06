@@ -2,26 +2,23 @@
 /*
   File: src/pages/project/[id].astro
   Purpose: Displays detailed information for a specific project
-  Dependencies: BaseLayout, getProjectById from data/projects.ts
+  Dependencies: BaseLayout, getProject from utils/db
 */
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjectById, projects, createEmptyProject } from '../../data/projects';
-import { getActivitiesByProject } from '../../data/activities';
+import { getProject, createEmptyProject, getProjectActivities } from '../../utils/db';
+import { formatDistanceToNow } from 'date-fns';
 import Modal from '../../components/Modal.astro';
 import ProjectForm from '../../components/projects/ProjectForm.astro';
 
-// Generate static paths for all projects
-export function getStaticPaths() {
-  return projects.map(project => ({
-    params: { id: project.id },
-    props: { project },
-  }));
-}
-
 // Get project ID from URL
 const { id } = Astro.params;
-const project = await getProjectById(id);
+
+// Check if user is authenticated (for development, assume true)
+const isAuthenticated = true;
+
+// Get project data
+const project = await getProject(id, isAuthenticated);
 
 // Create empty project for form when adding new
 const emptyProject = createEmptyProject();
@@ -29,7 +26,7 @@ const emptyProject = createEmptyProject();
 // Get related activities
 let activities = [];
 try {
-  activities = await getActivitiesByProject(id);
+  activities = await getProjectActivities(id, isAuthenticated);
 } catch (error) {
   console.error("Error fetching activities:", error);
 }
@@ -40,8 +37,10 @@ if (!project) {
 }
 
 // Format date for display
-function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString('en-US', {
+function formatDate(dateValue) {
+  if (!dateValue) return 'No date';
+  
+  return new Date(dateValue).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -49,32 +48,15 @@ function formatDate(dateString) {
 }
 
 // Format relative time for last activity
-function getRelativeTimeString(dateString) {
-  if (!dateString) return 'No activity';
+function getRelativeTimeString(dateValue) {
+  if (!dateValue) return 'No activity';
   
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  
-  if (diffInHours < 24) {
-    return diffInHours === 0 ? 'Just now' : 
-           diffInHours === 1 ? '1 hour ago' : 
-           `${diffInHours} hours ago`;
+  try {
+    const date = new Date(dateValue);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (e) {
+    return 'Invalid date';
   }
-  
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) {
-    return diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
-  }
-  
-  if (diffInDays < 30) {
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
-  }
-  
-  const diffInMonths = Math.floor(diffInDays / 30);
-  return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
 }
 
 // Status color mapping
@@ -85,16 +67,28 @@ const statusColors = {
   paused: 'bg-amber-100 text-amber-800'
 };
 
-// Get the most recent activity date
-const lastActivityDate = project.activities && project.activities.length > 0
-  ? project.activities[0].date
-  : null;
+// Activity type icons
+const activityIcons = {
+  'update': 'ri-refresh-line',
+  'milestone': 'ri-flag-line',
+  'note': 'ri-sticky-note-line',
+  'meeting': 'ri-team-line',
+  'research': 'ri-search-line',
+  'design': 'ri-palette-line',
+  'development': 'ri-code-s-slash-line',
+  'testing': 'ri-bug-line',
+  'deployment': 'ri-rocket-line',
+  'other': 'ri-more-line'
+};
+
+// Sort activities by date (newest first)
+activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 ---
 
 <BaseLayout title={project.title} activePage="projects">
   <div class="container mx-auto px-4">
     <div class="mb-6">
-      <a href="/projects" class="text-highlight hover:underline inline-flex items-center">
+      <a href="/projects" class="text-primary hover:underline inline-flex items-center">
         <i class="ri-arrow-left-line mr-1"></i> Back to Projects
       </a>
     </div>
@@ -106,14 +100,16 @@ const lastActivityDate = project.activities && project.activities.length > 0
           <div>
             <h1 class="text-3xl font-bold mb-2">{project.title}</h1>
             <div class="flex items-center gap-2 mb-3">
-              <span class={`text-xs px-2 py-1 rounded-full ${statusColors[project.status]}`}>
-                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+              <span class={`text-xs px-2 py-1 rounded-full ${statusColors[project.status] || 'bg-gray-100 text-gray-800'}`}>
+                {project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Unknown'}
               </span>
-              <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                {project.category}
-              </span>
+              {project.category && (
+                <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                  {project.category}
+                </span>
+              )}
             </div>
-            <p class="text-light-ink">{project.description}</p>
+            <p class="text-gray-600">{project.description || 'No description provided'}</p>
           </div>
           
           <div class="flex gap-2">
@@ -129,7 +125,7 @@ const lastActivityDate = project.activities && project.activities.length > 0
             )}
             <button 
               id="edit-project-btn" 
-              class="edit-project-btn bg-highlight text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center"
+              class="edit-project-btn bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors flex items-center"
               data-id={project.id}
             >
               <i class="ri-edit-line mr-1"></i> Edit
@@ -140,22 +136,22 @@ const lastActivityDate = project.activities && project.activities.length > 0
       
       <!-- Key Metrics Section -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b border-gray-200 bg-gray-50">
-        <div class="flex items-center text-light-ink">
+        <div class="flex items-center text-gray-600">
           <i class="ri-time-line mr-2"></i>
-          <span>Last updated: {getRelativeTimeString(project.lastUpdated)}</span>
+          <span>Last updated: {getRelativeTimeString(project.updatedAt || project.startDate)}</span>
         </div>
-        <div class="flex items-center text-light-ink">
-          <i class="ri-git-commit-line mr-2"></i>
-          <span>{project.activities?.filter(a => a.type === 'commit').length || 0} commits</span>
+        <div class="flex items-center text-gray-600">
+          <i class="ri-list-check-line mr-2"></i>
+          <span>{activities.length} activities</span>
         </div>
-        <div class="flex items-center text-light-ink">
+        <div class="flex items-center text-gray-600">
           <i class="ri-calendar-line mr-2"></i>
           <span>Started: {formatDate(project.startDate)}</span>
         </div>
         <div class="flex items-center">
-          <span class="inline-flex items-center text-light-ink">
+          <span class="inline-flex items-center text-gray-600">
             <i class="ri-progress-4-line mr-2"></i>
-            <span>{project.progress}% Complete</span>
+            <span>{project.progress || 0}% Complete</span>
           </span>
         </div>
       </div>
@@ -164,59 +160,35 @@ const lastActivityDate = project.activities && project.activities.length > 0
       <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column - Main Details -->
         <div class="lg:col-span-2">
-          <!-- Next Steps -->
-          <div class="mb-8">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold">Next Steps</h2>
-              <button class="text-highlight hover:underline text-sm flex items-center">
-                <i class="ri-add-line mr-1"></i> Add Step
-              </button>
-            </div>
-            
-            <div class="bg-gray-50 p-4 rounded-lg">
-              {project.nextSteps && project.nextSteps.length > 0 ? (
-                <ul class="space-y-2">
-                  {project.nextSteps.map((step) => (
-                    <li class="flex items-start">
-                      <span class="text-highlight mr-2 mt-0.5"><i class="ri-checkbox-blank-circle-line"></i></span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="text-light-ink">No next steps defined yet. Add some to track your progress.</p>
-              )}
-            </div>
-          </div>
-          
           <!-- Activities -->
           <div>
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-bold">Activity Log</h2>
-              <button class="text-highlight hover:underline text-sm flex items-center">
+              <a href="/activity/new?projectId={project.id}" class="text-primary hover:underline text-sm flex items-center">
                 <i class="ri-add-line mr-1"></i> Log Activity
-              </button>
+              </a>
             </div>
             
             <div class="bg-gray-50 p-4 rounded-lg">
-              {project.activities && project.activities.length > 0 ? (
+              {activities.length > 0 ? (
                 <ul class="divide-y divide-gray-200">
-                  {project.activities.map((activity) => (
+                  {activities.map((activity) => (
                     <li class="py-3">
                       <div class="flex items-start">
-                        <span class={`text-${activity.type === 'commit' ? 'blue' : activity.type === 'pr' ? 'green' : 'purple'}-600 mr-2`}>
-                          <i class={`ri-${activity.type === 'commit' ? 'github-fill' : activity.type === 'pr' ? 'git-pull-request-line' : 'edit-line'}`}></i>
+                        <span class="text-gray-600 mr-2">
+                          <i class={activityIcons[activity.type] || 'ri-more-line'}></i>
                         </span>
                         <div>
-                          <p class="font-medium">{activity.description}</p>
-                          <p class="text-sm text-light-ink">{formatDate(activity.date)}</p>
+                          <p class="font-medium">{activity.title}</p>
+                          <p class="text-sm text-gray-600">{activity.description}</p>
+                          <p class="text-xs text-gray-500 mt-1">{formatDate(activity.date)}</p>
                         </div>
                       </div>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p class="text-light-ink">No activities logged yet. Add some to track your progress.</p>
+                <p class="text-gray-500">No activities logged yet. Add some to track your progress.</p>
               )}
             </div>
           </div>
@@ -228,19 +200,15 @@ const lastActivityDate = project.activities && project.activities.length > 0
           <div class="mb-8">
             <h2 class="text-xl font-bold mb-4">Tags</h2>
             <div class="flex flex-wrap gap-2">
-              {project.tags && project.tags.length > 0 ? (
+              {project.tags && Array.isArray(project.tags) && project.tags.length > 0 ? (
                 project.tags.map((tag) => (
-                  <span class="bg-gray-100 text-light-ink px-3 py-1 rounded-full text-sm">
+                  <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                     {tag}
                   </span>
                 ))
               ) : (
-                <p class="text-light-ink">No tags added yet.</p>
+                <p class="text-gray-500">No tags added yet.</p>
               )}
-              
-              <button class="text-highlight hover:underline text-sm flex items-center">
-                <i class="ri-add-line"></i> Add Tag
-              </button>
             </div>
           </div>
           
@@ -248,19 +216,15 @@ const lastActivityDate = project.activities && project.activities.length > 0
           <div class="mb-8">
             <h2 class="text-xl font-bold mb-4">Tech Stack</h2>
             <div class="flex flex-wrap gap-2">
-              {project.techStack && project.techStack.length > 0 ? (
+              {project.techStack && Array.isArray(project.techStack) && project.techStack.length > 0 ? (
                 project.techStack.map((tech) => (
                   <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
                     {tech}
                   </span>
                 ))
               ) : (
-                <p class="text-light-ink">No tech stack defined yet.</p>
+                <p class="text-gray-500">No tech stack defined yet.</p>
               )}
-              
-              <button class="text-highlight hover:underline text-sm flex items-center">
-                <i class="ri-add-line"></i> Add Tech
-              </button>
             </div>
           </div>
           
@@ -269,14 +233,10 @@ const lastActivityDate = project.activities && project.activities.length > 0
             <h2 class="text-xl font-bold mb-4">Notes</h2>
             <div class="bg-gray-50 p-4 rounded-lg">
               {project.notes ? (
-                <p class="text-light-ink">{project.notes}</p>
+                <p class="text-gray-700">{project.notes}</p>
               ) : (
-                <p class="text-light-ink">No notes added yet.</p>
+                <p class="text-gray-500">No notes added yet.</p>
               )}
-              
-              <button class="text-highlight hover:underline text-sm flex items-center mt-2">
-                <i class="ri-edit-line"></i> Edit Notes
-              </button>
             </div>
           </div>
         </div>
@@ -284,51 +244,35 @@ const lastActivityDate = project.activities && project.activities.length > 0
     </div>
   </div>
   
-  <!-- Project Form Modal -->
-  <Modal id="project-modal" title="Project Form">
-    <ProjectForm 
-      project={emptyProject} 
-      mode="create" 
-    />
+  <!-- Edit Project Modal -->
+  <Modal id="edit-project-modal" title="Edit Project">
+    <ProjectForm project={project} mode="edit" />
   </Modal>
-  
-  <script is:inline>
-    // Use astro:page-load for View Transitions compatibility
-    document.addEventListener('astro:page-load', () => {
-      // Set up edit button to open modal and update URL with edit parameter
-      const editBtn = document.getElementById('edit-project-btn');
-      
-      if (editBtn) {
-        editBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          const projectId = editBtn.getAttribute('data-id');
-          if (!projectId) return;
-          
-          // Update URL with edit parameter
-          const url = new URL(window.location.href);
-          url.searchParams.set('edit', projectId);
-          window.history.replaceState({}, '', url);
-          
-          // Dispatch the project:edit event
-          document.dispatchEvent(new CustomEvent('project:edit', { 
-            detail: { id: projectId } 
-          }));
-          
-          // Open the modal
-          window.openModal('project-modal');
-        });
-      }
-      
-      // Check URL for edit parameter on load
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('edit')) {
-        const projectId = urlParams.get('edit');
+</BaseLayout>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    // Set up edit button
+    const editBtn = document.getElementById('edit-project-btn');
+    const modal = document.getElementById('edit-project-modal');
+    
+    if (editBtn && modal) {
+      editBtn.addEventListener('click', () => {
+        // Show the modal
+        modal.classList.remove('hidden');
+        
+        // Trigger the project:edit event
         document.dispatchEvent(new CustomEvent('project:edit', { 
-          detail: { id: projectId } 
+          detail: { id: editBtn.getAttribute('data-id') }
         }));
-        window.openModal('project-modal');
+      });
+    }
+    
+    // Handle cancel event from the form
+    document.addEventListener('project:cancel', () => {
+      if (modal) {
+        modal.classList.add('hidden');
       }
     });
-  </script>
-</BaseLayout> 
+  });
+</script> 

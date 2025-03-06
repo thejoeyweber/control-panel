@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Control Panel",
+    "description": "Personal dashboard for tracking activities and projects",
+    "status": "in-progress",
+    "visibility": "private",
+    "tags": ["dashboard", "personal"],
+    "startDate": "2023-01-01",
+    "endDate": null
+  },
+  {
+    "id": "2",
+    "name": "Portfolio Website",
+    "description": "Personal portfolio website",
+    "status": "completed",
+    "visibility": "public",
+    "tags": ["website", "portfolio"],
+    "startDate": "2023-02-15",
+    "endDate": "2023-04-01"
+  },
+  {
+    "id": "3",
+    "name": "Blog Platform",
+    "description": "Custom blog publishing platform",
+    "status": "planned",
+    "visibility": "private",
+    "tags": ["blog", "writing"],
+    "startDate": null,
+    "endDate": null
+  }
+] 

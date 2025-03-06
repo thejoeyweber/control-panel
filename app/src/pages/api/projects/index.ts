@@ -1,16 +1,25 @@
 /*
   File: src/pages/api/projects/index.ts
   Purpose: Handle project CRUD operations via API endpoints
-  Dependencies: Project model and utility functions
+  Dependencies: Astro DB utility functions for Projects operations
 */
 
 import type { APIRoute } from 'astro';
-import { projects, saveProject, deleteProject } from '../../../data/projects';
+import { getAllProjects, createProject, deleteProject } from '../../../utils/db';
+import { parseFormData } from '../../../utils/form';
+import { isAuthenticated } from '../../../utils/auth';
 import type { Project } from '../../../types';
-import { generateId } from '../../../utils/data';
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   try {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const formData = await request.formData();
     const _method = formData.get('_method');
     
@@ -31,61 +40,37 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     }
     
     // Process project data from form
-    const projectId = formData.get('id') as string;
-    const id = projectId || generateId();
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
-    const status = formData.get('status') as 'active' | 'completed' | 'planning' | 'paused';
-    const visibility = formData.get('visibility') as 'public' | 'private';
-    const startDate = formData.get('startDate') as string;
-    const progress = parseInt(formData.get('progress') as string) || 0;
+    const projectData = parseFormData(formData);
     
     // Process tags and tech stack (comma-separated strings)
-    const tagsString = formData.get('tags') as string;
-    const tags = tagsString ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+    if (typeof projectData.tags === 'string') {
+      projectData.tags = (projectData.tags as string)
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag);
+    }
     
-    const techStackString = formData.get('techStack') as string;
-    const techStack = techStackString ? techStackString.split(',').map(tech => tech.trim()).filter(Boolean) : [];
-    
-    // Optional fields
-    const githubUrl = formData.get('githubUrl') as string || '';
-    const liveUrl = formData.get('liveUrl') as string || '';
-    const notes = formData.get('notes') as string || '';
-    
-    // Create project object
-    const project: Project = {
-      id,
-      title,
-      description,
-      category,
-      status,
-      visibility,
-      startDate,
-      progress,
-      tags,
-      techStack,
-      githubUrl,
-      liveUrl,
-      notes,
-      lastUpdated: new Date().toISOString().split('T')[0],
-      activities: [] // Initialize with empty activities array
-    };
+    if (typeof projectData.techStack === 'string') {
+      projectData.techStack = (projectData.techStack as string)
+        .split(',')
+        .map(tech => tech.trim())
+        .filter(tech => tech);
+    }
     
     // Validate required fields
-    if (!title) {
+    if (!projectData.title) {
       return new Response(JSON.stringify({ error: 'Title is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
-    // Save the project
-    const savedProject = await saveProject(project);
-    const isNewProject = !projectId;
+    // Save the project using the database utility
+    const savedProject = await createProject(projectData);
+    const isNewProject = !projectData.id;
     
     // Redirect back to projects page with success message
-    return redirect(`/projects?success=${encodeURIComponent(title)} ${isNewProject ? 'created' : 'updated'} successfully&action=${isNewProject ? 'create' : 'update'}`, 303);
+    return redirect(`/projects?success=${encodeURIComponent(projectData.title as string)} ${isNewProject ? 'created' : 'updated'} successfully&action=${isNewProject ? 'create' : 'update'}`, 303);
     
   } catch (error) {
     console.error('Error processing project:', error);
@@ -99,6 +84,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 // GET handler to return all projects
 export const GET: APIRoute = async () => {
   try {
+    // Check if user is authenticated
+    const authenticated = isAuthenticated();
+    
+    // Get all projects
+    const projects = await getAllProjects(authenticated);
+    
     return new Response(JSON.stringify(projects), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

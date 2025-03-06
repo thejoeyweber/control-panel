@@ -1,56 +1,79 @@
 ---
 /*
   File: src/components/projects/ProjectStats.astro
-  Purpose: Displays statistics about projects (counts, percentages, etc.)
-  Dependencies: getProjectStats from data/projects.ts
+  Purpose: Display project statistics in a card format
+  Dependencies: Projects from Astro DB
 */
 
-import { getProjectStats } from '../../data/projects';
+interface Props {
+  projects: any[]; // Projects from Astro DB
+}
 
-// Get project statistics
-const stats = getProjectStats();
+const { projects } = Astro.props;
+
+// Calculate statistics
+const totalProjects = projects.length;
+const activeProjects = projects.filter(p => p.status === 'active').length;
+const completedProjects = projects.filter(p => p.status === 'completed').length;
+const plannedProjects = projects.filter(p => p.status === 'planning').length;
+
+// Calculate average progress
+const totalProgress = projects.reduce((sum, project) => sum + (project.progress || 0), 0);
+const averageProgress = totalProjects > 0 ? Math.round(totalProgress / totalProjects) : 0;
+
+// Get most common category
+const categoryCount = projects.reduce((acc, project) => {
+  if (project.category) {
+    acc[project.category] = (acc[project.category] || 0) + 1;
+  }
+  return acc;
+}, {});
+
+const mostCommonCategory = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 ---
 
-<div class="bg-white rounded-lg shadow-card p-6 mb-6">
-  <h2 class="text-lg font-bold mb-4">Project Statistics</h2>
+<div class="bg-white rounded-lg shadow-card p-6">
+  <h3 class="text-lg font-semibold mb-4">Project Statistics</h3>
   
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="stat-card p-4 bg-gray-50 rounded-lg">
-      <div class="stat-title text-sm text-light-ink">Total Projects</div>
-      <div class="stat-value text-2xl font-bold">{stats.total}</div>
-      <div class="stat-desc text-xs flex items-center text-light-ink mt-1">
-        <i class="ri-list-check-2 mr-1"></i> All projects
-      </div>
+  <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="bg-gray-50 p-3 rounded-md">
+      <div class="text-2xl font-bold">{totalProjects}</div>
+      <div class="text-sm text-gray-600">Total Projects</div>
     </div>
     
-    <div class="stat-card p-4 bg-gray-50 rounded-lg">
-      <div class="stat-title text-sm text-light-ink">Active</div>
-      <div class="stat-value text-2xl font-bold">{stats.active}</div>
-      <div class="stat-desc mt-2">
-        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-highlight h-full rounded-full" style={`width: ${stats.activePercentage}%`}></div>
-        </div>
-      </div>
+    <div class="bg-gray-50 p-3 rounded-md">
+      <div class="text-2xl font-bold">{activeProjects}</div>
+      <div class="text-sm text-gray-600">Active Projects</div>
     </div>
     
-    <div class="stat-card p-4 bg-gray-50 rounded-lg">
-      <div class="stat-title text-sm text-light-ink">Completed</div>
-      <div class="stat-value text-2xl font-bold">{stats.completed}</div>
-      <div class="stat-desc mt-2">
-        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-success h-full rounded-full" style={`width: ${stats.completedPercentage}%`}></div>
-        </div>
-      </div>
+    <div class="bg-gray-50 p-3 rounded-md">
+      <div class="text-2xl font-bold">{completedProjects}</div>
+      <div class="text-sm text-gray-600">Completed</div>
     </div>
     
-    <div class="stat-card p-4 bg-gray-50 rounded-lg">
-      <div class="stat-title text-sm text-light-ink">Planning</div>
-      <div class="stat-value text-2xl font-bold">{stats.planning}</div>
-      <div class="stat-desc mt-2">
-        <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-warning h-full rounded-full" style={`width: ${stats.planningPercentage}%`}></div>
-        </div>
-      </div>
+    <div class="bg-gray-50 p-3 rounded-md">
+      <div class="text-2xl font-bold">{plannedProjects}</div>
+      <div class="text-sm text-gray-600">Planned</div>
+    </div>
+  </div>
+  
+  <div class="mb-4">
+    <div class="flex justify-between text-sm mb-1">
+      <span>Average Progress</span>
+      <span>{averageProgress}%</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2">
+      <div 
+        class="bg-primary h-2 rounded-full" 
+        style={`width: ${averageProgress}%`}
+      ></div>
+    </div>
+  </div>
+  
+  <div class="text-sm">
+    <div class="flex justify-between mb-1">
+      <span>Most Common Category</span>
+      <span class="font-medium">{mostCommonCategory}</span>
     </div>
   </div>
 </div> 

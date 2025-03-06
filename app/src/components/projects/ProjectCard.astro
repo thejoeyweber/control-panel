@@ -2,13 +2,13 @@
 /*
   File: src/components/projects/ProjectCard.astro
   Purpose: Reusable card component for displaying project information in a grid
-  Dependencies: Project interface from data/projects.ts
+  Dependencies: Project interface from Astro DB
 */
 
-import type { Project } from '../../data/projects';
+import type { Project } from '../../types';
 
 interface Props {
-  project: Project;
+  project: any; // Project from Astro DB
   statusColors?: Record<string, string>;
 }
 
@@ -20,8 +20,18 @@ const { project, statusColors = {
 }} = Astro.props;
 
 // Format date for display
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+const formatDate = (dateValue: any) => {
+  if (!dateValue) return 'No date';
+  
+  if (dateValue instanceof Date) {
+    return dateValue.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+  
+  return new Date(dateValue).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -48,11 +58,12 @@ const formatDate = (dateString: string) => {
             </button>
             <form 
               method="post" 
-              action={`/api/projects/${project.id}`} 
+              action="/api/projects" 
               class="w-full"
               onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.')"
             >
               <input type="hidden" name="_method" value="DELETE">
+              <input type="hidden" name="id" value={project.id}>
               <button 
                 type="submit"
                 class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
@@ -63,31 +74,31 @@ const formatDate = (dateString: string) => {
           </div>
         </div>
         <span class={`text-xs px-2 py-1 rounded-full ${statusColors[project.status] || 'bg-gray-200'}`}>
-          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+          {project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Unknown'}
         </span>
       </div>
     </div>
     
-    <p class="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
+    <p class="text-gray-600 mb-4 line-clamp-2">{project.description || 'No description'}</p>
     
     <div class="mb-4">
       <div class="flex justify-between text-xs text-gray-500 mb-1">
         <span>Progress</span>
-        <span>{project.progress}%</span>
+        <span>{project.progress || 0}%</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-2">
         <div 
           class="bg-primary h-2 rounded-full" 
-          style={`width: ${project.progress}%`}
+          style={`width: ${project.progress || 0}%`}
         ></div>
       </div>
     </div>
     
     <div class="flex flex-wrap gap-2 mb-4">
-      {project.tags && project.tags.slice(0, 3).map(tag => (
+      {project.tags && Array.isArray(project.tags) && project.tags.slice(0, 3).map(tag => (
         <span class="text-xs bg-gray-100 px-2 py-1 rounded-full">{tag}</span>
       ))}
-      {project.tags && project.tags.length > 3 && 
+      {project.tags && Array.isArray(project.tags) && project.tags.length > 3 && 
         <span class="text-xs text-gray-500">+{project.tags.length - 3} more</span>
       }
     </div>
@@ -123,6 +134,7 @@ const formatDate = (dateString: string) => {
   // Set up dropdowns for project cards - use astro:page-load for View Transitions compatibility
   document.addEventListener('astro:page-load', () => {
     setupDropdowns();
+    setupEditButtons();
   });
 
   function setupDropdowns() {
@@ -175,6 +187,23 @@ const formatDate = (dateString: string) => {
         hideTimeout = setTimeout(() => {
           menu.classList.add('hidden');
         }, 300);
+      });
+    });
+  }
+  
+  function setupEditButtons() {
+    // Set up edit buttons to trigger the edit modal
+    const editButtons = document.querySelectorAll('.edit-project-btn');
+    
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const projectId = button.getAttribute('data-id');
+        if (projectId) {
+          // Dispatch a custom event that the page can listen for
+          document.dispatchEvent(new CustomEvent('project:edit', { 
+            detail: { id: projectId }
+          }));
+        }
       });
     });
   }

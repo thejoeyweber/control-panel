@@ -30,23 +30,42 @@ Directory structure:
     │   │   │   ├── Welcome.astro
     │   │   │   ├── activity/
     │   │   │   │   ├── ActivityFilters.astro
+    │   │   │   │   ├── ActivityForm.astro
     │   │   │   │   ├── ActivityList.astro
     │   │   │   │   ├── ActivityPagination.astro
     │   │   │   │   └── ActivityStats.astro
-    │   │   │   └── projects/
-    │   │   │       ├── ProjectCard.astro
-    │   │   │       ├── ProjectFilters.astro
-    │   │   │       ├── ProjectForm.astro
-    │   │   │       ├── ProjectStats.astro
-    │   │   │       ├── ProjectsAttention.astro
-    │   │   │       ├── RecentActivity.astro
-    │   │   │       └── TechStack.astro
+    │   │   │   ├── ai/
+    │   │   │   │   └── AIToolForm.astro
+    │   │   │   ├── books/
+    │   │   │   │   └── BookForm.astro
+    │   │   │   ├── projects/
+    │   │   │   │   ├── ProjectCard.astro
+    │   │   │   │   ├── ProjectFilters.astro
+    │   │   │   │   ├── ProjectForm.astro
+    │   │   │   │   ├── ProjectStats.astro
+    │   │   │   │   ├── ProjectsAttention.astro
+    │   │   │   │   ├── RecentActivity.astro
+    │   │   │   │   └── TechStack.astro
+    │   │   │   ├── resources/
+    │   │   │   │   └── ResourceForm.astro
+    │   │   │   ├── revenue/
+    │   │   │   │   └── RevenueForm.astro
+    │   │   │   └── writing/
+    │   │   │       └── WritingForm.astro
     │   │   ├── data/
+    │   │   │   ├── activities.json
+    │   │   │   ├── activities.ts
+    │   │   │   ├── ai-tools.json
     │   │   │   ├── ai-tools.ts
+    │   │   │   ├── books.json
     │   │   │   ├── books.ts
     │   │   │   ├── projects.ts
+    │   │   │   ├── resources.json
     │   │   │   ├── resources.ts
+    │   │   │   ├── revenue.json
     │   │   │   ├── revenue.ts
+    │   │   │   ├── writing-pieces.json
+    │   │   │   ├── writing.json
     │   │   │   └── writing.ts
     │   │   ├── layouts/
     │   │   │   ├── BaseLayout.astro
@@ -62,7 +81,28 @@ Directory structure:
     │   │   │   ├── revenue.astro
     │   │   │   ├── writing.astro
     │   │   │   ├── api/
-    │   │   │   │   └── projects/
+    │   │   │   │   ├── activities/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── activity/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── ai-tools/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── books/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── projects/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── resources/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   ├── revenue/
+    │   │   │   │   │   ├── [id].ts
+    │   │   │   │   │   └── index.ts
+    │   │   │   │   └── writing/
     │   │   │   │       ├── [id].ts
     │   │   │   │       └── index.ts
     │   │   │   └── project/
@@ -70,11 +110,15 @@ Directory structure:
     │   │   ├── styles/
     │   │   │   └── global.css
     │   │   ├── types/
+    │   │   │   ├── AITool.ts
+    │   │   │   ├── Activity.ts
+    │   │   │   ├── Resource.ts
     │   │   │   └── index.ts
     │   │   └── utils/
     │   │       ├── auth.ts
     │   │       ├── data.ts
-    │   │       └── filters.ts
+    │   │       ├── filters.ts
+    │   │       └── form.ts
     │   └── .vscode/
     │       ├── extensions.json
     │       └── launch.json
