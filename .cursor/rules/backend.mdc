@@ -37,12 +37,12 @@ membership: membershipEnum("membership").notNull().default("free")
 
 Example of a schema:
 
-`db/schema/todos-schema.ts`
+`db/schema/projects-schema.ts`
 
 ```ts
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-export const todosTable = pgTable("todos", {
+export const projectsTable = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").notNull(),
   content: text("content").notNull(),
@@ -54,8 +54,8 @@ export const todosTable = pgTable("todos", {
     .$onUpdate(() => new Date())
 })
 
-export type InsertTodo = typeof todosTable.$inferInsert
-export type SelectTodo = typeof todosTable.$inferSelect
+export type InsertProject = typeof projectsTable.$inferInsert
+export type SelectProject = typeof projectsTable.$inferSelect
 ```
 
 And exporting it:
@@ -63,7 +63,7 @@ And exporting it:
 `db/schema/index.ts`
 
 ```ts
-export * from "./todos-schema"
+export * from "./projects-schema"
 ```
 
 And adding it to the schema in `db/db.ts`:
@@ -71,10 +71,10 @@ And adding it to the schema in `db/db.ts`:
 `db/db.ts`
 
 ```ts
-import { todosTable } from "@/db/schema"
+import { projectsTable } from "@/db/schema"
 
 const schema = {
-  todos: todosTable
+  todos: projectsTable
 }
 ```
 

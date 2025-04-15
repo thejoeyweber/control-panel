@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { List, Menu, X } from "lucide-react";
+import { LayoutDashboard, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,8 +17,8 @@ export default function Header() {
     <header className="bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <List className="h-6 w-6" />
-          <div className="text-xl font-bold">Notes App</div>
+          <LayoutDashboard className="h-6 w-6" />
+          <div className="text-xl font-bold">Control Panel</div>
         </div>
 
         <nav className="hidden md:flex space-x-4">

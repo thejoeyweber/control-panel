@@ -1,3 +1,14 @@
+/**
+ * @description
+ * This is the root layout for the Next.js application.
+ * It provides global configuration, including metadata, global providers, and theming.
+ * 
+ * @notes
+ * - If the user is logged in but has no profile, we create one automatically.
+ * - Providers wraps the application to handle theming and tooltips.
+ * - Toaster handles global notifications.
+ */
+
 import { getProfileByUserIdAction } from "@/actions/profiles-actions";
 import Header from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,13 +23,18 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Notes App",
-  description: "A full-stack template for a notes app."
+  title: "Control Panel",
+  description: "An AI-driven, just-in-time project management web app."
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
   const { userId } = auth();
 
+  // Create a profile row if none exists.
   if (userId) {
     const res = await getProfileByUserIdAction(userId);
     if (!res.data) {

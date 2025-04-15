@@ -1,60 +1,79 @@
-# Notes App Starter
 
-This is a full-stack app template for courses on [Takeoff](https://JoinTakeoff.com/).
+# Control Panel
 
-## Sponsors
-
-If you are interested in sponsoring my repos, please contact me at [ads@takeoffai.org](mailto:ads@takeoffai.org).
-
-Or sponsor me directly on [GitHub Sponsors](https://github.com/sponsors/mckaywrigley).
+Control Panel is an AI-driven, just-in-time project management web app. It enables users to
+intuitively progress their projects by suggesting adaptive "work chunks," surfacing contextually
+relevant resources, and maintaining structured, AI-friendly project histories.
 
 ## Tech Stack
 
-- IDE: [Cursor](https://www.cursor.com/)
-- AI Tools: [V0](https://v0.dev/), [Perplexity](https://www.perplexity.com/)
-- Frontend: [Next.js](https://nextjs.org/docs), [Tailwind](https://tailwindcss.com/docs/guides/nextjs), [Shadcn](https://ui.shadcn.com/docs/installation), [Framer Motion](https://www.framer.com/motion/introduction/)
-- Backend: [PostgreSQL](https://www.postgresql.org/about/), [Supabase](https://supabase.com/), [Drizzle](https://orm.drizzle.team/docs/get-started-postgresql), [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
-- Auth: [Clerk](https://clerk.com/)
-- Payments: [Stripe](https://stripe.com/)
+- **Frontend**: Next.js (App Router), Tailwind, Shadcn, Framer Motion
+- **Backend**: Postgres, Supabase, Drizzle ORM, Server Actions
+- **Auth**: Clerk
+- **Payments**: Stripe
+- **Analytics**: PostHog
+- **Deployment**: Vercel
+- **Orchestration**: n8n
 
 ## Prerequisites
 
-You will need accounts for the following services.
-
-They all have free plans that you can use to get started.
-
-- Create a [Cursor](https://www.cursor.com/) account
-- Create a [GitHub](https://github.com/) account
-- Create a [Supabase](https://supabase.com/) account
-- Create a [Clerk](https://clerk.com/) account
-- Create a [Stripe](https://stripe.com/) account
-- Create a [Vercel](https://vercel.com/) account
-
-You will likely not need paid plans unless you are building a business.
+- Next.js and Node.js installed locally
+- A Supabase account for database hosting
+- A Clerk account for authentication
+- A Stripe account for payments
+- A PostHog account for analytics (optional, if using analytics)
 
 ## Environment Variables
 
-```bash
-# DB (Supabase)
+Set these in `.env.local`:
+
+```
+# Database
 DATABASE_URL=
 
-# Auth (Clerk)
+# Clerk
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
 
-# Payments (Stripe)
+# Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PORTAL_LINK=
-NEXT_PUBLIC_STRIPE_PAYMENT_LINK_YEARLY=
 NEXT_PUBLIC_STRIPE_PAYMENT_LINK_MONTHLY=
+NEXT_PUBLIC_STRIPE_PAYMENT_LINK_YEARLY=
+
+# PostHog
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=
 ```
 
 ## Setup
 
-1. Clone the repository
-2. Copy `.env.example` to `.env.local` and fill in the environment variables from above
-3. Run `npm install` to install dependencies
-4. Run `npm run dev` to run the app locally
+1. **Install Dependencies**  
+   ```bash
+   npm install
+   ```
+
+2. **Start the Development Server**  
+   ```bash
+   npm run dev
+   ```
+
+3. **Database Migrations**  
+   ```bash
+   npm run db:generate
+   npm run db:migrate
+   ```
+
+4. **Auth & Services**  
+   - Configure Clerk, Supabase, and Stripe accounts
+   - Update `.env.local` with your keys
+
+5. **Deployment**  
+   - For Vercel or another platform, ensure environment variables are set.
+
+## Usage
+
+After running `npm run dev`, open [http://localhost:3000](http://localhost:3000) to view the app in your browser.
