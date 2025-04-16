@@ -11,7 +11,12 @@ It uses Postgres, Supabase, Drizzle ORM, and Server Actions.
 
 #### General Rules
 
-- Never generate migrations. You do not have to do anything in the `db/migrations` folder inluding migrations and metadata. Ignore it.
+- Migration Management:
+  - Use Drizzle's built-in migration tools (`db:generate` and `db:migrate` scripts) for database schema changes
+  - Never manually create, edit, or delete files in the `db/migrations` folder
+  - Let Drizzle automatically handle migration file generation based on schema changes
+  - Always review generated migrations before applying them to production
+  - Keep migration history in version control
 
 #### Organization
 
